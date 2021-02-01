@@ -1,18 +1,25 @@
 {
   "license": "UNLICENSED",
   "dependencies": {
-    "@babylonjs/core": "^4.2.0"
-  },
-  "devDependencies": {
+    "@babylonjs/core": "^4.2.0",
     "@babylonjs/inspector": "^4.2.0",
     "@babylonjs/loaders": "^4.2.0",
-    "@babylonjs/materials": "^4.2.0",
+    "@babylonjs/materials": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.2.14",
+    "@types/mocha": "^8.2.0",
+    "@types/sinon": "^9.0.10",
+    "chai": "^4.2.0",
+    "mocha": "^8.2.1",
     "parcel": "^1.12.4",
-    "parcel-plugin-asset-copier": "^1.1.0",
+    "sinon": "^9.2.4",
+    "sinon-chai": "^3.5.0",
+    "ts-mocha": "^8.0.0",
     "typescript": "^4.1.3"
   },
-  "assetsPath": "./assets",
   "scripts": {
-    "dev": "parcel serve --hmr-port 1235 src/index.html"
+    "dev": "parcel serve --hmr-port 1235 src/index.html",
+    "test": "ts-mocha -p test/tsconfig.json test/bootstrap.ts src/**/*.spec.ts"
   }
 }

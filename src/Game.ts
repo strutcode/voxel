@@ -18,7 +18,11 @@ export default class Game {
 
   public static start() {
     Renderer.init()
-    Renderer.newChunk(new Chunk())
+
+    const chunk = new Chunk()
+    chunk.randomize()
+    Renderer.newChunk(chunk)
+
     this.world = new World()
   }
 
@@ -26,6 +30,5 @@ export default class Game {
     if (this.state === GameState.Play) {
       this.world.updateView()
     }
-    // console.log('hello')
   }
 }

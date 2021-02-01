@@ -1,21 +1,23 @@
 import {
+  ArcRotateCamera,
   CascadedShadowGenerator,
   Color3,
   DirectionalLight,
   Engine,
   HemisphericLight,
+  Material,
   Mesh,
-  MeshBuilder,
   Scene,
+  StandardMaterial,
   Vector3,
-  VertexBuffer,
+  VertexData,
 } from '@babylonjs/core'
 import Chunk from './Chunk'
 import ChunkMesher from './ChunkMesher'
 
 export default class Renderer {
   private static scene: Scene
-  
+
   public static init() {
     const container = document.getElementById('app')
     const canvas = document.createElement('canvas')
@@ -33,7 +35,7 @@ export default class Renderer {
     container?.appendChild(canvas)
 
     const engine = new Engine(canvas)
-    const scene = this.scene = new Scene(engine)
+    const scene = (this.scene = new Scene(engine))
 
     // Lights...
     const sky = new HemisphericLight('sky', Vector3.Up(), scene)
@@ -41,20 +43,23 @@ export default class Renderer {
     sky.groundColor = Color3.FromHexString('#492A13')
     sky.intensity = 0.5
     const sun = new DirectionalLight('sun', new Vector3(1, -1, 1), scene)
-    const shadow = new CascadedShadowGenerator(1024, sun, true)
+    // const shadow = new CascadedShadowGenerator(1024, sun, true)
 
-    sun.autoUpdateExtends = true
-    sun.autoCalcShadowZBounds = true
-    shadow.bias = 0.001
-    shadow.normalBias = 0.01
-    setTimeout(() => {
-      shadow.autoCalcDepthBounds = true
-      shadow.autoCalcDepthBoundsRefreshRate = 2
-    })
+    // sun.autoUpdateExtends = true
+    // sun.autoCalcShadowZBounds = true
+    // shadow.bias = 0.001
+    // shadow.normalBias = 0.01
+    // setTimeout(() => {
+    //   shadow.autoCalcDepthBounds = true
+    //   shadow.autoCalcDepthBoundsRefreshRate = 2
+    // })
 
     // Camera...
-    scene.createDefaultCamera(false)
+    scene.createDefaultCamera(true)
     scene.activeCamera?.attachControl(canvas)
+    ;(scene.activeCamera as ArcRotateCamera).radius = 32
+
+    // MeshBuilder.CreateBox('', {}, scene)
 
     // Action!
     engine.runRenderLoop(() => {
@@ -68,7 +73,17 @@ export default class Renderer {
 
   public static newChunk(chunk: Chunk) {
     const mesh = new Mesh('', this.scene)
-    ChunkMesher.createMesh(chunk).applyToMesh(mesh)
+    const data = ChunkMesher.createMesh(chunk)
+    const vertData = new VertexData()
+    vertData.positions = data.positions
+    vertData.indices = data.indices
+    vertData.applyToMesh(mesh)
+
+    const mat = new StandardMaterial('', this.scene)
+    mat.backFaceCulling = false
+    // mat.alpha = 0.5
+    // mat.alphaMode = Material.MATERIAL_ALPHABLEND
+    mesh.material = mat
   }
 
   public static delChunk(chunk: Chunk) {}

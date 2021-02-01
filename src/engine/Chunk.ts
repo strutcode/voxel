@@ -1,14 +1,15 @@
 import Block from './Block'
 
-const chunkSize = 64
-const squareSize = chunkSize ** 2
-const cubeSize = chunkSize ** 3
 const blockPos = (x: number, y: number, z: number) =>
-  Math.floor((y * squareSize + z * chunkSize + x) / 32)
+  Math.floor((y * Chunk.squareSize + z * Chunk.size + x) / 32)
 
 export default class Chunk {
-  private solidStore = new Int32Array(cubeSize / 32)
-  private opaqueStore = new Int32Array(cubeSize / 32)
+  public static size = 32
+  public static squareSize = Chunk.size ** 2
+  public static cubeSize = Chunk.size ** 3
+
+  private solidStore = new Uint32Array(Chunk.cubeSize / 32)
+  private opaqueStore = new Uint32Array(Chunk.cubeSize / 32)
 
   constructor() {}
 
@@ -17,6 +18,14 @@ export default class Chunk {
   }
 
   public set(x: number, y: number, z: number, block: Block) {}
+
+  public randomize() {
+    for (let i = 0; i < this.solidStore.length; i++) {
+      this.solidStore[i] = this.opaqueStore[i] = Math.floor(
+        Math.random() * 2 ** 32,
+      )
+    }
+  }
 
   public isSolid(x: number, y: number, z: number): boolean {
     return (this.solidStore[blockPos(x, y, z)] & (1 << x % 32)) > 0
