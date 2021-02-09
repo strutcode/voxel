@@ -38,11 +38,10 @@ export default class Renderer {
     const scene = (this.scene = new Scene(engine))
 
     // Lights...
-    const sky = new HemisphericLight('sky', Vector3.Up(), scene)
-    sky.diffuse = Color3.FromHexString('#ABB9BC')
-    sky.groundColor = Color3.FromHexString('#492A13')
-    sky.intensity = 0.5
-    const sun = new DirectionalLight('sun', new Vector3(1, -1, 1), scene)
+    // const sky = new HemisphericLight('sky', Vector3.Up(), scene)
+    // sky.diffuse = Color3.FromHexString('#ABB9BC')
+    // sky.groundColor = Color3.FromHexString('#492A13')
+    // sky.intensity = 0.5
     // const shadow = new CascadedShadowGenerator(1024, sun, true)
 
     // sun.autoUpdateExtends = true
@@ -81,9 +80,6 @@ export default class Renderer {
     vertData.applyToMesh(mesh)
 
     const mat = new StandardMaterial('', this.scene)
-    mat.backFaceCulling = false
-    // mat.alpha = 0.5
-    // mat.alphaMode = Material.MATERIAL_ALPHABLEND
     mesh.material = mat
 
     mesh.position = new Vector3(
