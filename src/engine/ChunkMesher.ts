@@ -1,8 +1,8 @@
 import Chunk from './Chunk'
 
 interface ChunkMesh {
-  positions: number[]
-  indices: number[]
+  positions: ArrayBuffer
+  indices: ArrayBuffer
 }
 
 export default class ChunkMesher {
@@ -120,8 +120,8 @@ export default class ChunkMesher {
     )
 
     return {
-      positions,
-      indices,
+      positions: new Uint8Array(positions),
+      indices: new Uint32Array(indices),
     }
   }
 }
