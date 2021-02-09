@@ -28,10 +28,10 @@ export default class Chunk {
   }
 
   public isSolid(x: number, y: number, z: number): boolean {
-    return (this.solidStore[blockPos(x, y, z)] & (1 << x % 32)) > 0
+    return (this.solidStore[blockPos(x, y, z)] & (1 << x % 31)) > 0
   }
 
   public isOpaque(x: number, y: number, z: number): boolean {
-    return (this.opaqueStore[blockPos(x, y, z)] & (1 << x % 32)) > 0
+    return (this.opaqueStore[blockPos(x, y, z)] & (1 << x % 31)) > 0
   }
 }
