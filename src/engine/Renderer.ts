@@ -3,8 +3,7 @@ import {
   Color3,
   DirectionalLight,
   Engine,
-  HemisphericLight,
-  Material,
+  FreeCamera,
   Mesh,
   Scene,
   StandardMaterial,
@@ -42,12 +41,13 @@ export default class Renderer {
     const sun = new DirectionalLight('sun', new Vector3(1, -1, 0.5), scene)
 
     // Camera...
-    scene.createDefaultCamera(true)
+    scene.createDefaultCamera(false)
     scene.activeCamera?.attachControl(canvas)
-    camera.target = new Vector3(64, 32, 64)
-    camera.radius = 128
 
-    // MeshBuilder.CreateBox('', {}, scene)
+    const camera = scene.activeCamera as FreeCamera
+    camera.position = new Vector3(32 * 16, 34, 32 * 16)
+    camera.target = camera.position.add(Vector3.Backward())
+    camera.speed = 10
 
     // Action!
     engine.runRenderLoop(() => {
@@ -68,6 +68,8 @@ export default class Renderer {
     vertData.applyToMesh(mesh)
 
     const mat = new StandardMaterial('', this.scene)
+    mat.diffuseColor = new Color3(0.258545, 0.157138, 0.061421)
+    mat.ambientColor = new Color3(0.113, 0.036, 0.014)
     mesh.material = mat
 
     mesh.position = new Vector3(

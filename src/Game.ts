@@ -25,8 +25,8 @@ export default class Game {
       Renderer.newChunk(chunk)
     }
 
-    for (let x = 0; x < 8; x++) {
-      for (let z = 0; z < 8; z++) {
+    for (let x = 0; x < 32; x++) {
+      for (let z = 0; z < 32; z++) {
         addChunk(x, 0, z)
       }
     }
