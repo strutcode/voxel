@@ -53,16 +53,16 @@ export default class ChunkMesher {
             if (z == Chunk.size - 1 || !chunk.isOpaque(x, y, z + 1)) {
               positions.push(
                 x,
-                y,
-                z + 1,
-                x + 1,
-                y,
+                y + 1,
                 z + 1,
                 x + 1,
                 y + 1,
+                z + 1,
+                x + 1,
+                y,
                 z + 1,
                 x,
-                y + 1,
+                y,
                 z + 1,
               )
 
@@ -101,7 +101,7 @@ export default class ChunkMesher {
             }
             // -Y
             if (y == 0 || !chunk.isOpaque(x, y - 1, z)) {
-              positions.push(x, y, z, x + 1, y, z, x + 1, y, z + 1, x, y, z + 1)
+              positions.push(x, y, z, x, y, z + 1, x + 1, y, z + 1, x + 1, y, z)
 
               indices.push(v, v + 1, v + 3, v + 1, v + 2, v + 3)
 
