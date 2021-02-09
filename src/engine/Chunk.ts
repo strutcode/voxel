@@ -11,7 +11,7 @@ export default class Chunk {
   private solidStore = new Uint32Array(Chunk.cubeSize / 32)
   private opaqueStore = new Uint32Array(Chunk.cubeSize / 32)
 
-  constructor() {}
+  constructor(public x = 0, public y = 0, public z = 0) {}
 
   public get(x: number, y: number, z: number): Block {
     return {}

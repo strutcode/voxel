@@ -19,9 +19,17 @@ export default class Game {
   public static start() {
     Renderer.init()
 
-    const chunk = new Chunk()
-    chunk.randomize()
-    Renderer.newChunk(chunk)
+    const addChunk = (x: number, y: number, z: number) => {
+      const chunk = new Chunk(x, y, z)
+      chunk.randomize()
+      Renderer.newChunk(chunk)
+    }
+
+    for (let x = 0; x < 8; x++) {
+      for (let z = 0; z < 8; z++) {
+        addChunk(x, 0, z)
+      }
+    }
 
     this.world = new World()
   }

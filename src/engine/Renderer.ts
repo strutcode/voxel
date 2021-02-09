@@ -57,7 +57,8 @@ export default class Renderer {
     // Camera...
     scene.createDefaultCamera(true)
     scene.activeCamera?.attachControl(canvas)
-    ;(scene.activeCamera as ArcRotateCamera).radius = 32
+    camera.target = new Vector3(64, 32, 64)
+    camera.radius = 128
 
     // MeshBuilder.CreateBox('', {}, scene)
 
@@ -84,6 +85,12 @@ export default class Renderer {
     // mat.alpha = 0.5
     // mat.alphaMode = Material.MATERIAL_ALPHABLEND
     mesh.material = mat
+
+    mesh.position = new Vector3(
+      chunk.x * Chunk.size,
+      chunk.y * Chunk.size,
+      chunk.z * Chunk.size,
+    )
   }
 
   public static delChunk(chunk: Chunk) {}
