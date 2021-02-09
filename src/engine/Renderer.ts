@@ -1,6 +1,5 @@
 import {
-  ArcRotateCamera,
-  CascadedShadowGenerator,
+  AbstractMesh,
   Color3,
   DirectionalLight,
   Engine,
@@ -37,21 +36,10 @@ export default class Renderer {
     const engine = new Engine(canvas)
     const scene = (this.scene = new Scene(engine))
 
-    // Lights...
-    // const sky = new HemisphericLight('sky', Vector3.Up(), scene)
-    // sky.diffuse = Color3.FromHexString('#ABB9BC')
-    // sky.groundColor = Color3.FromHexString('#492A13')
-    // sky.intensity = 0.5
-    // const shadow = new CascadedShadowGenerator(1024, sun, true)
+    scene.ambientColor = Color3.White()
 
-    // sun.autoUpdateExtends = true
-    // sun.autoCalcShadowZBounds = true
-    // shadow.bias = 0.001
-    // shadow.normalBias = 0.01
-    // setTimeout(() => {
-    //   shadow.autoCalcDepthBounds = true
-    //   shadow.autoCalcDepthBoundsRefreshRate = 2
-    // })
+    // Lights...
+    const sun = new DirectionalLight('sun', new Vector3(1, -1, 0.5), scene)
 
     // Camera...
     scene.createDefaultCamera(true)
@@ -87,6 +75,9 @@ export default class Renderer {
       chunk.y * Chunk.size,
       chunk.z * Chunk.size,
     )
+
+    mesh.isPickable = false
+    mesh.cullingStrategy = AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY
   }
 
   public static delChunk(chunk: Chunk) {}
