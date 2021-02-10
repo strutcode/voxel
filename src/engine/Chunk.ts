@@ -7,15 +7,28 @@ const blockPos = (x: number, y: number, z: number) =>
 
 const noise = new Noise()
 
+type ChunkData = {
+  x: number
+  y: number
+  z: number
+  data: Uint32Array
+}
+
 export default class Chunk {
   public static size = 32
   public static squareSize = Chunk.size ** 2
   public static cubeSize = Chunk.size ** 3
 
+  public static deserialize(serialized: ChunkData) {
+    const chunk = new Chunk(serialized.x, serialized.y, serialized.z, true)
+    chunk.chunkStore = serialized.data
+    return chunk
+  }
+
   private chunkStore = new Uint32Array(Chunk.cubeSize)
 
-  constructor(public x = 0, public y = 0, public z = 0) {
-    this.initialize()
+  constructor(public x = 0, public y = 0, public z = 0, empty = false) {
+    if (!empty) this.initialize()
   }
 
   public get(x: number, y: number, z: number): Block {
@@ -68,5 +81,14 @@ export default class Chunk {
 
   public isOpaque(x: number, y: number, z: number): boolean {
     return this.chunkStore[blockPos(x, y, z)] > 0
+  }
+
+  public serialize(): ChunkData {
+    return {
+      x: this.x,
+      y: this.y,
+      z: this.z,
+      data: this.chunkStore,
+    }
   }
 }

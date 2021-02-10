@@ -21,6 +21,8 @@ export default class Renderer {
   private static scene: Scene
   private static camera: FreeCamera
   private static blockMaterial: ShaderMaterial
+  private static meshWorker = new Worker('./ChunkMesherWorker.ts')
+  private static deleteQueue = new Set<string>()
 
   public static init() {
     const container = document.getElementById('app')
@@ -72,8 +74,10 @@ export default class Renderer {
     camera.position.y = 40
 
     // Action!
+    this.initMeshWorker()
+
     engine.runRenderLoop(() => {
-      scene.render()
+      this.render()
     })
 
     window.addEventListener('resize', () => {
@@ -86,35 +90,47 @@ export default class Renderer {
   }
 
   public static newChunk(chunk: Chunk) {
-    const mesh = new Mesh(`${chunk.x},${chunk.y},${chunk.z}`, this.scene)
-    const data = ChunkMesher.createMesh(chunk)
-    const vertData = new VertexData()
-    vertData.positions = data.positions
-    vertData.indices = data.indices
-    vertData.normals = data.normals
-    vertData.applyToMesh(mesh)
-
-    mesh.material = this.blockMaterial
-
-    mesh.position = new Vector3(
-      chunk.x * Chunk.size,
-      chunk.y * Chunk.size,
-      chunk.z * Chunk.size,
-    )
-
-    mesh.isPickable = false
-    mesh.cullingStrategy = AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY
+    this.meshWorker.postMessage(chunk.serialize())
   }
 
   public static delChunk(chunk: Chunk) {
-    const mesh = this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
+    this.deleteQueue.add(`${chunk.x},${chunk.y},${chunk.z}`)
+  }
 
-    if (mesh) {
-      mesh.dispose()
-    } else {
-      console.error(
-        `Couldn't dispose of chunk '${chunk.x},${chunk.y},${chunk.z}'`,
+  private static render() {
+    this.deleteQueue.forEach((key) => {
+      const mesh = this.scene.getMeshByName(key)
+
+      if (mesh) {
+        mesh.dispose()
+        this.deleteQueue.delete(key)
+      }
+    })
+
+    this.scene.render()
+  }
+
+  private static initMeshWorker() {
+    this.meshWorker.onmessage = (event: MessageEvent) => {
+      const { x, y, z, attributes } = event.data
+
+      const mesh = new Mesh(`${x},${y},${z}`, this.scene)
+      const vertData = new VertexData()
+      vertData.positions = attributes.positions
+      vertData.indices = attributes.indices
+      vertData.normals = attributes.normals
+      vertData.applyToMesh(mesh)
+
+      mesh.material = this.blockMaterial
+
+      mesh.position = new Vector3(
+        x * Chunk.size,
+        y * Chunk.size,
+        z * Chunk.size,
       )
+
+      mesh.isPickable = false
+      mesh.cullingStrategy = AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY
     }
   }
 }
