@@ -1,13 +1,13 @@
 import {
   AbstractMesh,
   Color3,
+  Color4,
   DirectionalLight,
   Engine,
   FreeCamera,
   Mesh,
   Scene,
   ShaderMaterial,
-  StandardMaterial,
   Texture,
   Vector3,
   VertexData,
@@ -16,10 +16,10 @@ import vs from './vs.glsl'
 import fs from './fs.glsl'
 import Chunk from './Chunk'
 import ChunkMesher from './ChunkMesher'
-import World from './World'
 
 export default class Renderer {
   private static scene: Scene
+  private static camera: FreeCamera
   private static blockMaterial: ShaderMaterial
 
   public static init() {
@@ -42,6 +42,7 @@ export default class Renderer {
     const scene = (this.scene = new Scene(engine))
 
     scene.ambientColor = Color3.White()
+    scene.clearColor = new Color4(0.7, 0.8, 1, 1)
 
     const mat = (this.blockMaterial = new ShaderMaterial(
       '',
@@ -66,14 +67,9 @@ export default class Renderer {
     scene.createDefaultCamera(false)
     scene.activeCamera?.attachControl(canvas)
 
-    const camera = scene.activeCamera as FreeCamera
-    camera.position = new Vector3(
-      (World.size * Chunk.size) / 2,
-      Chunk.size,
-      (World.size * Chunk.size) / 2,
-    )
-    camera.target = camera.position.add(Vector3.Backward())
+    const camera = (this.camera = scene.activeCamera as FreeCamera)
     camera.speed = 10
+    camera.position.y = 40
 
     // Action!
     engine.runRenderLoop(() => {
@@ -85,8 +81,12 @@ export default class Renderer {
     })
   }
 
+  public static getViewPosition() {
+    return this.camera.position
+  }
+
   public static newChunk(chunk: Chunk) {
-    const mesh = new Mesh('', this.scene)
+    const mesh = new Mesh(`${chunk.x},${chunk.y},${chunk.z}`, this.scene)
     const data = ChunkMesher.createMesh(chunk)
     const vertData = new VertexData()
     vertData.positions = data.positions
@@ -106,5 +106,15 @@ export default class Renderer {
     mesh.cullingStrategy = AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY
   }
 
-  public static delChunk(chunk: Chunk) {}
+  public static delChunk(chunk: Chunk) {
+    const mesh = this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
+
+    if (mesh) {
+      mesh.dispose()
+    } else {
+      console.error(
+        `Couldn't dispose of chunk '${chunk.x},${chunk.y},${chunk.z}'`,
+      )
+    }
+  }
 }

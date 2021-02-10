@@ -127,11 +127,8 @@ export default class ChunkMesher {
     }
 
     const end = performance.now()
-    console.log(
-      `Meshed ${Chunk.cubeSize} voxels in ${end - start}ms. ${
-        indices.length / 3
-      } faces`,
-    )
+
+    // TODO: performance monitor
 
     return {
       positions: new Uint8Array(positions),
