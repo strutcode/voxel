@@ -3,7 +3,7 @@ import Chunk from './Chunk'
 import Renderer from './Renderer'
 
 export default class World {
-  public static viewDistance = 22
+  public static viewDistance = 16
 
   private chunks = new Map<string, Chunk>()
   private visited = new Set<string>()
@@ -16,6 +16,16 @@ export default class World {
     this.viewPos.z = Math.floor(position.z / Chunk.size)
     this.visited.clear()
     this.checkChunk(this.viewPos.x, 0, this.viewPos.z)
+
+    // HACK: The flood fill algorithm should remove these
+    this.chunks.forEach((chunk) => {
+      const distance =
+        Math.abs(chunk.x - this.viewPos.x) + Math.abs(chunk.z - this.viewPos.z)
+
+      if (distance > World.viewDistance) {
+        this.unloadChunk(chunk.x, chunk.y, chunk.z)
+      }
+    })
   }
 
   private checkChunk(x: number, y: number, z: number) {
