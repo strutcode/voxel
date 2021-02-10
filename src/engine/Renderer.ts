@@ -53,7 +53,7 @@ export default class Renderer {
     const mainTexture = new Texture(
       'grass.png',
       scene,
-      true,
+      false,
       false,
       Texture.NEAREST_SAMPLINGMODE,
     )

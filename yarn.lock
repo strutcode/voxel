@@ -1026,6 +1026,11 @@
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-8.2.0.tgz#3eb56d13a1de1d347ecb1957c6860c911704bc44"
   integrity sha512-/Sge3BymXo4lKc31C8OINJgXLaw+7vL1/L1pGiBNpGrBiT8FQiaFpSYV0uhTaG4y78vcMBTMFsWaHDvuD+xGzQ==
 
+"@types/noisejs@^0.0.28":
+  version "0.0.28"
+  resolved "https://registry.yarnpkg.com/@types/noisejs/-/noisejs-0.0.28.tgz#797ac259d592004f8e13526cc9afeaf9f1fcb26e"
+  integrity sha1-eXrCWdWSAE+OE1Jsya/q+fH8sm4=
+
 "@types/q@^1.5.1":
   version "1.5.4"
   resolved "https://registry.yarnpkg.com/@types/q/-/q-1.5.4.tgz#15925414e0ad2cd765bfef58842f7e26a7accb24"
@@ -4029,6 +4034,11 @@ node-releases@^1.1.67:
   version "1.1.67"
   resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-1.1.67.tgz#28ebfcccd0baa6aad8e8d4d8fe4cbc49ae239c12"
   integrity sha512-V5QF9noGFl3EymEwUYzO+3NTDpGfQB4ve6Qfnzf3UNydMhjQRVPR1DZTuvWiLzaFJYw2fmDwAfnRNEVb64hSIg==
+
+noisejs@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/noisejs/-/noisejs-2.1.0.tgz#84b4c4cd04ff43367034f65253e213e0d9fe1aff"
+  integrity sha1-hLTEzQT/QzZwNPZSU+IT4Nn+Gv8=
 
 normalize-path@^2.1.1:
   version "2.1.1"
