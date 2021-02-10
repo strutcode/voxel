@@ -70,7 +70,7 @@ export default class Renderer {
     scene.activeCamera?.attachControl(canvas)
 
     const camera = (this.camera = scene.activeCamera as FreeCamera)
-    camera.speed = 10
+    camera.speed = 8
     camera.position.y = 40
 
     // Action!

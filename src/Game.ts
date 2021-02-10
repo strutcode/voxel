@@ -21,6 +21,7 @@ export default class Game {
     Renderer.init()
 
     this.world = new World()
+    globalThis.World = this.world
   }
 
   public static update() {
