@@ -6,15 +6,21 @@ import {
   FreeCamera,
   Mesh,
   Scene,
+  ShaderMaterial,
   StandardMaterial,
+  Texture,
   Vector3,
   VertexData,
 } from '@babylonjs/core'
+import vs from './vs.glsl'
+import fs from './fs.glsl'
 import Chunk from './Chunk'
 import ChunkMesher from './ChunkMesher'
+import World from './World'
 
 export default class Renderer {
   private static scene: Scene
+  private static blockMaterial: ShaderMaterial
 
   public static init() {
     const container = document.getElementById('app')
@@ -37,6 +43,22 @@ export default class Renderer {
 
     scene.ambientColor = Color3.White()
 
+    const mat = (this.blockMaterial = new ShaderMaterial(
+      '',
+      scene,
+      { vertexSource: vs, fragmentSource: fs },
+      { attributes: ['position', 'normal'], uniforms: ['worldViewProjection'] },
+    ))
+
+    const mainTexture = new Texture(
+      'grass.png',
+      scene,
+      true,
+      false,
+      Texture.NEAREST_SAMPLINGMODE,
+    )
+    mat.setTexture('mainTex', mainTexture)
+
     // Lights...
     const sun = new DirectionalLight('sun', new Vector3(1, -1, 0.5), scene)
 
@@ -45,7 +67,11 @@ export default class Renderer {
     scene.activeCamera?.attachControl(canvas)
 
     const camera = scene.activeCamera as FreeCamera
-    camera.position = new Vector3(32 * 16, 34, 32 * 16)
+    camera.position = new Vector3(
+      (World.size * Chunk.size) / 2,
+      Chunk.size,
+      (World.size * Chunk.size) / 2,
+    )
     camera.target = camera.position.add(Vector3.Backward())
     camera.speed = 10
 
@@ -65,12 +91,10 @@ export default class Renderer {
     const vertData = new VertexData()
     vertData.positions = data.positions
     vertData.indices = data.indices
+    vertData.normals = data.normals
     vertData.applyToMesh(mesh)
 
-    const mat = new StandardMaterial('', this.scene)
-    mat.diffuseColor = new Color3(0.258545, 0.157138, 0.061421)
-    mat.ambientColor = new Color3(0.113, 0.036, 0.014)
-    mesh.material = mat
+    mesh.material = this.blockMaterial
 
     mesh.position = new Vector3(
       chunk.x * Chunk.size,

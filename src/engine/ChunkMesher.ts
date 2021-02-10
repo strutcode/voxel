@@ -3,6 +3,7 @@ import Chunk from './Chunk'
 interface ChunkMesh {
   positions: ArrayBuffer
   indices: ArrayBuffer
+  normals: ArrayBuffer
 }
 
 export default class ChunkMesher {
@@ -15,6 +16,7 @@ export default class ChunkMesher {
 
     const positions: number[] = []
     const indices: number[] = []
+    const normals: number[] = []
 
     for (y = 0; y < Chunk.size; y++) {
       for (z = 0; z < Chunk.size; z++) {
@@ -39,6 +41,8 @@ export default class ChunkMesher {
 
               indices.push(v, v + 1, v + 3, v + 1, v + 2, v + 3)
 
+              normals.push(1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0)
+
               v += 4
             }
             // -X
@@ -46,6 +50,8 @@ export default class ChunkMesher {
               positions.push(x, y, z, x, y, z + 1, x, y + 1, z + 1, x, y + 1, z)
 
               indices.push(v + 3, v + 1, v, v + 3, v + 2, v + 1)
+
+              normals.push(-1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0)
 
               v += 4
             }
@@ -68,6 +74,8 @@ export default class ChunkMesher {
 
               indices.push(v, v + 1, v + 3, v + 1, v + 2, v + 3)
 
+              normals.push(0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1)
+
               v += 4
             }
             // -Z
@@ -75,6 +83,8 @@ export default class ChunkMesher {
               positions.push(x, y, z, x + 1, y, z, x + 1, y + 1, z, x, y + 1, z)
 
               indices.push(v, v + 1, v + 3, v + 1, v + 2, v + 3)
+
+              normals.push(0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1)
 
               v += 4
             }
@@ -97,6 +107,8 @@ export default class ChunkMesher {
 
               indices.push(v, v + 1, v + 3, v + 1, v + 2, v + 3)
 
+              normals.push(0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0)
+
               v += 4
             }
             // -Y
@@ -104,6 +116,8 @@ export default class ChunkMesher {
               positions.push(x, y, z, x, y, z + 1, x + 1, y, z + 1, x + 1, y, z)
 
               indices.push(v, v + 1, v + 3, v + 1, v + 2, v + 3)
+
+              normals.push(0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0)
 
               v += 4
             }
@@ -122,6 +136,7 @@ export default class ChunkMesher {
     return {
       positions: new Uint8Array(positions),
       indices: new Uint32Array(indices),
+      normals: new Int8Array(normals),
     }
   }
 }
