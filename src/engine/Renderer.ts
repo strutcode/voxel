@@ -21,7 +21,7 @@ export default class Renderer {
   private static scene: Scene
   private static camera: FreeCamera
   private static blockMaterial: ShaderMaterial
-  private static meshWorker = new Worker('./ChunkMesherWorker.ts')
+  private static meshWorker = new Worker('./ChunkMesher.worker.ts')
   private static deleteQueue = new Set<string>()
 
   public static init() {

@@ -8,7 +8,7 @@ export default class World {
   private chunks = new Map<string, Chunk | null>()
   private visited = new Set<string>()
   private viewPos = new Vector3()
-  private chunkWorker = new Worker('./ChunkGeneratorWorker.ts')
+  private chunkWorker = new Worker('./ChunkGenerator.worker.ts')
 
   public constructor() {
     this.setupWorker()

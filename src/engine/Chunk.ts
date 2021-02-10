@@ -1,11 +1,12 @@
-import { Noise } from 'noisejs'
+// @ts-ignore
+import NoiseType, { Noise } from 'noisejs'
 
 import Block from './Block'
 
 const blockPos = (x: number, y: number, z: number) =>
   Math.floor(y * Chunk.squareSize + z * Chunk.size + x)
 
-const noise = new Noise()
+const noise = new Noise() as NoiseType
 
 type ChunkData = {
   x: number
