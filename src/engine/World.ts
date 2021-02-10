@@ -5,11 +5,14 @@ import Renderer from './Renderer'
 export default class World {
   public static viewDistance = 16
 
-  private chunks = new Map<string, Chunk>()
+  private chunks = new Map<string, Chunk | null>()
   private visited = new Set<string>()
   private viewPos = new Vector3()
+  private chunkWorker = new Worker('./ChunkGeneratorWorker.ts')
 
-  public constructor() {}
+  public constructor() {
+    this.setupWorker()
+  }
 
   public updateView(position: Vector3, direction: Vector3) {
     this.viewPos.x = Math.floor(position.x / Chunk.size)
@@ -19,6 +22,8 @@ export default class World {
 
     // HACK: The flood fill algorithm should remove these
     this.chunks.forEach((chunk) => {
+      if (!chunk) return
+
       const distance =
         Math.abs(chunk.x - this.viewPos.x) + Math.abs(chunk.z - this.viewPos.z)
 
@@ -59,10 +64,9 @@ export default class World {
   }
 
   private loadChunk(x: number, y: number, z: number) {
-    const chunk = new Chunk(x, y, z)
+    this.chunks.set(`${x},${y},${z}`, null)
 
-    Renderer.newChunk(chunk)
-    this.chunks.set(`${x},${y},${z}`, chunk)
+    this.chunkWorker.postMessage({ x, y, z })
   }
 
   private unloadChunk(x: number, y: number, z: number) {
@@ -71,6 +75,16 @@ export default class World {
     if (chunk) {
       Renderer.delChunk(chunk)
       this.chunks.delete(`${x},${y},${z}`)
+    }
+  }
+
+  private setupWorker() {
+    this.chunkWorker.onmessage = (ev: MessageEvent) => {
+      const { x, y, z } = ev.data
+      const chunk = Chunk.deserialize(ev.data)
+
+      Renderer.newChunk(chunk)
+      this.chunks.set(`${x},${y},${z}`, chunk)
     }
   }
 }

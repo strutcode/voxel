@@ -21,7 +21,11 @@ export default class Game {
     Renderer.init()
 
     this.world = new World()
-    globalThis.World = this.world
+    ;(globalThis as any).options = {
+      set viewDistance(num: number) {
+        World.viewDistance = num
+      },
+    }
   }
 
   public static update() {
