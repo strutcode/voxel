@@ -6,6 +6,7 @@
     "@babylonjs/loaders": "^4.2.0",
     "@babylonjs/materials": "^4.2.0",
     "@types/noisejs": "^0.0.28",
+    "ammo.js": "kripken/ammo.js",
     "noisejs": "^2.1.0"
   },
   "devDependencies": {

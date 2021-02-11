@@ -1,11 +1,15 @@
 import {
   AbstractMesh,
+  AmmoJSPlugin,
+  CannonJSPlugin,
   Color3,
   Color4,
   DirectionalLight,
   Engine,
   FreeCamera,
   Mesh,
+  MeshBuilder,
+  PhysicsImpostor,
   Scene,
   ShaderMaterial,
   Texture,
@@ -15,7 +19,7 @@ import {
 import vs from './vs.glsl'
 import fs from './fs.glsl'
 import Chunk from './Chunk'
-import ChunkMesher from './ChunkMesher'
+import Ammo from 'ammo.js/builds/ammo.js'
 
 export default class Renderer {
   private static scene: Scene
@@ -24,7 +28,7 @@ export default class Renderer {
   private static meshWorker = new Worker('./ChunkMesher.worker.ts')
   private static deleteQueue = new Set<string>()
 
-  public static init() {
+  public static async init() {
     const container = document.getElementById('app')
     const canvas = document.createElement('canvas')
     Object.assign(container?.style, {
@@ -40,18 +44,20 @@ export default class Renderer {
     })
     container?.appendChild(canvas)
 
+    // First the programmer gods created the engine
     const engine = new Engine(canvas)
     const scene = (this.scene = new Scene(engine))
 
     scene.ambientColor = Color3.White()
     scene.clearColor = new Color4(0.7, 0.8, 1, 1)
 
-    const mat = (this.blockMaterial = new ShaderMaterial(
+    // Then formed the earth from dust
+    this.blockMaterial = new ShaderMaterial(
       '',
       scene,
       { vertexSource: vs, fragmentSource: fs },
       { attributes: ['position', 'normal'], uniforms: ['worldViewProjection'] },
-    ))
+    )
 
     const mainTexture = new Texture(
       'grass.png',
@@ -60,7 +66,28 @@ export default class Renderer {
       false,
       Texture.NEAREST_SAMPLINGMODE,
     )
-    mat.setTexture('mainTex', mainTexture)
+    this.blockMaterial.setTexture('mainTex', mainTexture)
+
+    // And made it move
+    scene.enablePhysics(
+      new Vector3(0, -9.87, 0),
+      new AmmoJSPlugin(undefined, await Ammo()),
+    )
+
+    // And all was good
+    window.addEventListener('keydown', (ev) => {
+      if (ev.key === 'b') {
+        const mesh = MeshBuilder.CreateBox('', {}, scene)
+        mesh.position = camera.getTarget()
+        mesh.isPickable = false
+        mesh.physicsImpostor = new PhysicsImpostor(
+          mesh,
+          PhysicsImpostor.BoxImpostor,
+          { mass: 1 },
+          scene,
+        )
+      }
+    })
 
     // Lights...
     const sun = new DirectionalLight('sun', new Vector3(1, -1, 0.5), scene)
@@ -127,6 +154,12 @@ export default class Renderer {
         x * Chunk.size,
         y * Chunk.size,
         z * Chunk.size,
+      )
+      mesh.physicsImpostor = new PhysicsImpostor(
+        mesh,
+        PhysicsImpostor.MeshImpostor,
+        { mass: 0 },
+        this.scene,
       )
 
       mesh.isPickable = false
