@@ -7,15 +7,19 @@ import {
   DirectionalLight,
   Engine,
   FreeCamera,
+  ISceneLoaderAsyncResult,
   Mesh,
   MeshBuilder,
   PhysicsImpostor,
   Scene,
+  SceneLoader,
   ShaderMaterial,
+  StandardMaterial,
   Texture,
   Vector3,
   VertexData,
 } from '@babylonjs/core'
+import '@babylonjs/loaders/glTF/2.0'
 import vs from './vs.glsl'
 import fs from './fs.glsl'
 import Chunk from './Chunk'
@@ -27,6 +31,7 @@ export default class Renderer {
   private static blockMaterial: ShaderMaterial
   private static meshWorker = new Worker('./ChunkMesher.worker.ts')
   private static deleteQueue = new Set<string>()
+  private static objects = new Map<string, ISceneLoaderAsyncResult>()
 
   public static async init() {
     const container = document.getElementById('app')
@@ -94,6 +99,23 @@ export default class Renderer {
       }
     })
 
+    this.objects.set(
+      'tree',
+      await SceneLoader.ImportMeshAsync('Cube.002', '/', 'tree.glb'),
+    )
+
+    this.objects.forEach((objScene) => {
+      objScene.meshes.forEach((mesh) => {
+        if (mesh.name === '__root__') {
+          mesh.isVisible = false
+        }
+
+        if (mesh.material) {
+          ;(mesh.material as StandardMaterial).ambientColor = Color3.White()
+        }
+      })
+    })
+
     // Lights...
     const sun = new DirectionalLight('sun', new Vector3(1, -1, 0.5), scene)
 
@@ -130,24 +152,22 @@ export default class Renderer {
   }
 
   public static enablePhysics(chunk: Chunk) {
-    const mesh = this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
-
-    if (mesh && !mesh.physicsImpostor) {
-      mesh.physicsImpostor = new PhysicsImpostor(
-        mesh,
-        PhysicsImpostor.MeshImpostor,
-        { mass: 0 },
-        this.scene,
-      )
-    }
+    // const mesh = this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
+    // if (mesh && !mesh.physicsImpostor) {
+    //   mesh.physicsImpostor = new PhysicsImpostor(
+    //     mesh,
+    //     PhysicsImpostor.MeshImpostor,
+    //     { mass: 0 },
+    //     this.scene,
+    //   )
+    // }
   }
 
   public static disablePhysics(chunk: Chunk) {
-    const mesh = this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
-
-    if (mesh && mesh.physicsImpostor) {
-      mesh.physicsImpostor.dispose()
-    }
+    // const mesh = this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
+    // if (mesh && mesh.physicsImpostor) {
+    //   mesh.physicsImpostor.dispose()
+    // }
   }
 
   private static render() {
@@ -165,7 +185,7 @@ export default class Renderer {
 
   private static initMeshWorker() {
     this.meshWorker.onmessage = (event: MessageEvent) => {
-      const { x, y, z, attributes } = event.data
+      const { x, y, z, attributes, objects } = event.data
 
       const mesh = new Mesh(`${x},${y},${z}`, this.scene)
       const vertData = new VertexData()
@@ -184,6 +204,26 @@ export default class Renderer {
 
       mesh.isPickable = false
       mesh.cullingStrategy = AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY
+
+      objects.forEach((object) => {
+        const objScene = this.objects.get(object.name)
+
+        if (objScene) {
+          const root = objScene.meshes.find((m) => m.name === '__root__')
+
+          if (root) {
+            const objMesh = root.clone('', mesh)
+            objMesh.position.x = object.x
+            objMesh.position.y = object.y
+            objMesh.position.z = object.z
+            objMesh.scaling.set(object.scale, object.scale, object.scale)
+            objMesh.isVisible = true
+            objMesh.isPickable = false
+            objMesh.cullingStrategy =
+              AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY
+          }
+        }
+      })
     }
   }
 }

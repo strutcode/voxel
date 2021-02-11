@@ -12,7 +12,16 @@ type ChunkData = {
   x: number
   y: number
   z: number
+  objects: ChunkObject[]
   data: Uint32Array
+}
+
+type ChunkObject = {
+  x: number
+  y: number
+  z: number
+  scale: number
+  name: string
 }
 
 export default class Chunk {
@@ -22,11 +31,13 @@ export default class Chunk {
 
   public static deserialize(serialized: ChunkData) {
     const chunk = new Chunk(serialized.x, serialized.y, serialized.z, true)
+    chunk.objects = serialized.objects
     chunk.chunkStore = serialized.data
     return chunk
   }
 
   private chunkStore = new Uint32Array(Chunk.cubeSize)
+  public objects: ChunkObject[] = []
 
   constructor(public x = 0, public y = 0, public z = 0, empty = false) {
     if (!empty) this.initialize()
@@ -60,12 +71,33 @@ export default class Chunk {
             0.5 *
             (Chunk.size - 1) +
           1
+        const tree =
+          noise.simplex2(
+            (this.x * Chunk.size + x) / 2,
+            (this.z * Chunk.size + z) / 2,
+          ) *
+            2 +
+          noise.simplex2(
+            (this.x * Chunk.size + x) / 128,
+            (this.z * Chunk.size + z) / 128,
+          )
 
-        for (let y = Chunk.size - 1; y > 0; y--) {
+        for (let y = 0; y < Chunk.size; y++) {
           if (y <= height) {
             this.set(x, y, z, {
               type: 1,
             })
+          } else {
+            if (tree > 2.5) {
+              this.objects.push({
+                x,
+                y,
+                z,
+                scale: Math.random() * 0.8 + 0.6,
+                name: 'tree',
+              })
+            }
+            break
           }
         }
       }
@@ -89,6 +121,7 @@ export default class Chunk {
       x: this.x,
       y: this.y,
       z: this.z,
+      objects: this.objects,
       data: this.chunkStore,
     }
   }

@@ -10,6 +10,7 @@ onmessage = function (event: MessageEvent) {
     x: event.data.x,
     y: event.data.y,
     z: event.data.z,
+    objects: chunk.objects,
     attributes,
   })
 }
