@@ -86,6 +86,11 @@ export default class Renderer {
           { mass: 1 },
           scene,
         )
+        mesh.onAfterRenderObservable.add(() => {
+          if (mesh.position.y < -10) {
+            mesh.dispose()
+          }
+        })
       }
     })
 
@@ -124,6 +129,27 @@ export default class Renderer {
     this.deleteQueue.add(`${chunk.x},${chunk.y},${chunk.z}`)
   }
 
+  public static enablePhysics(chunk: Chunk) {
+    const mesh = this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
+
+    if (mesh && !mesh.physicsImpostor) {
+      mesh.physicsImpostor = new PhysicsImpostor(
+        mesh,
+        PhysicsImpostor.MeshImpostor,
+        { mass: 0 },
+        this.scene,
+      )
+    }
+  }
+
+  public static disablePhysics(chunk: Chunk) {
+    const mesh = this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
+
+    if (mesh && mesh.physicsImpostor) {
+      mesh.physicsImpostor.dispose()
+    }
+  }
+
   private static render() {
     this.deleteQueue.forEach((key) => {
       const mesh = this.scene.getMeshByName(key)
@@ -154,12 +180,6 @@ export default class Renderer {
         x * Chunk.size,
         y * Chunk.size,
         z * Chunk.size,
-      )
-      mesh.physicsImpostor = new PhysicsImpostor(
-        mesh,
-        PhysicsImpostor.MeshImpostor,
-        { mass: 0 },
-        this.scene,
       )
 
       mesh.isPickable = false

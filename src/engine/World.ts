@@ -54,6 +54,15 @@ export default class World {
           this.checkChunk(x, 0, z + 1)
         }
       }
+
+      const chunk = this.chunks.get(`${x},${y},${z}`)
+      if (chunk) {
+        if (distance < 3) {
+          Renderer.enablePhysics(chunk)
+        } else {
+          Renderer.disablePhysics(chunk)
+        }
+      }
     } else if (distance <= World.viewDistance) {
       this.loadChunk(x, y, z)
     }

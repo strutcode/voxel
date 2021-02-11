@@ -13,10 +13,7 @@ export default class Game {
   public static state: GameState = GameState.Play
   public static world: World
 
-  private static mainLoop = setInterval(
-    Game.update.bind(Game),
-    1000 / Game.speedHz,
-  )
+  private static mainLoop
 
   public static async start() {
     await Renderer.init()
@@ -27,6 +24,8 @@ export default class Game {
         World.viewDistance = num
       },
     }
+
+    this.mainLoop = setInterval(Game.update.bind(Game), 1000 / Game.speedHz)
   }
 
   public static update() {
