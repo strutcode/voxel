@@ -34,7 +34,7 @@ export default class Renderer {
   private static blockMaterial: ShaderMaterial
   private static meshWorker = new Worker('./ChunkMesher.worker.ts')
   private static deleteQueue = new Set<string>()
-  private static objects = new Map<string, ISceneLoaderAsyncResult>()
+  private static objects = new Map<string, Mesh>()
 
   public static async init() {
     const container = document.getElementById('app')
@@ -62,9 +62,11 @@ export default class Renderer {
     scene.fogEnd = 10 * 32
     scene.fogStart = scene.fogEnd * 0.75
     scene.fogMode = Scene.FOGMODE_LINEAR
-    scene.fogColor = scene.clearColor
-
-    // scene.freezeActiveMeshes()
+    scene.fogColor.set(
+      scene.clearColor.r,
+      scene.clearColor.g,
+      scene.clearColor.b,
+    )
 
     // Then formed the earth from dust
     this.blockMaterial = new ShaderMaterial(
@@ -143,30 +145,27 @@ export default class Renderer {
     })
 
     const loadAsset = async (name: string) => {
-      this.objects.set(
-        name,
-        await SceneLoader.ImportMeshAsync(undefined, '/', `${name}.glb`),
+      const scene = await SceneLoader.ImportMeshAsync(
+        undefined,
+        '/',
+        `${name}.glb`,
       )
+
+      const firstMesh = scene.meshes.find((mesh) => mesh.name !== '__root__')
+
+      firstMesh.isVisible = false
+      firstMesh.alwaysSelectAsActiveMesh = true
+      if (firstMesh.material) {
+        ;(firstMesh.material as StandardMaterial).ambientColor = Color3.White()
+      }
+
+      this.objects.set(name, firstMesh as Mesh)
     }
 
     await loadAsset('tree')
     await loadAsset('pumpkin')
     await loadAsset('fox')
     await loadAsset('ocelot')
-
-    this.objects.forEach((objScene) => {
-      objScene.meshes.forEach((mesh) => {
-        if (mesh.name === '__root__') {
-          mesh.isVisible = false
-        }
-
-        mesh.alwaysSelectAsActiveMesh = true
-
-        if (mesh.material) {
-          ;(mesh.material as StandardMaterial).ambientColor = Color3.White()
-        }
-      })
-    })
 
     // Lights...
     const sun = new DirectionalLight('sun', new Vector3(1, -1, 0.5), scene)
@@ -268,31 +267,24 @@ export default class Renderer {
 
       mesh.isPickable = false
       mesh.alwaysSelectAsActiveMesh = true
-      // mesh.cullingStrategy = AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY
 
       objects.forEach((object) => {
-        const objScene = this.objects.get(object.name)
+        const mesh = this.objects.get(object.name)
 
-        if (objScene) {
-          const root = objScene.meshes.find((m) => m.name === '__root__')
-
-          if (root) {
-            const objMesh = root.clone('', mesh)
-            objMesh.position.x = object.x + 0.5
-            objMesh.position.y = object.y
-            objMesh.position.z = object.z + 0.5
-            objMesh.scaling.set(object.scale, object.scale, object.scale)
-            objMesh.rotateAround(
-              objMesh.position,
-              Vector3.Up(),
-              Math.random() * Math.PI,
-            )
-            objMesh.isVisible = true
-            objMesh.isPickable = false
-            objMesh.alwaysSelectAsActiveMesh = true
-            // objMesh.cullingStrategy =
-            //   AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY
-          }
+        if (mesh) {
+          const objMesh = mesh.createInstance('')
+          objMesh.position.x = x * Chunk.size + object.x + 0.5
+          objMesh.position.y = y * Chunk.size + object.y
+          objMesh.position.z = z * Chunk.size + object.z + 0.5
+          objMesh.scaling.set(object.scale, object.scale, object.scale)
+          objMesh.rotateAround(
+            objMesh.position,
+            Vector3.Up(),
+            Math.random() * Math.PI,
+          )
+          objMesh.isVisible = true
+          objMesh.isPickable = false
+          objMesh.alwaysSelectAsActiveMesh = true
         }
       })
     }
