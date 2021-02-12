@@ -1,6 +1,7 @@
 import {
   AbstractMesh,
   AmmoJSPlugin,
+  Buffer,
   CannonJSPlugin,
   Color3,
   Color4,
@@ -11,6 +12,7 @@ import {
   Mesh,
   MeshBuilder,
   PhysicsImpostor,
+  RawTexture2DArray,
   Scene,
   SceneLoader,
   ShaderMaterial,
@@ -26,6 +28,7 @@ import Chunk from './Chunk'
 import Ammo from 'ammo.js/builds/ammo.js'
 
 export default class Renderer {
+  private static engine: Engine
   private static scene: Scene
   private static camera: FreeCamera
   private static blockMaterial: ShaderMaterial
@@ -50,34 +53,74 @@ export default class Renderer {
     container?.appendChild(canvas)
 
     // First the programmer gods created the engine
-    const engine = new Engine(canvas)
+    const engine = (this.engine = new Engine(canvas))
     const scene = (this.scene = new Scene(engine))
 
     scene.ambientColor = Color3.White()
     scene.clearColor = new Color4(0.7, 0.8, 1, 1)
+    scene.fogEnabled = true
+    scene.fogEnd = 10 * 32
+    scene.fogStart = scene.fogEnd * 0.75
+    scene.fogMode = Scene.FOGMODE_LINEAR
+    scene.fogColor = scene.clearColor
+
+    // scene.freezeActiveMeshes()
 
     // Then formed the earth from dust
     this.blockMaterial = new ShaderMaterial(
       '',
       scene,
       { vertexSource: vs, fragmentSource: fs },
-      { attributes: ['position', 'normal'], uniforms: ['worldViewProjection'] },
+      {
+        attributes: ['position', 'uv', 'texInd'],
+        uniforms: [
+          'world',
+          'view',
+          'projection',
+          'viewProjection',
+          'worldViewProjection',
+          'viewPosition',
+        ],
+      },
     )
+    this.blockMaterial.setFloat('fogStart', scene.fogStart)
+    this.blockMaterial.setFloat('fogEnd', scene.fogEnd)
+    this.blockMaterial.setArray3('fogColor', [
+      scene.fogColor.r,
+      scene.fogColor.g,
+      scene.fogColor.b,
+    ])
 
-    const mainTexture = new Texture(
-      'grass.png',
-      scene,
-      false,
-      false,
-      Texture.NEAREST_SAMPLINGMODE,
-    )
-    this.blockMaterial.setTexture('mainTex', mainTexture)
+    // new RawTexture2DArray(new Uint8Array(), 32, 32, 24, 0, scene)
+    this.blockMaterial.setTextureArray('blockTex', [
+      new Texture(
+        'grass.png',
+        scene,
+        false,
+        false,
+        Texture.NEAREST_SAMPLINGMODE,
+      ),
+      new Texture(
+        'dirtgrass.png',
+        scene,
+        false,
+        false,
+        Texture.NEAREST_SAMPLINGMODE,
+      ),
+      new Texture(
+        'dirt.png',
+        scene,
+        false,
+        false,
+        Texture.NEAREST_SAMPLINGMODE,
+      ),
+    ])
 
     // And made it move
-    scene.enablePhysics(
-      new Vector3(0, -9.87, 0),
-      new AmmoJSPlugin(undefined, await Ammo()),
-    )
+    // scene.enablePhysics(
+    //   new Vector3(0, -9.87, 0),
+    //   new AmmoJSPlugin(undefined, await Ammo()),
+    // )
 
     // And all was good
     window.addEventListener('keydown', (ev) => {
@@ -99,16 +142,25 @@ export default class Renderer {
       }
     })
 
-    this.objects.set(
-      'tree',
-      await SceneLoader.ImportMeshAsync('Cube.002', '/', 'tree.glb'),
-    )
+    const loadAsset = async (name: string) => {
+      this.objects.set(
+        name,
+        await SceneLoader.ImportMeshAsync(undefined, '/', `${name}.glb`),
+      )
+    }
+
+    await loadAsset('tree')
+    await loadAsset('pumpkin')
+    await loadAsset('fox')
+    await loadAsset('ocelot')
 
     this.objects.forEach((objScene) => {
       objScene.meshes.forEach((mesh) => {
         if (mesh.name === '__root__') {
           mesh.isVisible = false
         }
+
+        mesh.alwaysSelectAsActiveMesh = true
 
         if (mesh.material) {
           ;(mesh.material as StandardMaterial).ambientColor = Color3.White()
@@ -124,7 +176,7 @@ export default class Renderer {
     scene.activeCamera?.attachControl(canvas)
 
     const camera = (this.camera = scene.activeCamera as FreeCamera)
-    camera.speed = 5
+    camera.speed = 0.5
     camera.position.y = 40
 
     // Action!
@@ -171,6 +223,11 @@ export default class Renderer {
   }
 
   private static render() {
+    this.blockMaterial.setVector3(
+      'viewPosition',
+      this.scene.activeCamera.position,
+    )
+
     this.deleteQueue.forEach((key) => {
       const mesh = this.scene.getMeshByName(key)
 
@@ -191,7 +248,14 @@ export default class Renderer {
       const vertData = new VertexData()
       vertData.positions = attributes.positions
       vertData.indices = attributes.indices
-      vertData.normals = attributes.normals
+      vertData.uvs = attributes.uvs
+      mesh.setVerticesBuffer(
+        new Buffer(this.engine, attributes.texInd, false, 1).createVertexBuffer(
+          'texInd',
+          0,
+          1,
+        ),
+      )
       vertData.applyToMesh(mesh)
 
       mesh.material = this.blockMaterial
@@ -203,7 +267,8 @@ export default class Renderer {
       )
 
       mesh.isPickable = false
-      mesh.cullingStrategy = AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY
+      mesh.alwaysSelectAsActiveMesh = true
+      // mesh.cullingStrategy = AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY
 
       objects.forEach((object) => {
         const objScene = this.objects.get(object.name)
@@ -213,14 +278,20 @@ export default class Renderer {
 
           if (root) {
             const objMesh = root.clone('', mesh)
-            objMesh.position.x = object.x
+            objMesh.position.x = object.x + 0.5
             objMesh.position.y = object.y
-            objMesh.position.z = object.z
+            objMesh.position.z = object.z + 0.5
             objMesh.scaling.set(object.scale, object.scale, object.scale)
+            objMesh.rotateAround(
+              objMesh.position,
+              Vector3.Up(),
+              Math.random() * Math.PI,
+            )
             objMesh.isVisible = true
             objMesh.isPickable = false
-            objMesh.cullingStrategy =
-              AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY
+            objMesh.alwaysSelectAsActiveMesh = true
+            // objMesh.cullingStrategy =
+            //   AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY
           }
         }
       })
