@@ -25,7 +25,7 @@ import '@babylonjs/loaders/glTF/2.0'
 import vs from './vs.glsl'
 import fs from './fs.glsl'
 import Chunk from './Chunk'
-import Ammo from 'ammo.js/builds/ammo.js'
+import Ammo from '../../ammojs/builds/ammo.js'
 
 export default class Renderer {
   private static engine: Engine
@@ -119,10 +119,10 @@ export default class Renderer {
     ])
 
     // And made it move
-    // scene.enablePhysics(
-    //   new Vector3(0, -9.87, 0),
-    //   new AmmoJSPlugin(undefined, await Ammo()),
-    // )
+    scene.enablePhysics(
+      new Vector3(0, -9.87, 0),
+      new AmmoJSPlugin(undefined, await Ammo()),
+    )
 
     // And all was good
     window.addEventListener('keydown', (ev) => {
@@ -203,22 +203,30 @@ export default class Renderer {
   }
 
   public static enablePhysics(chunk: Chunk) {
-    // const mesh = this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
-    // if (mesh && !mesh.physicsImpostor) {
-    //   mesh.physicsImpostor = new PhysicsImpostor(
-    //     mesh,
-    //     PhysicsImpostor.MeshImpostor,
-    //     { mass: 0 },
-    //     this.scene,
-    //   )
-    // }
+    const mesh = this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
+    if (mesh && !mesh.physicsImpostor) {
+      const original = mesh.getChildMeshes
+      mesh.getChildMeshes = () => []
+
+      mesh.physicsImpostor = new PhysicsImpostor(
+        mesh,
+        PhysicsImpostor.MeshImpostor,
+        { mass: 0 },
+        this.scene,
+      )
+      // mesh.showBoundingBox = true
+
+      mesh.getChildMeshes = original
+    }
   }
 
   public static disablePhysics(chunk: Chunk) {
-    // const mesh = this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
-    // if (mesh && mesh.physicsImpostor) {
-    //   mesh.physicsImpostor.dispose()
-    // }
+    const mesh = this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
+    if (mesh && mesh.physicsImpostor) {
+      mesh.physicsImpostor.dispose()
+      mesh.physicsImpostor = null
+      // mesh.showBoundingBox = false
+    }
   }
 
   private static render() {
