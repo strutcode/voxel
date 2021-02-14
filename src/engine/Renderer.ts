@@ -69,6 +69,7 @@ export default class Renderer {
       scene.clearColor.g,
       scene.clearColor.b,
     )
+    scene['_skipFrustumClipping'] = true // Force this because it's too slow
 
     // Then formed the earth from dust
     this.blockMaterial = new ShaderMaterial(
