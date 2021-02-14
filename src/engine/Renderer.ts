@@ -8,6 +8,7 @@ import {
   DirectionalLight,
   Engine,
   FreeCamera,
+  InstancedMesh,
   ISceneLoaderAsyncResult,
   Mesh,
   MeshBuilder,
@@ -35,6 +36,7 @@ export default class Renderer {
   private static meshWorker = new Worker('./ChunkMesher.worker.ts')
   private static deleteQueue = new Set<string>()
   private static objects = new Map<string, Mesh>()
+  private static chunkObjects: Record<string, InstancedMesh[]> = {}
 
   public static async init() {
     const container = document.getElementById('app')
@@ -242,6 +244,11 @@ export default class Renderer {
         mesh.dispose()
         this.deleteQueue.delete(key)
       }
+
+      if (this.chunkObjects[key]) {
+        this.chunkObjects[key].forEach((mesh) => mesh.dispose())
+        delete this.chunkObjects[key]
+      }
     })
 
     this.scene.render()
@@ -251,7 +258,9 @@ export default class Renderer {
     this.meshWorker.onmessage = (event: MessageEvent) => {
       const { x, y, z, attributes, objects } = event.data
 
-      const mesh = new Mesh(`${x},${y},${z}`, this.scene)
+      const key = `${x},${y},${z}`
+
+      const mesh = new Mesh(key, this.scene)
       const vertData = new VertexData()
       vertData.positions = attributes.positions
       vertData.indices = attributes.indices
@@ -276,7 +285,9 @@ export default class Renderer {
       mesh.isPickable = false
       mesh.alwaysSelectAsActiveMesh = true
 
-      objects.forEach((object) => {
+      this.chunkObjects[key] ??= []
+
+      objects.forEach((object, i) => {
         const mesh = this.objects.get(object.name)
 
         if (mesh) {
@@ -293,6 +304,8 @@ export default class Renderer {
           objMesh.isVisible = true
           objMesh.isPickable = false
           objMesh.alwaysSelectAsActiveMesh = true
+
+          this.chunkObjects[key].push(objMesh)
         }
       })
     }
