@@ -115,7 +115,7 @@ export default class Chunk {
                 scale: Math.random() * 0.4 + 0.6,
                 name: 'pumpkin',
               })
-            } else if (Math.random() < 0.001) {
+            } else if (Math.random() < 0.0005) {
               const animals = ['fox', 'ocelot']
 
               this.objects.push({
@@ -125,7 +125,16 @@ export default class Chunk {
                 scale: 1,
                 name: animals[Math.floor(Math.random() * animals.length)],
               })
+            } else if (Math.random() < 0.5) {
+              this.objects.push({
+                x,
+                y,
+                z,
+                scale: 1,
+                name: 'grass',
+              })
             }
+
             break
           }
         }

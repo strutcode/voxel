@@ -10,8 +10,11 @@ import {
   FreeCamera,
   InstancedMesh,
   ISceneLoaderAsyncResult,
+  Material,
+  Matrix,
   Mesh,
   MeshBuilder,
+  PBRMaterial,
   PhysicsImpostor,
   RawTexture2DArray,
   Scene,
@@ -26,7 +29,7 @@ import '@babylonjs/loaders/glTF/2.0'
 import vs from './vs.glsl'
 import fs from './fs.glsl'
 import Chunk from './Chunk'
-import Ammo from '../../ammojs/builds/ammo.js'
+import Ammo from '../../ammojs/builds/ammo.wasm.js'
 
 export default class Renderer {
   private static engine: Engine
@@ -36,7 +39,10 @@ export default class Renderer {
   private static meshWorker = new Worker('./ChunkMesher.worker.ts')
   private static deleteQueue = new Set<string>()
   private static objects = new Map<string, Mesh>()
-  private static chunkObjects: Record<string, InstancedMesh[]> = {}
+  private static chunkObjects: Record<
+    string,
+    Record<string, number[]> | undefined
+  > = {}
 
   public static async init() {
     const container = document.getElementById('app')
@@ -156,10 +162,18 @@ export default class Renderer {
 
       const firstMesh = scene.meshes.find((mesh) => mesh.name !== '__root__')
 
-      firstMesh.isVisible = false
+      firstMesh.isVisible = true
       firstMesh.alwaysSelectAsActiveMesh = true
-      if (firstMesh.material) {
-        ;(firstMesh.material as StandardMaterial).ambientColor = Color3.White()
+
+      const material = firstMesh.material as PBRMaterial | null
+      if (material) {
+        material.ambientColor = Color3.White()
+
+        if (name == 'grass') {
+          material.albedoTexture.hasAlpha = true
+          material.transparencyMode = Material.MATERIAL_ALPHATEST
+          material.alphaCutOff = 0.5
+        }
       }
 
       this.objects.set(name, firstMesh as Mesh)
@@ -169,6 +183,7 @@ export default class Renderer {
     await loadAsset('pumpkin')
     await loadAsset('fox')
     await loadAsset('ocelot')
+    await loadAsset('grass')
 
     // Lights...
     const sun = new DirectionalLight('sun', new Vector3(1, -1, 0.5), scene)
@@ -232,6 +247,10 @@ export default class Renderer {
     }
   }
 
+  public static update() {
+    this.render()
+  }
+
   private static render() {
     this.blockMaterial.setVector3(
       'viewPosition',
@@ -247,7 +266,15 @@ export default class Renderer {
       }
 
       if (this.chunkObjects[key]) {
-        this.chunkObjects[key].forEach((mesh) => mesh.dispose())
+        Object.keys(this.chunkObjects[key]).forEach((name) => {
+          const chunkObj = this.objects.get(name)
+
+          if (chunkObj) {
+            this.chunkObjects[key][name].forEach((index) => {
+              // chunkObj.thinInstancePartialBufferUpdate()
+            })
+          }
+        })
         delete this.chunkObjects[key]
       }
     })
@@ -286,27 +313,24 @@ export default class Renderer {
       mesh.isPickable = false
       mesh.alwaysSelectAsActiveMesh = true
 
-      this.chunkObjects[key] ??= []
+      this.chunkObjects[key] ??= {}
 
       objects.forEach((object, i) => {
         const mesh = this.objects.get(object.name)
 
         if (mesh) {
-          const objMesh = mesh.createInstance('')
-          objMesh.position.x = x * Chunk.size + object.x + 0.5
-          objMesh.position.y = y * Chunk.size + object.y
-          objMesh.position.z = z * Chunk.size + object.z + 0.5
-          objMesh.scaling.set(object.scale, object.scale, object.scale)
-          objMesh.rotateAround(
-            objMesh.position,
-            Vector3.Up(),
-            Math.random() * Math.PI,
-          )
-          objMesh.isVisible = true
-          objMesh.isPickable = false
-          objMesh.alwaysSelectAsActiveMesh = true
+          this.chunkObjects[key][object.name] ??= []
 
-          this.chunkObjects[key].push(objMesh)
+          const idx = mesh.thinInstanceAdd(
+            Matrix.Translation(
+              x * Chunk.size + object.x + 0.5,
+              y * Chunk.size + object.y,
+              z * Chunk.size + object.z + 0.5,
+            ),
+            i === objects.length - 1,
+          )
+
+          this.chunkObjects[key][object.name].push(idx)
         }
       })
     }
