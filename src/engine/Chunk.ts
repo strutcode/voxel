@@ -130,8 +130,7 @@ export default class Chunk {
                 x,
                 y,
                 z,
-                rotation: 45,
-                scale: 1.5,
+                rotation: Math.random() * 360,
                 name: 'grass',
               })
             }
