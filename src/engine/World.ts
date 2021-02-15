@@ -3,7 +3,7 @@ import Chunk from './Chunk'
 import Renderer from './Renderer'
 
 export default class World {
-  public static viewDistance = 16
+  public static viewDistance = 3
 
   private chunks = new Map<string, Chunk | null>()
   private visited = new Set<string>()

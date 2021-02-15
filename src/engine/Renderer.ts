@@ -323,12 +323,16 @@ export default class Renderer {
           this.chunkObjects[key][object.name] ??= []
           meshesToUpdate.push(mesh)
 
+          const scale = object.scale ?? 1
+
           const idx = mesh.thinInstanceAdd(
-            Matrix.Translation(
-              -x * Chunk.size - object.x - 0.5, // Inverse because of gltf coordinates
-              y * Chunk.size + object.y,
-              z * Chunk.size + object.z + 0.5,
-            ),
+            Matrix.Scaling(scale, scale, scale)
+              .multiply(Matrix.RotationY((object.rotation ?? 0) * 0.0174533))
+              .setTranslationFromFloats(
+                -x * Chunk.size - object.x - 0.5, // Inverse because of gltf coordinates
+                y * Chunk.size + object.y,
+                z * Chunk.size + object.z + 0.5,
+              ),
             false,
           )
 

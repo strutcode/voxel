@@ -20,7 +20,8 @@ type ChunkObject = {
   x: number
   y: number
   z: number
-  scale: number
+  rotation?: number
+  scale?: number
   name: string
 }
 
@@ -122,7 +123,6 @@ export default class Chunk {
                 x,
                 y,
                 z,
-                scale: 1,
                 name: animals[Math.floor(Math.random() * animals.length)],
               })
             } else if (Math.random() < 0.5) {
@@ -130,7 +130,8 @@ export default class Chunk {
                 x,
                 y,
                 z,
-                scale: 1,
+                rotation: 45,
+                scale: 1.5,
                 name: 'grass',
               })
             }
