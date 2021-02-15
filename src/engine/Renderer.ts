@@ -314,24 +314,30 @@ export default class Renderer {
       mesh.alwaysSelectAsActiveMesh = true
 
       this.chunkObjects[key] ??= {}
+      const meshesToUpdate: Mesh[] = []
 
-      objects.forEach((object, i) => {
+      objects.forEach((object) => {
         const mesh = this.objects.get(object.name)
 
         if (mesh) {
           this.chunkObjects[key][object.name] ??= []
+          meshesToUpdate.push(mesh)
 
           const idx = mesh.thinInstanceAdd(
             Matrix.Translation(
-              x * Chunk.size + object.x + 0.5,
+              -x * Chunk.size - object.x - 0.5, // Inverse because of gltf coordinates
               y * Chunk.size + object.y,
               z * Chunk.size + object.z + 0.5,
             ),
-            i === objects.length - 1,
+            false,
           )
 
           this.chunkObjects[key][object.name].push(idx)
         }
+      })
+
+      meshesToUpdate.forEach((mesh) => {
+        mesh.thinInstanceBufferUpdated('matrix')
       })
     }
   }
