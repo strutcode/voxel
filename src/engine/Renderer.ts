@@ -158,21 +158,23 @@ export default class Renderer {
       img.onload = () => resolve(img)
     })
     const data = await createImageBitmap(img)
-
-    this.blockMaterial.setTexture(
-      'tiles',
-      new RawTexture2DArray(
-        data,
-        16,
-        16,
-        data.height / 16,
-        Engine.TEXTUREFORMAT_RGBA,
-        scene,
-        true,
-        false,
-        Texture.NEAREST_LINEAR_MIPLINEAR,
-      ),
+    const textureArray = new RawTexture2DArray(
+      data,
+      16,
+      16,
+      data.height / 16,
+      Engine.TEXTUREFORMAT_RGBA,
+      scene,
+      true,
+      false,
+      Texture.NEAREST_LINEAR_MIPLINEAR,
     )
+
+    textureArray.wrapU = Texture.CLAMP_ADDRESSMODE
+    textureArray.wrapV = Texture.CLAMP_ADDRESSMODE
+    textureArray.wrapR = Texture.CLAMP_ADDRESSMODE
+
+    this.blockMaterial.setTexture('tiles', textureArray)
 
     // And made it move
     scene.enablePhysics(
@@ -215,8 +217,10 @@ export default class Renderer {
       const material = firstMesh.material as PBRMaterial | null
       if (material) {
         material.ambientColor = Color3.White()
+        material.albedoTexture.wrapU = Texture.CLAMP_ADDRESSMODE
+        material.albedoTexture.wrapV = Texture.CLAMP_ADDRESSMODE
 
-        if (name == 'grass') {
+        if (name == 'grass2') {
           material.albedoTexture.hasAlpha = true
           material.transparencyMode = Material.MATERIAL_ALPHATEST
           material.alphaCutOff = 0.5
