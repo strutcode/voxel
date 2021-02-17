@@ -6,7 +6,6 @@
     "@babylonjs/loaders": "^4.2.0",
     "@babylonjs/materials": "^4.2.0",
     "@types/noisejs": "^0.0.28",
-    "ammo.js": "kripken/ammo.js",
     "noisejs": "^2.1.0"
   },
   "devDependencies": {
@@ -17,6 +16,7 @@
     "glslify-bundle": "^5.1.1",
     "glslify-deps": "^1.3.2",
     "mocha": "^8.2.1",
+    "nodemon": "^2.0.7",
     "parcel": "^1.12.4",
     "parcel-plugin-asset-copier": "^1.1.0",
     "sinon": "^9.2.4",
@@ -27,6 +27,6 @@
   "assetsPath": "./assets",
   "scripts": {
     "dev": "parcel serve --hmr-port 1235 src/index.html",
-    "test": "ts-mocha -p test/tsconfig.json test/bootstrap.ts src/**/*.spec.ts"
+    "test": "TS_NODE_IGNORE='node_modules/(?!@babylonjs)' ts-mocha -p test/tsconfig.json test/bootstrap.ts 'src/**/*.spec.ts'"
   }
 }

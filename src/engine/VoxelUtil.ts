@@ -6,8 +6,10 @@ export default class VoxelUtil {
     dx: number,
     dy: number,
     dz: number,
-    isSolid: (x: number, y: number, z: number) => boolean
+    isSolid: (x: number, y: number, z: number) => boolean,
   ): [number, number, number] | null {
+    if (isSolid(x, y, z)) return [x, y, z]
+
     return null
   }
 

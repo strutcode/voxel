@@ -1,10 +1,10 @@
-import VoxelUtil from "./VoxelUtil"
+import VoxelUtil from './VoxelUtil'
 
 describe('VoxelUtil', () => {
   describe('can find the hit location of a ray cast in the voxel world', () => {
     it('exits immediately on solid', () => {
-      const isSolid = Sinon.stub()
-      expect(VoxelUtil.rayCast()).to.eql([])
+      const isSolid = Sinon.stub().returns(true)
+      expect(VoxelUtil.rayCast(0, 0, 0, 1, 0, 0, isSolid)).to.eql([0, 0, 0])
     })
 
     it('iterates along the shortest axis')

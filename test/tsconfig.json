@@ -2,9 +2,13 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "target": "ES6",
-    "module": "commonjs"
+    "module": "commonjs",
+    "allowJs": true
   },
   "include": [
     "../src/**/*.spec.ts"
+  ],
+  "exclude": [
+    "../src/**/*.glsl"
   ]
 }

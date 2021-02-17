@@ -1,15 +1,11 @@
 import {
-  AbstractMesh,
   AmmoJSPlugin,
   Buffer,
-  CannonJSPlugin,
   Color3,
   Color4,
   DirectionalLight,
   Engine,
   FreeCamera,
-  InstancedMesh,
-  ISceneLoaderAsyncResult,
   Material,
   Matrix,
   Mesh,
@@ -20,7 +16,6 @@ import {
   Scene,
   SceneLoader,
   ShaderMaterial,
-  StandardMaterial,
   Texture,
   Vector3,
   VertexData,
@@ -31,6 +26,65 @@ import fs from './fs.glsl'
 import Chunk from './Chunk'
 import Ammo from '../../ammojs/builds/ammo.wasm.js'
 
+export class ObjectInfo {
+  ranges: { key: string; start: number; end: number; length: number }[] = []
+  buffer = new Float32Array(1024)
+  bufferLength = 0
+
+  constructor(public mesh: Mesh) {}
+
+  public addRange(key: string, newBuffer: Float32Array) {
+    const start = this.bufferLength
+    const length = newBuffer.length
+
+    if (start + length > this.buffer.length) {
+      // Expand buffer
+      const oldBuffer = this.buffer
+      let newLength = oldBuffer.length * 2
+
+      while (start + length > newLength) newLength *= 2
+
+      this.buffer = new Float32Array(newLength)
+      this.buffer.set(oldBuffer, 0)
+    }
+
+    this.buffer.set(newBuffer, start)
+    this.ranges.push({
+      key,
+      start,
+      end: start + length,
+      length,
+    })
+    this.bufferLength += length
+
+    this.mesh.thinInstanceSetBuffer('matrix', this.buffer, 16, true)
+  }
+
+  public removeRange(key) {
+    const index = this.ranges.findIndex((r) => r.key === key)
+    const range = this.ranges[index]
+
+    if (index === -1) return
+
+    // Shift left
+    let lastStart = range.start
+    for (let i = index + 1; i < this.ranges.length; i++) {
+      this.buffer.copyWithin(
+        lastStart,
+        this.ranges[i].start,
+        this.ranges[i].end,
+      )
+
+      this.ranges[i].start -= range.length
+      this.ranges[i].end -= range.length
+      lastStart += this.ranges[i].length
+    }
+
+    this.bufferLength -= range.length
+    this.ranges.splice(index, 1)
+  }
+}
+
 export default class Renderer {
   private static engine: Engine
   private static scene: Scene
@@ -38,11 +92,7 @@ export default class Renderer {
   private static blockMaterial: ShaderMaterial
   private static meshWorker = new Worker('./ChunkMesher.worker.ts')
   private static deleteQueue = new Set<string>()
-  private static objects = new Map<string, Mesh>()
-  private static chunkObjects: Record<
-    string,
-    Record<string, number[]> | undefined
-  > = {}
+  private static objects: Record<string, ObjectInfo> = {}
 
   public static async init() {
     const container = document.getElementById('app')
@@ -176,7 +226,7 @@ export default class Renderer {
         }
       }
 
-      this.objects.set(name, firstMesh as Mesh)
+      this.objects[name] = new ObjectInfo(firstMesh as Mesh)
     }
 
     await loadAsset('tree')
@@ -265,18 +315,9 @@ export default class Renderer {
         this.deleteQueue.delete(key)
       }
 
-      if (this.chunkObjects[key]) {
-        Object.keys(this.chunkObjects[key]).forEach((name) => {
-          const chunkObj = this.objects.get(name)
-
-          if (chunkObj) {
-            this.chunkObjects[key][name].forEach((index) => {
-              // chunkObj.thinInstancePartialBufferUpdate()
-            })
-          }
-        })
-        delete this.chunkObjects[key]
-      }
+      Object.values(this.objects).forEach((objInfo) => {
+        objInfo.removeRange(key)
+      })
     })
 
     this.scene.render()
@@ -313,35 +354,30 @@ export default class Renderer {
       mesh.isPickable = false
       mesh.alwaysSelectAsActiveMesh = true
 
-      this.chunkObjects[key] ??= {}
-      const meshesToUpdate: Mesh[] = []
+      Object.entries(objects).forEach(([name, objects]) => {
+        const objInfo = this.objects[name]
 
-      objects.forEach((object) => {
-        const mesh = this.objects.get(object.name)
+        if (objInfo) {
+          const buffer = new Float32Array(objects.length * 16)
 
-        if (mesh) {
-          this.chunkObjects[key][object.name] ??= []
-          meshesToUpdate.push(mesh)
-
-          const scale = object.scale ?? 1
-
-          const idx = mesh.thinInstanceAdd(
-            Matrix.Scaling(scale, scale, scale)
-              .multiply(Matrix.RotationY((object.rotation ?? 0) * 0.0174533))
+          objects.forEach((object, i) => {
+            const scale = object.scale ?? 1
+            const rotRadians = (object.rotation ?? 0) * 0.0174533
+            const mat = Matrix.Scaling(scale, scale, scale)
+              .multiply(Matrix.RotationY(rotRadians))
               .setTranslationFromFloats(
                 -x * Chunk.size - object.x - 0.5, // Inverse because of gltf coordinates
                 y * Chunk.size + object.y,
                 z * Chunk.size + object.z + 0.5,
-              ),
-            false,
-          )
+              )
 
-          this.chunkObjects[key][object.name].push(idx)
+            for (let c = 0; c < 16; c++) {
+              buffer[i * 16 + c] = mat.m[c]
+            }
+          })
+
+          objInfo.addRange(key, buffer)
         }
-      })
-
-      meshesToUpdate.forEach((mesh) => {
-        mesh.thinInstanceBufferUpdated('matrix')
       })
     }
   }

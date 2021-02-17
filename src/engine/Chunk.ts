@@ -12,7 +12,7 @@ type ChunkData = {
   x: number
   y: number
   z: number
-  objects: ChunkObject[]
+  objects: Record<string, ChunkObject[]>
   data: Uint32Array
 }
 
@@ -22,7 +22,6 @@ type ChunkObject = {
   z: number
   rotation?: number
   scale?: number
-  name: string
 }
 
 export default class Chunk {
@@ -38,7 +37,7 @@ export default class Chunk {
   }
 
   private chunkStore = new Uint32Array(Chunk.cubeSize)
-  public objects: ChunkObject[] = []
+  public objects: Record<string, ChunkObject[]> = {}
 
   constructor(public x = 0, public y = 0, public z = 0, empty = false) {
     if (!empty) this.initialize()
@@ -101,38 +100,34 @@ export default class Chunk {
             })
           } else {
             if (tree > 1.5 && Math.random() < 0.05) {
-              this.objects.push({
+              this.addObject(
+                'tree',
                 x,
                 y,
                 z,
-                scale: Math.random() * 0.6 + 0.2,
-                name: 'tree',
-              })
+                Math.floor(Math.random() * 4) * 90,
+                Math.random() * 0.6 + 0.2,
+              )
             } else if (pumpkin > 2.5) {
-              this.objects.push({
+              this.addObject(
+                'pumpkin',
                 x,
                 y,
                 z,
-                scale: Math.random() * 0.4 + 0.6,
-                name: 'pumpkin',
-              })
+                Math.random() * 360,
+                Math.random() * 0.4 + 0.6,
+              )
             } else if (Math.random() < 0.0005) {
               const animals = ['fox', 'ocelot']
 
-              this.objects.push({
+              this.addObject(
+                animals[Math.floor(Math.random() * animals.length)],
                 x,
                 y,
                 z,
-                name: animals[Math.floor(Math.random() * animals.length)],
-              })
+              )
             } else if (Math.random() < 0.5) {
-              this.objects.push({
-                x,
-                y,
-                z,
-                rotation: Math.random() * 360,
-                name: 'grass',
-              })
+              this.addObject('grass2', x, y, z, Math.random() * 360)
             }
 
             break
@@ -140,6 +135,24 @@ export default class Chunk {
         }
       }
     }
+  }
+
+  public addObject(
+    name: string,
+    x: number,
+    y: number,
+    z: number,
+    rotation = 0,
+    scale = 1,
+  ) {
+    this.objects[name] ??= []
+    this.objects[name].push({
+      x,
+      y,
+      z,
+      rotation,
+      scale,
+    })
   }
 
   public initialize() {

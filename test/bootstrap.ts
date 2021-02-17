@@ -7,6 +7,7 @@ Chai.use(SinonChai)
 Object.assign(global, {
   expect: Chai.expect,
   Sinon,
+  Worker: class MockWorker {},
 })
 
 afterEach(() => {
