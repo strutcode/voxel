@@ -1,8 +1,9 @@
 #ifdef GL_ES
-    precision mediump float;
+  precision mediump float;
+  precision highp sampler2DArray;
 #endif
 
-uniform sampler2D blockTex[3];
+uniform sampler2DArray tiles;
 uniform float fogStart;
 uniform float fogEnd;
 uniform vec3 fogColor;
@@ -15,18 +16,7 @@ varying float viewDistance;
 void main(void) {
   vec4 color;
 
-  if (v_ti < 0.9) {
-    color = texture2D(blockTex[0], v_uv);
-  }
-  else if (v_ti < 1.9) {
-    color = texture2D(blockTex[1], v_uv);
-  }
-  else if (v_ti < 2.9) {
-    color = texture2D(blockTex[2], v_uv);
-  }
-  else {
-    color = vec4(1.0, 0.0, 1.0, 1.0);
-  }
+  color = texture(tiles, vec3(v_uv.x, v_uv.y, v_ti));
 
   float fog = clamp((viewDistance - fogStart) / (fogEnd - fogStart), 0.0, 1.0);
   color.rgb = (1.0 - fog) * color.rgb + fog * fogColor;

@@ -152,30 +152,27 @@ export default class Renderer {
       scene.fogColor.b,
     ])
 
-    // new RawTexture2DArray(new Uint8Array(), 32, 32, 24, 0, scene)
-    this.blockMaterial.setTextureArray('blockTex', [
-      new Texture(
-        'grass.png',
+    const img = await new Promise<Image>((resolve) => {
+      const img = new Image()
+      img.src = '/tileset.png'
+      img.onload = () => resolve(img)
+    })
+    const data = await createImageBitmap(img)
+
+    this.blockMaterial.setTexture(
+      'tiles',
+      new RawTexture2DArray(
+        data,
+        16,
+        16,
+        data.height / 16,
+        Engine.TEXTUREFORMAT_RGBA,
         scene,
+        true,
         false,
-        false,
-        Texture.NEAREST_SAMPLINGMODE,
+        Texture.NEAREST_LINEAR_MIPLINEAR,
       ),
-      new Texture(
-        'dirtgrass.png',
-        scene,
-        false,
-        false,
-        Texture.NEAREST_SAMPLINGMODE,
-      ),
-      new Texture(
-        'dirt.png',
-        scene,
-        false,
-        false,
-        Texture.NEAREST_SAMPLINGMODE,
-      ),
-    ])
+    )
 
     // And made it move
     scene.enablePhysics(
@@ -233,7 +230,7 @@ export default class Renderer {
     await loadAsset('pumpkin')
     await loadAsset('fox')
     await loadAsset('ocelot')
-    await loadAsset('grass')
+    await loadAsset('grass2')
 
     // Lights...
     const sun = new DirectionalLight('sun', new Vector3(1, -1, 0.5), scene)
