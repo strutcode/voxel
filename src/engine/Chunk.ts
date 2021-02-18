@@ -1,19 +1,14 @@
-// @ts-ignore
-import NoiseType, { Noise } from 'noisejs'
-
 import Block from './Block'
 
 const blockPos = (x: number, y: number, z: number) =>
   Math.floor(y * Chunk.squareSize + z * Chunk.size + x)
-
-const noise = new Noise() as NoiseType
 
 type ChunkData = {
   x: number
   y: number
   z: number
   objects: Record<string, ChunkObject[]>
-  data: Uint32Array
+  data: Uint32Array | undefined
 }
 
 type ChunkObject = {
@@ -30,110 +25,36 @@ export default class Chunk {
   public static cubeSize = Chunk.size ** 3
 
   public static deserialize(serialized: ChunkData) {
-    const chunk = new Chunk(serialized.x, serialized.y, serialized.z, true)
+    const chunk = new Chunk(serialized.x, serialized.y, serialized.z)
     chunk.objects = serialized.objects
     chunk.chunkStore = serialized.data
     return chunk
   }
 
-  private chunkStore = new Uint32Array(Chunk.cubeSize)
+  private chunkStore?: Uint32Array
   public objects: Record<string, ChunkObject[]> = {}
 
-  constructor(public x = 0, public y = 0, public z = 0, empty = false) {
-    if (!empty) this.initialize()
-  }
+  constructor(public x = 0, public y = 0, public z = 0) {}
 
   public get(x: number, y: number, z: number): Block {
+    if (!this.chunkStore) {
+      return {
+        type: 0,
+      }
+    }
+
     return {
       type: this.chunkStore[blockPos(x, y, z)],
     }
   }
 
   public set(x: number, y: number, z: number, block: Block) {
-    this.chunkStore[blockPos(x, y, z)] = block.type
-  }
-
-  private randomize() {
-    for (let i = 0; i < this.chunkStore.length; i++) {
-      this.chunkStore[i] = Math.round(Math.random())
+    if (!this.chunkStore && block.type !== 0) {
+      this.chunkStore = new Uint32Array(Chunk.cubeSize)
     }
-  }
 
-  private perlin() {
-    for (let z = 0; z < Chunk.size; z++) {
-      for (let x = 0; x < Chunk.size; x++) {
-        const terrain =
-          noise.simplex2(
-            (this.x * Chunk.size + x) / 88,
-            (this.z * Chunk.size + z) / 88,
-          ) *
-          noise.simplex2(
-            (this.x * Chunk.size + x) / 272,
-            (this.z * Chunk.size + z) / 272,
-          )
-        const height = (terrain + 1) * 0.5 * (Chunk.size - 1) + 1
-        const tree =
-          noise.simplex2(
-            (this.x * Chunk.size + x) / 50,
-            (this.z * Chunk.size + z) / 50,
-          ) *
-            2 +
-          noise.simplex2(
-            (this.x * Chunk.size + x) / 400,
-            (this.z * Chunk.size + z) / 400,
-          )
-        const pumpkin =
-          noise.simplex2(
-            (this.x * Chunk.size + x) / 2,
-            (this.z * Chunk.size + z) / 2,
-          ) *
-            2 +
-          noise.simplex2(
-            100 + (this.x * Chunk.size + x) / 100,
-            100 + (this.z * Chunk.size + z) / 100,
-          )
-
-        for (let y = 0; y < Chunk.size; y++) {
-          if (y <= height) {
-            this.set(x, y, z, {
-              type: 1,
-            })
-          } else {
-            if (tree > 1.5 && Math.random() < 0.05) {
-              this.addObject(
-                'tree',
-                x,
-                y,
-                z,
-                Math.floor(Math.random() * 4) * 90,
-                Math.random() * 0.6 + 0.2,
-              )
-            } else if (pumpkin > 2.5) {
-              this.addObject(
-                'pumpkin',
-                x,
-                y,
-                z,
-                Math.random() * 360,
-                Math.random() * 0.4 + 0.6,
-              )
-            } else if (Math.random() < 0.0005) {
-              const animals = ['fox', 'ocelot']
-
-              this.addObject(
-                animals[Math.floor(Math.random() * animals.length)],
-                x,
-                y,
-                z,
-              )
-            } else if (Math.random() < 0.5) {
-              this.addObject('grass2', x, y, z, Math.random() * 360)
-            }
-
-            break
-          }
-        }
-      }
+    if (this.chunkStore) {
+      this.chunkStore[blockPos(x, y, z)] = block.type
     }
   }
 
@@ -155,15 +76,15 @@ export default class Chunk {
     })
   }
 
-  public initialize() {
-    this.perlin()
-  }
-
   public isSolid(x: number, y: number, z: number): boolean {
+    if (!this.chunkStore) return false
+
     return this.chunkStore[blockPos(x, y, z)] > 0
   }
 
   public isOpaque(x: number, y: number, z: number): boolean {
+    if (!this.chunkStore) return false
+
     return this.chunkStore[blockPos(x, y, z)] > 0
   }
 

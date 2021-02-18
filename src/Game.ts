@@ -1,5 +1,4 @@
 import { Vector3 } from '@babylonjs/core'
-import Chunk from './engine/Chunk'
 import Renderer from './engine/Renderer'
 import World from './engine/World'
 

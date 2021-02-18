@@ -165,7 +165,7 @@ export default class Renderer {
       data.height / 16,
       Engine.TEXTUREFORMAT_RGBA,
       scene,
-      true,
+      false,
       false,
       Texture.NEAREST_LINEAR_MIPLINEAR,
     )

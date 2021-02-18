@@ -1038,11 +1038,6 @@
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-8.2.0.tgz#3eb56d13a1de1d347ecb1957c6860c911704bc44"
   integrity sha512-/Sge3BymXo4lKc31C8OINJgXLaw+7vL1/L1pGiBNpGrBiT8FQiaFpSYV0uhTaG4y78vcMBTMFsWaHDvuD+xGzQ==
 
-"@types/noisejs@^0.0.28":
-  version "0.0.28"
-  resolved "https://registry.yarnpkg.com/@types/noisejs/-/noisejs-0.0.28.tgz#797ac259d592004f8e13526cc9afeaf9f1fcb26e"
-  integrity sha1-eXrCWdWSAE+OE1Jsya/q+fH8sm4=
-
 "@types/q@^1.5.1":
   version "1.5.4"
   resolved "https://registry.yarnpkg.com/@types/q/-/q-1.5.4.tgz#15925414e0ad2cd765bfef58842f7e26a7accb24"
@@ -1245,6 +1240,11 @@ asap@~2.0.3:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/asap/-/asap-2.0.6.tgz#e50347611d7e690943208bbdafebcbc2fb866d46"
   integrity sha1-5QNHYR1+aQlDIIu9r+vLwvuGbUY=
+
+asm-noise@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/asm-noise/-/asm-noise-1.0.2.tgz#03f67173e15235628931d6a6ad379ea36bf8cfa9"
+  integrity sha512-mzFPIPUCSVUSso+VJKkQRG/+c2koOgs27QX74V1u/ywi/9bw7DD86nyNLF4dgYJPNcDDZ0K0/cdsaC55tmtZdg==
 
 asn1.js@^5.2.0:
   version "5.4.1"
@@ -4368,11 +4368,6 @@ nodemon@^2.0.7:
     touch "^3.1.0"
     undefsafe "^2.0.3"
     update-notifier "^4.1.0"
-
-noisejs@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/noisejs/-/noisejs-2.1.0.tgz#84b4c4cd04ff43367034f65253e213e0d9fe1aff"
-  integrity sha1-hLTEzQT/QzZwNPZSU+IT4Nn+Gv8=
 
 nopt@~1.0.10:
   version "1.0.10"
