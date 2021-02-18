@@ -1,4 +1,4 @@
-import { ObjectInfo } from './Renderer'
+import ObjectInfo from './ObjectInfo'
 
 describe('ObjectInfo', () => {
   const fakeMesh = {

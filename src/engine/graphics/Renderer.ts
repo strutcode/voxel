@@ -1,6 +1,6 @@
-import BabylonImplementation from './BabylonImplementation'
-import Chunk from './Chunk'
-import Vector from './Vector'
+import BabylonImplementation from '../external/BabylonImplementation'
+import Chunk from '../voxel/Chunk'
+import Vector from '../math/Vector'
 
 export default class Renderer {
   private static viewPos = new Vector()

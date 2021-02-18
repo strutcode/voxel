@@ -1,5 +1,6 @@
-import Renderer from './engine/Renderer'
-import Vector from './engine/Vector'
+import Renderer from './engine/graphics/Renderer'
+import Physics from './engine/physics/Physics'
+import Vector from './engine/math/Vector'
 import World from './engine/World'
 
 enum GameState {
@@ -15,6 +16,7 @@ export default class Game {
 
   public static async start() {
     await Renderer.init()
+    await Physics.init()
 
     this.world = new World()
     ;(globalThis as any).options = {

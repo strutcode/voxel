@@ -1,8 +1,8 @@
-import Chunk from './Chunk'
-import { manhattanDistance3d } from './Math'
-import Physics from './Physics'
-import Renderer from './Renderer'
-import Vector from './Vector'
+import Chunk from './voxel/Chunk'
+import { manhattanDistance3d } from './math/Geometry'
+import Physics from './physics/Physics'
+import Renderer from './graphics/Renderer'
+import Vector from './math/Vector'
 
 function signed10bit(n) {
   return (n + 511) & 1023
@@ -18,7 +18,7 @@ export default class World {
   private chunks = new Map<number, Chunk | null>()
   private visited = new Set<number>()
   private viewPos = new Vector()
-  private chunkWorker = new Worker('./ChunkGenerator.worker.ts')
+  private chunkWorker = new Worker('./voxel/ChunkGenerator.worker.ts')
 
   public constructor() {
     this.setupWorker()

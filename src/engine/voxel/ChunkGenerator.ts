@@ -1,5 +1,5 @@
 import noise from 'asm-noise'
-import { lerp } from './Math'
+import { lerp } from '../math/Interpolation'
 import Chunk from './Chunk'
 
 export default class ChunkGenerator {

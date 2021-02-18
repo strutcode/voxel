@@ -21,18 +21,18 @@ import {
   VertexData,
 } from '@babylonjs/core'
 import '@babylonjs/loaders/glTF/2.0'
-import vs from './vs.glsl'
-import fs from './fs.glsl'
-import Chunk from './Chunk'
-import Ammo from '../../ammojs/builds/ammo.wasm.js'
-import ObjectInfo from './ObjectInfo'
+import vs from '../graphics/vs.glsl'
+import fs from '../graphics/fs.glsl'
+import Chunk from '../voxel/Chunk'
+import Ammo from '../../../ammojs/builds/ammo.wasm.js'
+import ObjectInfo from '../graphics/ObjectInfo'
 
 export default class BabylonImplementation {
   private static engine: Engine
   private static scene: Scene
   private static camera: FreeCamera
   private static blockMaterial: ShaderMaterial
-  private static meshWorker = new Worker('./ChunkMesher.worker.ts')
+  private static meshWorker = new Worker('../voxel/ChunkMesher.worker.ts')
   private static deleteQueue = new Set<string>()
   private static objects: Record<string, ObjectInfo> = {}
   private static _init = false
