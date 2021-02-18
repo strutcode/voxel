@@ -1,7 +1,8 @@
-import { Vector3 } from '@babylonjs/core'
 import Chunk from './Chunk'
 import { manhattanDistance3d } from './Math'
+import Physics from './Physics'
 import Renderer from './Renderer'
+import Vector from './Vector'
 
 function signed10bit(n) {
   return (n + 511) & 1023
@@ -16,14 +17,14 @@ export default class World {
 
   private chunks = new Map<number, Chunk | null>()
   private visited = new Set<number>()
-  private viewPos = new Vector3()
+  private viewPos = new Vector()
   private chunkWorker = new Worker('./ChunkGenerator.worker.ts')
 
   public constructor() {
     this.setupWorker()
   }
 
-  public updateView(position: Vector3, direction: Vector3) {
+  public updateView(position: Vector, direction: Vector) {
     this.viewPos.x = Math.floor(position.x / Chunk.size)
     this.viewPos.y = Math.floor(position.y / Chunk.size)
     this.viewPos.z = Math.floor(position.z / Chunk.size)
@@ -76,9 +77,9 @@ export default class World {
       const chunk = this.chunks.get(key)
       if (chunk) {
         if (distance < 3) {
-          Renderer.enablePhysics(chunk)
+          Physics.addChunk(chunk)
         } else {
-          Renderer.disablePhysics(chunk)
+          Physics.remChunk(chunk)
         }
       }
     } else if (distance <= World.viewDistance) {
@@ -100,7 +101,7 @@ export default class World {
     const chunk = this.chunks.get(digitKey(x, y, z))
 
     if (chunk) {
-      Renderer.delChunk(chunk)
+      Renderer.remChunk(chunk)
       this.chunks.delete(digitKey(x, y, z))
     }
   }
@@ -110,7 +111,7 @@ export default class World {
       const { x, y, z } = ev.data
       const chunk = Chunk.deserialize(ev.data)
 
-      Renderer.newChunk(chunk)
+      Renderer.addChunk(chunk)
       this.chunks.set(digitKey(x, y, z), chunk)
     }
   }

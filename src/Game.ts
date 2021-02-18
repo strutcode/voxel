@@ -1,5 +1,5 @@
-import { Vector3 } from '@babylonjs/core'
 import Renderer from './engine/Renderer'
+import Vector from './engine/Vector'
 import World from './engine/World'
 
 enum GameState {
@@ -28,8 +28,7 @@ export default class Game {
 
   public static update() {
     if (this.state === GameState.Play) {
-      this.world.updateView(Renderer.getViewPosition(), Vector3.Zero())
-      // Renderer.update()
+      this.world.updateView(Renderer.getViewPosition(), new Vector())
     }
 
     requestAnimationFrame(this.boundUpdate)
