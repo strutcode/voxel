@@ -171,6 +171,66 @@ export default class ChunkGenerator {
               type,
             })
           } else {
+            if (type === 1) {
+              const tree =
+                noise(
+                  (chunk.x * Chunk.size + x) / 50,
+                  (chunk.z * Chunk.size + z) / 50,
+                ) +
+                noise(
+                  (chunk.x * Chunk.size + x) / 400,
+                  (chunk.z * Chunk.size + z) / 400,
+                )
+              const pumpkin =
+                noise(
+                  (chunk.x * Chunk.size + x) / 2,
+                  (chunk.z * Chunk.size + z) / 2,
+                ) +
+                noise(
+                  100 + (chunk.x * Chunk.size + x) / 100,
+                  100 + (chunk.z * Chunk.size + z) / 100,
+                )
+
+              if (tree > 1.2 && Math.random() < 0.008) {
+                chunk.addObject(
+                  'tree',
+                  x,
+                  y,
+                  z,
+                  Math.floor(Math.random() * 4) * 90,
+                  Math.random() * 0.6 + 0.2,
+                )
+              } else if (pumpkin > 1.8 && Math.random() < 0.05) {
+                chunk.addObject(
+                  'pumpkin',
+                  x,
+                  y,
+                  z,
+                  Math.random() * 360,
+                  Math.random() * 0.4 + 0.6,
+                )
+              } else if (Math.random() < 0.0005) {
+                const animals = ['fox', 'ocelot']
+
+                chunk.addObject(
+                  animals[Math.floor(Math.random() * animals.length)],
+                  x,
+                  y,
+                  z,
+                )
+              }
+            } else if (type === 2) {
+              if (Math.random() < 0.0005) {
+                chunk.addObject(
+                  'cactus',
+                  x,
+                  y,
+                  z,
+                  Math.floor(Math.random() * 4) * 90,
+                )
+              }
+            }
+
             break
           }
         }

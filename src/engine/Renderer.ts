@@ -228,6 +228,7 @@ export default class Renderer {
     await loadAsset('fox')
     await loadAsset('ocelot')
     await loadAsset('grass2')
+    await loadAsset('cactus')
 
     // Lights...
     const sun = new DirectionalLight('sun', new Vector3(1, -1, 0.5), scene)
@@ -355,31 +356,31 @@ export default class Renderer {
       mesh.isPickable = false
       mesh.alwaysSelectAsActiveMesh = true
 
-      // Object.entries(objects).forEach(([name, objects]) => {
-      //   const objInfo = this.objects[name]
+      Object.entries(objects).forEach(([name, objects]) => {
+        const objInfo = this.objects[name]
 
-      //   if (objInfo) {
-      //     const buffer = new Float32Array(objects.length * 16)
+        if (objInfo) {
+          const buffer = new Float32Array(objects.length * 16)
 
-      //     objects.forEach((object, i) => {
-      //       const scale = object.scale ?? 1
-      //       const rotRadians = (object.rotation ?? 0) * 0.0174533
-      //       const mat = Matrix.Scaling(scale, scale, scale)
-      //         .multiply(Matrix.RotationY(rotRadians))
-      //         .setTranslationFromFloats(
-      //           -x * Chunk.size - object.x - 0.5, // Inverse because of gltf coordinates
-      //           y * Chunk.size + object.y,
-      //           z * Chunk.size + object.z + 0.5,
-      //         )
+          objects.forEach((object, i) => {
+            const scale = object.scale ?? 1
+            const rotRadians = (object.rotation ?? 0) * 0.0174533
+            const mat = Matrix.Scaling(scale, scale, scale)
+              .multiply(Matrix.RotationY(rotRadians))
+              .setTranslationFromFloats(
+                -x * Chunk.size - object.x - 0.5, // Inverse because of gltf coordinates
+                y * Chunk.size + object.y,
+                z * Chunk.size + object.z + 0.5,
+              )
 
-      //       for (let c = 0; c < 16; c++) {
-      //         buffer[i * 16 + c] = mat.m[c]
-      //       }
-      //     })
+            for (let c = 0; c < 16; c++) {
+              buffer[i * 16 + c] = mat.m[c]
+            }
+          })
 
-      //     objInfo.addRange(key, buffer)
-      //   }
-      // })
+          objInfo.addRange(key, buffer)
+        }
+      })
     }
   }
 }
