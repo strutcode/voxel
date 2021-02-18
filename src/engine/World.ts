@@ -1,12 +1,22 @@
 import { Vector3 } from '@babylonjs/core'
 import Chunk from './Chunk'
+import { manhattanDistance3d } from './Math'
 import Renderer from './Renderer'
 
-export default class World {
-  public static viewDistance = 3
+const signBit = 1 << 63
+function signed10bit(n) {
+  return (n + 511) & 1023
+}
 
-  private chunks = new Map<string, Chunk | null>()
-  private visited = new Set<string>()
+function digitKey(x, y, z) {
+  return (signed10bit(x) << 20) + (signed10bit(y) << 10) + signed10bit(z)
+}
+
+export default class World {
+  public static viewDistance = 32
+
+  private chunks = new Map<number, Chunk | null>()
+  private visited = new Set<number>()
   private viewPos = new Vector3()
   private chunkWorker = new Worker('./ChunkGenerator.worker.ts')
 
@@ -16,6 +26,7 @@ export default class World {
 
   public updateView(position: Vector3, direction: Vector3) {
     this.viewPos.x = Math.floor(position.x / Chunk.size)
+    this.viewPos.y = Math.floor(position.y / Chunk.size)
     this.viewPos.z = Math.floor(position.z / Chunk.size)
     this.visited.clear()
     this.checkChunk(this.viewPos.x, 0, this.viewPos.z)
@@ -34,28 +45,36 @@ export default class World {
   }
 
   private checkChunk(x: number, y: number, z: number) {
-    this.visited.add(`${x},${y},${z}`)
-    const distance = Math.abs(x - this.viewPos.x) + Math.abs(z - this.viewPos.z)
+    const key = digitKey(x, y, z)
+    this.visited.add(key)
+    const distance = manhattanDistance3d(
+      this.viewPos.x,
+      this.viewPos.y,
+      this.viewPos.z,
+      x,
+      y,
+      z,
+    )
 
     if (this.isLoaded(x, y, z)) {
       if (distance > World.viewDistance) {
         this.unloadChunk(x, y, z)
       } else {
-        if (!this.visited.has(`${x - 1},${y},${z}`)) {
+        if (!this.visited.has(digitKey(x - 1, 0, z))) {
           this.checkChunk(x - 1, 0, z)
         }
-        if (!this.visited.has(`${x + 1},${y},${z}`)) {
+        if (!this.visited.has(digitKey(x + 1, 0, z))) {
           this.checkChunk(x + 1, 0, z)
         }
-        if (!this.visited.has(`${x},${y},${z - 1}`)) {
+        if (!this.visited.has(digitKey(x, 0, z - 1))) {
           this.checkChunk(x, 0, z - 1)
         }
-        if (!this.visited.has(`${x},${y},${z + 1}`)) {
+        if (!this.visited.has(digitKey(x, 0, z + 1))) {
           this.checkChunk(x, 0, z + 1)
         }
       }
 
-      const chunk = this.chunks.get(`${x},${y},${z}`)
+      const chunk = this.chunks.get(key)
       if (chunk) {
         if (distance < 3) {
           Renderer.enablePhysics(chunk)
@@ -69,21 +88,21 @@ export default class World {
   }
 
   private isLoaded(x: number, y: number, z: number) {
-    return this.chunks.has(`${x},${y},${z}`)
+    return this.chunks.has(digitKey(x, y, z))
   }
 
   private loadChunk(x: number, y: number, z: number) {
-    this.chunks.set(`${x},${y},${z}`, null)
+    this.chunks.set(digitKey(x, y, z), null)
 
     this.chunkWorker.postMessage({ x, y, z })
   }
 
   private unloadChunk(x: number, y: number, z: number) {
-    const chunk = this.chunks.get(`${x},${y},${z}`)
+    const chunk = this.chunks.get(digitKey(x, y, z))
 
     if (chunk) {
       Renderer.delChunk(chunk)
-      this.chunks.delete(`${x},${y},${z}`)
+      this.chunks.delete(digitKey(x, y, z))
     }
   }
 
@@ -93,7 +112,7 @@ export default class World {
       const chunk = Chunk.deserialize(ev.data)
 
       Renderer.newChunk(chunk)
-      this.chunks.set(`${x},${y},${z}`, chunk)
+      this.chunks.set(digitKey(x, y, z), chunk)
     }
   }
 }
