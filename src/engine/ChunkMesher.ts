@@ -4,6 +4,7 @@ interface ChunkMesh {
   positions: ArrayBuffer
   indices: ArrayBuffer
   uvs: ArrayBuffer
+  colors: ArrayBuffer
   texInd: ArrayBuffer
 }
 
@@ -18,6 +19,7 @@ export default class ChunkMesher {
     const positions: number[] = []
     const indices: number[] = []
     const uvs: number[] = []
+    const cols: number[] = []
     const texInd: number[] = []
 
     for (y = 0; y < Chunk.size; y++) {
@@ -42,6 +44,7 @@ export default class ChunkMesher {
               )
               indices.push(v, v + 1, v + 3, v + 1, v + 2, v + 3)
               uvs.push(0, 1, 1, 1, 1, 0, 0, 0)
+              cols.push(200, 200, 200, 200)
               texInd.push(1, 1, 1, 1)
 
               v += 4
@@ -51,6 +54,7 @@ export default class ChunkMesher {
               positions.push(x, y, z, x, y, z + 1, x, y + 1, z + 1, x, y + 1, z)
               indices.push(v + 3, v + 1, v, v + 3, v + 2, v + 1)
               uvs.push(0, 1, 1, 1, 1, 0, 0, 0)
+              cols.push(200, 200, 200, 200)
               texInd.push(1, 1, 1, 1)
 
               v += 4
@@ -73,6 +77,7 @@ export default class ChunkMesher {
               )
               indices.push(v, v + 1, v + 3, v + 1, v + 2, v + 3)
               uvs.push(0, 0, 1, 0, 1, 1, 0, 1)
+              cols.push(200, 200, 200, 200)
               texInd.push(1, 1, 1, 1)
 
               v += 4
@@ -82,6 +87,7 @@ export default class ChunkMesher {
               positions.push(x, y, z, x + 1, y, z, x + 1, y + 1, z, x, y + 1, z)
               indices.push(v, v + 1, v + 3, v + 1, v + 2, v + 3)
               uvs.push(0, 1, 1, 1, 1, 0, 0, 0)
+              cols.push(200, 200, 200, 200)
               texInd.push(1, 1, 1, 1)
               v += 4
             }
@@ -103,6 +109,7 @@ export default class ChunkMesher {
               )
               indices.push(v, v + 1, v + 3, v + 1, v + 2, v + 3)
               uvs.push(0, 0, 1, 0, 1, 1, 0, 1)
+              cols.push(255, 255, 255, 255)
               texInd.push(0, 0, 0, 0)
 
               v += 4
@@ -112,6 +119,7 @@ export default class ChunkMesher {
               positions.push(x, y, z, x, y, z + 1, x + 1, y, z + 1, x + 1, y, z)
               indices.push(v, v + 1, v + 3, v + 1, v + 2, v + 3)
               uvs.push(0, 0, 1, 0, 1, 1, 0, 1)
+              cols.push(177, 177, 177, 177)
               texInd.push(2, 2, 2, 2)
 
               v += 4
@@ -129,7 +137,8 @@ export default class ChunkMesher {
       positions: new Uint8Array(positions),
       indices: new Uint32Array(indices),
       uvs: new Int8Array(uvs),
-      texInd: new Int32Array(texInd),
+      colors: new Float32Array(cols),
+      texInd: new Uint32Array(texInd),
     }
   }
 }

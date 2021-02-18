@@ -3,7 +3,6 @@ import Chunk from './Chunk'
 import { manhattanDistance3d } from './Math'
 import Renderer from './Renderer'
 
-const signBit = 1 << 63
 function signed10bit(n) {
   return (n + 511) & 1023
 }

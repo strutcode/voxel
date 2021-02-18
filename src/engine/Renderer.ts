@@ -133,15 +133,8 @@ export default class Renderer {
       scene,
       { vertexSource: vs, fragmentSource: fs },
       {
-        attributes: ['position', 'uv', 'texInd'],
-        uniforms: [
-          'world',
-          'view',
-          'projection',
-          'viewProjection',
-          'worldViewProjection',
-          'viewPosition',
-        ],
+        attributes: ['position', 'uv', 'texInd', 'shade'],
+        uniforms: ['world', 'view', 'worldViewProjection', 'viewPosition'],
       },
     )
     this.blockMaterial.setFloat('fogStart', scene.fogStart)
@@ -338,6 +331,13 @@ export default class Renderer {
       mesh.setVerticesBuffer(
         new Buffer(this.engine, attributes.texInd, false, 1).createVertexBuffer(
           'texInd',
+          0,
+          1,
+        ),
+      )
+      mesh.setVerticesBuffer(
+        new Buffer(this.engine, attributes.colors, false, 1).createVertexBuffer(
+          'shade',
           0,
           1,
         ),
