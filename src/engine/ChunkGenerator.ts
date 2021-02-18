@@ -1,4 +1,5 @@
 import noise from 'asm-noise'
+import { lerp } from './Math'
 import Chunk from './Chunk'
 
 export default class ChunkGenerator {
@@ -19,14 +20,14 @@ export default class ChunkGenerator {
       for (let x = 0; x < Chunk.size; x++) {
         const terrain =
           noise(
-            (chunk.x * Chunk.size + x) / 88,
-            (chunk.z * Chunk.size + z) / 88,
+            (chunk.x * Chunk.size + x) / 44,
+            (chunk.z * Chunk.size + z) / 44,
           ) *
           noise(
-            (chunk.x * Chunk.size + x) / 272,
-            (chunk.z * Chunk.size + z) / 272,
+            (chunk.x * Chunk.size + x) / 128,
+            (chunk.z * Chunk.size + z) / 128,
           )
-        const height = (terrain + 1) * 0.5 * (Chunk.size - 1) + 1
+        const height = terrain * (Chunk.size - 1) + 1
         const tree =
           noise(
             (chunk.x * Chunk.size + x) / 50,
@@ -85,6 +86,91 @@ export default class ChunkGenerator {
               chunk.addObject('grass2', x, y, z, Math.random() * 360)
             }
 
+            break
+          }
+        }
+      }
+    }
+  }
+
+  public biome(chunk: Chunk) {
+    for (let z = 0; z < Chunk.size; z++) {
+      for (let x = 0; x < Chunk.size; x++) {
+        let type = 0
+        let terrain = 0
+
+        noise.octaves = 8
+        const biome = noise(
+          (chunk.x * Chunk.size + x) / 1024,
+          (chunk.z * Chunk.size + z) / 1024,
+        )
+        noise.octaves = 1
+
+        const stageSize = 0.33
+        const blendAmt = 0.1
+        const blendRange = stageSize * blendAmt
+
+        if (biome < 0.33) {
+          type = 3
+        } else if (biome < 0.66) {
+          type = 1
+        } else {
+          type = 2
+        }
+
+        const iceTerrain = () => 0.01
+        const grassTerrain = () =>
+          noise(
+            (chunk.x * Chunk.size + x) / 44,
+            (chunk.z * Chunk.size + z) / 44,
+          ) *
+          noise(
+            (chunk.x * Chunk.size + x) / 128,
+            (chunk.z * Chunk.size + z) / 128,
+          )
+        const desertTerrain = () =>
+          noise(
+            (chunk.x * Chunk.size + x) / 128,
+            (chunk.z * Chunk.size + z) / 128,
+          )
+
+        if (biome < stageSize - blendRange) {
+          terrain = iceTerrain()
+        } else if (
+          biome >= stageSize - blendRange &&
+          biome < stageSize + blendRange
+        ) {
+          terrain = lerp(
+            iceTerrain(),
+            grassTerrain(),
+            (biome - (stageSize - blendRange)) / (blendRange * 2),
+          )
+        } else if (
+          biome >= stageSize + blendRange &&
+          biome < stageSize * 2 - blendRange
+        ) {
+          terrain = grassTerrain()
+        } else if (
+          biome >= stageSize * 2 - blendRange &&
+          biome < stageSize * 2 + blendRange
+        ) {
+          terrain = lerp(
+            grassTerrain(),
+            desertTerrain(),
+            (biome - (stageSize * 2 - blendRange)) / (blendRange * 2),
+          )
+        } else {
+          terrain = desertTerrain()
+        }
+
+        const height = terrain * (Chunk.size - 1) + 1
+
+        for (let y = 0; y < Chunk.size; y++) {
+          if (y <= height) {
+            chunk.set(x, y, z, {
+              type,
+            })
+          } else {
             break
           }
         }

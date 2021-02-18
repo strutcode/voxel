@@ -45,7 +45,18 @@ export default class ChunkMesher {
               indices.push(v, v + 1, v + 3, v + 1, v + 2, v + 3)
               uvs.push(0, 1, 1, 1, 1, 0, 0, 0)
               cols.push(200, 200, 200, 200)
-              texInd.push(1, 1, 1, 1)
+
+              switch (chunk.type(x, y, z)) {
+                case 1:
+                  texInd.push(1, 1, 1, 1)
+                  break
+                case 2:
+                  texInd.push(3, 3, 3, 3)
+                  break
+                case 3:
+                  texInd.push(4, 4, 4, 4)
+                  break
+              }
 
               v += 4
             }
@@ -55,7 +66,18 @@ export default class ChunkMesher {
               indices.push(v + 3, v + 1, v, v + 3, v + 2, v + 1)
               uvs.push(0, 1, 1, 1, 1, 0, 0, 0)
               cols.push(200, 200, 200, 200)
-              texInd.push(1, 1, 1, 1)
+
+              switch (chunk.type(x, y, z)) {
+                case 1:
+                  texInd.push(1, 1, 1, 1)
+                  break
+                case 2:
+                  texInd.push(3, 3, 3, 3)
+                  break
+                case 3:
+                  texInd.push(4, 4, 4, 4)
+                  break
+              }
 
               v += 4
             }
@@ -78,7 +100,18 @@ export default class ChunkMesher {
               indices.push(v, v + 1, v + 3, v + 1, v + 2, v + 3)
               uvs.push(0, 0, 1, 0, 1, 1, 0, 1)
               cols.push(200, 200, 200, 200)
-              texInd.push(1, 1, 1, 1)
+
+              switch (chunk.type(x, y, z)) {
+                case 1:
+                  texInd.push(1, 1, 1, 1)
+                  break
+                case 2:
+                  texInd.push(3, 3, 3, 3)
+                  break
+                case 3:
+                  texInd.push(4, 4, 4, 4)
+                  break
+              }
 
               v += 4
             }
@@ -88,7 +121,19 @@ export default class ChunkMesher {
               indices.push(v, v + 1, v + 3, v + 1, v + 2, v + 3)
               uvs.push(0, 1, 1, 1, 1, 0, 0, 0)
               cols.push(200, 200, 200, 200)
-              texInd.push(1, 1, 1, 1)
+
+              switch (chunk.type(x, y, z)) {
+                case 1:
+                  texInd.push(1, 1, 1, 1)
+                  break
+                case 2:
+                  texInd.push(3, 3, 3, 3)
+                  break
+                case 3:
+                  texInd.push(4, 4, 4, 4)
+                  break
+              }
+
               v += 4
             }
             // +Y
@@ -110,7 +155,18 @@ export default class ChunkMesher {
               indices.push(v, v + 1, v + 3, v + 1, v + 2, v + 3)
               uvs.push(0, 0, 1, 0, 1, 1, 0, 1)
               cols.push(255, 255, 255, 255)
-              texInd.push(0, 0, 0, 0)
+
+              switch (chunk.type(x, y, z)) {
+                case 1:
+                  texInd.push(0, 0, 0, 0)
+                  break
+                case 2:
+                  texInd.push(3, 3, 3, 3)
+                  break
+                case 3:
+                  texInd.push(4, 4, 4, 4)
+                  break
+              }
 
               v += 4
             }
@@ -120,7 +176,18 @@ export default class ChunkMesher {
               indices.push(v, v + 1, v + 3, v + 1, v + 2, v + 3)
               uvs.push(0, 0, 1, 0, 1, 1, 0, 1)
               cols.push(177, 177, 177, 177)
-              texInd.push(2, 2, 2, 2)
+
+              switch (chunk.type(x, y, z)) {
+                case 1:
+                  texInd.push(2, 2, 2, 2)
+                  break
+                case 2:
+                  texInd.push(3, 3, 3, 3)
+                  break
+                case 3:
+                  texInd.push(4, 4, 4, 4)
+                  break
+              }
 
               v += 4
             }

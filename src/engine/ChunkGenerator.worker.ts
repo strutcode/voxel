@@ -5,7 +5,7 @@ const generator = new ChunkGenerator()
 
 onmessage = function (event: MessageEvent) {
   const chunk = new Chunk(event.data.x, event.data.y, event.data.z)
-  generator.perlin(chunk)
+  generator.biome(chunk)
 
   postMessage(chunk.serialize())
 }

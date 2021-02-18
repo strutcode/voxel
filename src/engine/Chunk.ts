@@ -76,6 +76,12 @@ export default class Chunk {
     })
   }
 
+  public type(x: number, y: number, z: number): number {
+    if (!this.chunkStore) return 0
+
+    return this.chunkStore[blockPos(x, y, z)]
+  }
+
   public isSolid(x: number, y: number, z: number): boolean {
     if (!this.chunkStore) return false
 

@@ -117,7 +117,7 @@ export default class Renderer {
     scene.ambientColor = Color3.White()
     scene.clearColor = new Color4(0.7, 0.8, 1, 1)
     scene.fogEnabled = true
-    scene.fogEnd = 10 * 32
+    scene.fogEnd = 22 * 32
     scene.fogStart = scene.fogEnd * 0.75
     scene.fogMode = Scene.FOGMODE_LINEAR
     scene.fogColor.set(
@@ -237,7 +237,7 @@ export default class Renderer {
     scene.activeCamera?.attachControl(canvas)
 
     const camera = (this.camera = scene.activeCamera as FreeCamera)
-    camera.speed = 0.5
+    camera.speed = 5
     camera.position.y = 40
 
     // Action!
@@ -355,31 +355,31 @@ export default class Renderer {
       mesh.isPickable = false
       mesh.alwaysSelectAsActiveMesh = true
 
-      Object.entries(objects).forEach(([name, objects]) => {
-        const objInfo = this.objects[name]
+      // Object.entries(objects).forEach(([name, objects]) => {
+      //   const objInfo = this.objects[name]
 
-        if (objInfo) {
-          const buffer = new Float32Array(objects.length * 16)
+      //   if (objInfo) {
+      //     const buffer = new Float32Array(objects.length * 16)
 
-          objects.forEach((object, i) => {
-            const scale = object.scale ?? 1
-            const rotRadians = (object.rotation ?? 0) * 0.0174533
-            const mat = Matrix.Scaling(scale, scale, scale)
-              .multiply(Matrix.RotationY(rotRadians))
-              .setTranslationFromFloats(
-                -x * Chunk.size - object.x - 0.5, // Inverse because of gltf coordinates
-                y * Chunk.size + object.y,
-                z * Chunk.size + object.z + 0.5,
-              )
+      //     objects.forEach((object, i) => {
+      //       const scale = object.scale ?? 1
+      //       const rotRadians = (object.rotation ?? 0) * 0.0174533
+      //       const mat = Matrix.Scaling(scale, scale, scale)
+      //         .multiply(Matrix.RotationY(rotRadians))
+      //         .setTranslationFromFloats(
+      //           -x * Chunk.size - object.x - 0.5, // Inverse because of gltf coordinates
+      //           y * Chunk.size + object.y,
+      //           z * Chunk.size + object.z + 0.5,
+      //         )
 
-            for (let c = 0; c < 16; c++) {
-              buffer[i * 16 + c] = mat.m[c]
-            }
-          })
+      //       for (let c = 0; c < 16; c++) {
+      //         buffer[i * 16 + c] = mat.m[c]
+      //       }
+      //     })
 
-          objInfo.addRange(key, buffer)
-        }
-      })
+      //     objInfo.addRange(key, buffer)
+      //   }
+      // })
     }
   }
 }
