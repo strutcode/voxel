@@ -12,10 +12,12 @@ import {
   MeshBuilder,
   PBRMaterial,
   PhysicsImpostor,
+  Quaternion,
   RawTexture2DArray,
   Scene,
   SceneLoader,
   ShaderMaterial,
+  TargetCamera,
   Texture,
   Vector3,
   VertexData,
@@ -26,6 +28,8 @@ import fs from '../graphics/fs.glsl'
 import Chunk from '../voxel/Chunk'
 import Ammo from '../../../ammojs/builds/ammo.wasm.js'
 import ObjectInfo from '../graphics/ObjectInfo'
+import Player from '../Player'
+import Mobile from '../Mobile'
 
 export default class BabylonImplementation {
   private static engine: Engine
@@ -57,13 +61,13 @@ export default class BabylonImplementation {
     container?.appendChild(canvas)
 
     // First the programmer gods created the engine
-    const engine = (this.engine = new Engine(canvas))
+    const engine = (this.engine = new Engine(canvas, false))
     const scene = (this.scene = new Scene(engine))
 
     scene.ambientColor = Color3.White()
     scene.clearColor = new Color4(0.7, 0.8, 1, 1)
     scene.fogEnabled = true
-    scene.fogEnd = 22 * 32
+    scene.fogEnd = 11 * 32
     scene.fogStart = scene.fogEnd * 0.75
     scene.fogMode = Scene.FOGMODE_LINEAR
     scene.fogColor.set(
@@ -151,14 +155,14 @@ export default class BabylonImplementation {
     scene.activeCamera?.attachControl(canvas)
 
     const camera = (this.camera = scene.activeCamera as FreeCamera)
-    camera.speed = 5
+    camera.speed = 0.5
     camera.position.y = 40
 
     // Action!
     this.initMeshWorker()
 
     engine.runRenderLoop(() => {
-      this.render()
+      //   this.render()
     })
 
     window.addEventListener('resize', () => {
@@ -203,6 +207,21 @@ export default class BabylonImplementation {
     await loadAsset('cactus')
   }
 
+  public static setViewPosition(player: Player) {
+    const camera = this.scene.activeCamera as TargetCamera
+
+    camera.position.x = player.position.x
+    camera.position.y = player.position.y
+    camera.position.z = player.position.z
+
+    const result = new Vector3()
+    Vector3.Forward().rotateByQuaternionToRef(
+      Quaternion.RotationYawPitchRoll(player.yaw, player.pitch, 0),
+      result,
+    )
+    camera.setTarget(camera.position.add(result))
+  }
+
   public static getViewPosition() {
     return this.camera.position
   }
@@ -214,6 +233,14 @@ export default class BabylonImplementation {
   public static async renderRemChunk(chunk: Chunk) {
     this.deleteQueue.add(`${chunk.x},${chunk.y},${chunk.z}`)
   }
+
+  public static async renderAddPlayer(player: Player) {
+    this.scene.activeCamera = new TargetCamera('', Vector3.Zero(), this.scene)
+  }
+
+  public static async renderAddMob(mob: Mobile) {}
+
+  public static async renderDelMob(mob: Mobile) {}
 
   public static async physicsAddChunk(chunk: Chunk) {
     const mesh = this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
@@ -242,11 +269,29 @@ export default class BabylonImplementation {
     }
   }
 
-  public static async physicsAddMob() {}
+  public static async physicsAddPlayer(player: Player) {
+    const mesh = MeshBuilder.CreateBox('', {
+      width: 0.8,
+      depth: 0.8,
+      height: 1.7,
+    })
 
-  public static async physicsDelMob() {}
+    mesh.position.x = player.position.x
+    mesh.position.y = player.position.y
+    mesh.position.z = player.position.z
 
-  private static render() {
+    mesh.physicsImpostor = new PhysicsImpostor(
+      mesh,
+      PhysicsImpostor.CapsuleImpostor,
+      { mass: 1 },
+    )
+  }
+
+  public static async physicsAddMob(mob: Mobile) {}
+
+  public static async physicsDelMob(mob: Mobile) {}
+
+  public static render() {
     this.blockMaterial.setVector3(
       'viewPosition',
       this.scene.activeCamera.position,

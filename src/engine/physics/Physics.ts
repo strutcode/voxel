@@ -7,12 +7,18 @@ export default class Physics {
     await BabylonImplementation.init()
   }
 
+  public static update() {}
+
   public static addChunk(chunk: Chunk) {
     BabylonImplementation.physicsAddChunk(chunk)
   }
 
   public static remChunk(chunk: Chunk) {
     BabylonImplementation.physicsRemChunk(chunk)
+  }
+
+  public static addPlayer(player: Player) {
+    BabylonImplementation.physicsAddPlayer(player)
   }
 
   public static addMobile(mob: Mobile) {}

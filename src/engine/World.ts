@@ -13,10 +13,11 @@ function digitKey(x, y, z) {
 }
 
 export default class World {
-  public static viewDistance = 32
+  public static viewDistance = 16
 
   private chunks = new Map<number, Chunk | null>()
   private visited = new Set<number>()
+  private physics = new Set<number>()
   private viewPos = new Vector()
   private chunkWorker = new Worker('./voxel/ChunkGenerator.worker.ts')
 
@@ -77,9 +78,15 @@ export default class World {
       const chunk = this.chunks.get(key)
       if (chunk) {
         if (distance < 3) {
-          Physics.addChunk(chunk)
+          if (!this.physics.has(key)) {
+            Physics.addChunk(chunk)
+            this.physics.add(key)
+          }
         } else {
-          Physics.remChunk(chunk)
+          if (this.physics.has(key)) {
+            Physics.remChunk(chunk)
+            this.physics.delete(key)
+          }
         }
       }
     } else if (distance <= World.viewDistance) {
