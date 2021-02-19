@@ -16,6 +16,10 @@ export default class Renderer {
     BabylonImplementation.render()
   }
 
+  public static setAimedVoxel(target: Vector | null) {
+    BabylonImplementation.setAimedVoxel(target)
+  }
+
   public static async addChunk(chunk: Chunk) {
     await BabylonImplementation.renderAddChunk(chunk)
   }

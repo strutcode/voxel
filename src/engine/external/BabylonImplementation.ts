@@ -6,6 +6,7 @@ import {
   DirectionalLight,
   Engine,
   FreeCamera,
+  GlowLayer,
   Material,
   Matrix,
   Mesh,
@@ -17,6 +18,7 @@ import {
   Scene,
   SceneLoader,
   ShaderMaterial,
+  StandardMaterial,
   TargetCamera,
   Texture,
   Vector3,
@@ -32,8 +34,10 @@ import Player from '../Player'
 import Mobile from '../Mobile'
 import Ammo from 'ammojs-typed'
 import Game from '../../Game'
+import Vector from '../math/Vector'
 
 let Ammo: typeof AmmoModule
+let rayCastResult: Ammo.ClosestRayResultCallback
 
 export default class BabylonImplementation {
   private static engine: Engine
@@ -47,6 +51,7 @@ export default class BabylonImplementation {
   private static physicsWorld: Ammo.btSoftRigidDynamicsWorld
   private static playerTransform: Ammo.btTransform
   private static playerController: Ammo.btKinematicCharacterController
+  private static aimedVoxelIndicator: Mesh
 
   public static async init() {
     if (this._init) return
@@ -126,10 +131,32 @@ export default class BabylonImplementation {
 
     this.blockMaterial.setTexture('tiles', textureArray)
 
+    this.aimedVoxelIndicator = MeshBuilder.CreateBox('', { size: 1.01 })
+    this.aimedVoxelIndicator.alwaysSelectAsActiveMesh = true
+    this.aimedVoxelIndicator.isPickable = false
+    const mat = new StandardMaterial('', scene)
+    mat.wireframe = true
+    mat.disableLighting = true
+    mat.emissiveColor = Color3.White()
+    this.aimedVoxelIndicator.material = mat
+    // const glowLayer = new GlowLayer('', scene)
+    // glowLayer.addIncludedOnlyMesh(this.aimedVoxelIndicator)
+    // glowLayer.customEmissiveColorSelector = (
+    //   mesh,
+    //   subMesh,
+    //   material,
+    //   result,
+    // ) => {
+    //   if (mesh === this.aimedVoxelIndicator) {
+    //     result.set(1, 1, 1, 1)
+    //   }
+    // }
+
     // And made it move
     Ammo = await AmmoModule()
     const physicsPlugin = new AmmoJSPlugin(undefined, Ammo)
     this.physicsWorld = physicsPlugin.world
+    rayCastResult = new Ammo.ClosestRayResultCallback()
     scene.enablePhysics(new Vector3(0, -9.87, 0), physicsPlugin)
 
     // And all was good
@@ -233,6 +260,18 @@ export default class BabylonImplementation {
     return this.scene.activeCamera.position
   }
 
+  public static setAimedVoxel(target: Vector | null) {
+    if (target == null) {
+      this.aimedVoxelIndicator.isVisible = false
+      return
+    }
+
+    this.aimedVoxelIndicator.isVisible = true
+    this.aimedVoxelIndicator.position.x = target.x + 0.5
+    this.aimedVoxelIndicator.position.y = target.y + 0.5
+    this.aimedVoxelIndicator.position.z = target.z + 0.5
+  }
+
   public static async renderAddChunk(chunk: Chunk) {
     this.meshWorker.postMessage(chunk.serialize())
   }
@@ -242,7 +281,10 @@ export default class BabylonImplementation {
   }
 
   public static async renderAddPlayer(player: Player) {
-    this.scene.activeCamera = new TargetCamera('', Vector3.Zero(), this.scene)
+    const camera = new TargetCamera('', Vector3.Zero(), this.scene)
+    camera.minZ = 0.1
+    camera.maxZ = 1000
+    this.scene.activeCamera = camera
   }
 
   public static async renderAddMob(mob: Mobile) {}
@@ -261,7 +303,7 @@ export default class BabylonImplementation {
         { mass: 0 },
         this.scene,
       )
-      mesh.showBoundingBox = true
+      // mesh.showBoundingBox = true
 
       mesh.getChildMeshes = original
     }
@@ -272,7 +314,7 @@ export default class BabylonImplementation {
     if (mesh && mesh.physicsImpostor) {
       mesh.physicsImpostor.dispose()
       mesh.physicsImpostor = null
-      mesh.showBoundingBox = false
+      // mesh.showBoundingBox = false
     }
   }
 
@@ -332,6 +374,38 @@ export default class BabylonImplementation {
     player.position.y = pos.y()
     player.position.z = pos.z()
     this.setViewPosition(player)
+  }
+
+  public static physicsGetAimedVoxel(): Vector | null {
+    const camera = this.scene.activeCamera as TargetCamera
+    const direction = camera.target
+      .subtractInPlace(camera.position)
+      .multiplyInPlace(new Vector3(10, 10, 10))
+
+    const from = new Ammo.btVector3(
+      camera.position.x,
+      camera.position.y,
+      camera.position.z,
+    )
+    const to = new Ammo.btVector3(
+      camera.position.x + direction.x,
+      camera.position.y + direction.y,
+      camera.position.z + direction.z,
+    )
+    rayCastResult = new Ammo.ClosestRayResultCallback()
+    this.physicsWorld.rayTest(from, to, rayCastResult)
+
+    if (rayCastResult.hasHit()) {
+      const f = rayCastResult.get_m_closestHitFraction() + 0.0001
+
+      return new Vector(
+        Math.floor(camera.position.x + direction.x * f),
+        Math.floor(camera.position.y + direction.y * f),
+        Math.floor(camera.position.z + direction.z * f),
+      )
+    }
+
+    return null
   }
 
   public static async physicsAddMob(mob: Mobile) {}
