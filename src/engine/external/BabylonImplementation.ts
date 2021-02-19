@@ -393,6 +393,7 @@ export default class BabylonImplementation {
       camera.position.z + direction.z,
     )
     rayCastResult = new Ammo.ClosestRayResultCallback()
+    rayCastResult.set_m_collisionFilterMask(1 | 2 | 4)
     this.physicsWorld.rayTest(from, to, rayCastResult)
 
     if (rayCastResult.hasHit()) {
