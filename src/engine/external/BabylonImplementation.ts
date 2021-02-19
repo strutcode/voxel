@@ -26,10 +26,14 @@ import '@babylonjs/loaders/glTF/2.0'
 import vs from '../graphics/vs.glsl'
 import fs from '../graphics/fs.glsl'
 import Chunk from '../voxel/Chunk'
-import Ammo from '../../../ammojs/builds/ammo.wasm.js'
+import AmmoModule from 'ammo.js'
 import ObjectInfo from '../graphics/ObjectInfo'
 import Player from '../Player'
 import Mobile from '../Mobile'
+import Ammo from 'ammojs-typed'
+import Game from '../../Game'
+
+let Ammo: typeof AmmoModule
 
 export default class BabylonImplementation {
   private static engine: Engine
@@ -40,6 +44,9 @@ export default class BabylonImplementation {
   private static deleteQueue = new Set<string>()
   private static objects: Record<string, ObjectInfo> = {}
   private static _init = false
+  private static physicsWorld: Ammo.btSoftRigidDynamicsWorld
+  private static playerTransform: Ammo.btTransform
+  private static playerController: Ammo.btKinematicCharacterController
 
   public static async init() {
     if (this._init) return
@@ -120,16 +127,16 @@ export default class BabylonImplementation {
     this.blockMaterial.setTexture('tiles', textureArray)
 
     // And made it move
-    scene.enablePhysics(
-      new Vector3(0, -9.87, 0),
-      new AmmoJSPlugin(undefined, await Ammo()),
-    )
+    Ammo = await AmmoModule()
+    const physicsPlugin = new AmmoJSPlugin(undefined, Ammo)
+    this.physicsWorld = physicsPlugin.world
+    scene.enablePhysics(new Vector3(0, -9.87, 0), physicsPlugin)
 
     // And all was good
     window.addEventListener('keydown', (ev) => {
       if (ev.key === 'b') {
         const mesh = MeshBuilder.CreateBox('', {}, scene)
-        mesh.position = camera.getTarget()
+        mesh.position = (scene.activeCamera as TargetCamera).getTarget()
         mesh.isPickable = false
         mesh.physicsImpostor = new PhysicsImpostor(
           mesh,
@@ -211,7 +218,7 @@ export default class BabylonImplementation {
     const camera = this.scene.activeCamera as TargetCamera
 
     camera.position.x = player.position.x
-    camera.position.y = player.position.y
+    camera.position.y = player.position.y + 0.8
     camera.position.z = player.position.z
 
     const result = new Vector3()
@@ -223,7 +230,7 @@ export default class BabylonImplementation {
   }
 
   public static getViewPosition() {
-    return this.camera.position
+    return this.scene.activeCamera.position
   }
 
   public static async renderAddChunk(chunk: Chunk) {
@@ -254,7 +261,7 @@ export default class BabylonImplementation {
         { mass: 0 },
         this.scene,
       )
-      // mesh.showBoundingBox = true
+      mesh.showBoundingBox = true
 
       mesh.getChildMeshes = original
     }
@@ -265,26 +272,66 @@ export default class BabylonImplementation {
     if (mesh && mesh.physicsImpostor) {
       mesh.physicsImpostor.dispose()
       mesh.physicsImpostor = null
-      // mesh.showBoundingBox = false
+      mesh.showBoundingBox = false
     }
   }
 
   public static async physicsAddPlayer(player: Player) {
-    const mesh = MeshBuilder.CreateBox('', {
-      width: 0.8,
-      depth: 0.8,
-      height: 1.7,
-    })
+    const shape = new Ammo.btCapsuleShape(0.6 / 2, 1.7 / 2)
+    const transform = new Ammo.btTransform()
 
-    mesh.position.x = player.position.x
-    mesh.position.y = player.position.y
-    mesh.position.z = player.position.z
-
-    mesh.physicsImpostor = new PhysicsImpostor(
-      mesh,
-      PhysicsImpostor.CapsuleImpostor,
-      { mass: 1 },
+    transform.setIdentity()
+    transform.setOrigin(
+      new Ammo.btVector3(
+        player.position.x,
+        player.position.y,
+        player.position.z,
+      ),
     )
+
+    const ghost = new Ammo.btPairCachingGhostObject()
+    ghost.setWorldTransform(transform)
+    ghost.setCollisionShape(shape)
+    ghost.setCollisionFlags(16)
+    this.physicsWorld
+      .getPairCache()
+      .setInternalGhostPairCallback(new Ammo.btGhostPairCallback())
+
+    this.playerTransform = ghost.getWorldTransform()
+    this.playerController = new Ammo.btKinematicCharacterController(
+      ghost,
+      shape,
+      1,
+    )
+
+    this.physicsWorld.addCollisionObject(ghost, 32, 1 | 2 | 4)
+    this.physicsWorld.addAction(this.playerController)
+
+    setTimeout(() => {
+      this.scene.onBeforePhysicsObservable.add(() => {
+        this.playerController.playerStep(
+          this.physicsWorld,
+          Game.deltaTime / 100000,
+        )
+      })
+    }, 2000)
+  }
+
+  public static physicsSyncPlayer(player: Player) {
+    if (!this.playerController) return
+
+    this.playerController.setWalkDirection(
+      new Ammo.btVector3(
+        player.velocity.x,
+        player.velocity.y,
+        player.velocity.z,
+      ),
+    )
+    const pos = this.playerTransform.getOrigin()
+    player.position.x = pos.x()
+    player.position.y = pos.y()
+    player.position.z = pos.z()
+    this.setViewPosition(player)
   }
 
   public static async physicsAddMob(mob: Mobile) {}

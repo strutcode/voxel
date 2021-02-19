@@ -21,6 +21,10 @@ export default class Physics {
     BabylonImplementation.physicsAddPlayer(player)
   }
 
+  public static syncPlayer(player: Player) {
+    BabylonImplementation.physicsSyncPlayer(player)
+  }
+
   public static addMobile(mob: Mobile) {}
 
   public static remMobile(mob: Mobile) {}

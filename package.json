@@ -5,6 +5,7 @@
     "@babylonjs/inspector": "^4.2.0",
     "@babylonjs/loaders": "^4.2.0",
     "@babylonjs/materials": "^4.2.0",
+    "ammojs-typed": "^1.0.6",
     "asm-noise": "^1.0.2"
   },
   "devDependencies": {
@@ -24,6 +25,9 @@
     "typescript": "^4.1.3"
   },
   "assetsPath": "./assets",
+  "alias": {
+    "ammo.js": "./ammojs/builds/ammo.js"
+  },
   "scripts": {
     "dev": "parcel serve --hmr-port 1235 src/index.html",
     "test": "TS_NODE_IGNORE='node_modules/(?!@babylonjs)' ts-mocha -p test/tsconfig.json test/bootstrap.ts 'src/**/*.spec.ts'"

@@ -5,9 +5,9 @@ export default class Vector {
 
   private storage = new Float32Array(3)
 
-  constructor(array: number[])
-  constructor(x?: number, y?: number, z?: number)
-  constructor(a?: number | number[], y?: number, z?: number) {
+  public constructor(array: number[])
+  public constructor(x?: number, y?: number, z?: number)
+  public constructor(a?: number | number[], y?: number, z?: number) {
     if (Array.isArray(a)) {
       this.x = a[0] ?? 0
       this.y = a[1] ?? 0
@@ -19,23 +19,29 @@ export default class Vector {
     }
   }
 
-  get x() {
+  public get x() {
     return this.storage[0]
   }
-  get y() {
+  public get y() {
     return this.storage[1]
   }
-  get z() {
+  public get z() {
     return this.storage[2]
   }
 
-  set x(val: number) {
+  public set x(val: number) {
     this.storage[0] = val
   }
-  set y(val: number) {
+  public set y(val: number) {
     this.storage[1] = val
   }
-  set z(val: number) {
+  public set z(val: number) {
     this.storage[2] = val
+  }
+
+  public set(x: number, y: number, z: number) {
+    this.storage[0] = x
+    this.storage[1] = y
+    this.storage[2] = z
   }
 }
