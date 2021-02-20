@@ -1,5 +1,3 @@
-import Block from './Block'
-
 const blockPos = (x: number, y: number, z: number) =>
   Math.floor(y * Chunk.squareSize + z * Chunk.size + x)
 
@@ -36,7 +34,7 @@ export default class Chunk {
 
   constructor(public x = 0, public y = 0, public z = 0) {}
 
-  public get(x: number, y: number, z: number): Block {
+  public get(x: number, y: number, z: number): number {
     if (!this.chunkStore) {
       return 0
     }
@@ -44,13 +42,13 @@ export default class Chunk {
     return this.chunkStore[blockPos(x, y, z)]
   }
 
-  public set(x: number, y: number, z: number, block: Block) {
-    if (!this.chunkStore && block !== 0) {
+  public set(x: number, y: number, z: number, id: number) {
+    if (!this.chunkStore && id !== 0) {
       this.chunkStore = new Uint32Array(Chunk.cubeSize)
     }
 
     if (this.chunkStore) {
-      this.chunkStore[blockPos(x, y, z)] = block
+      this.chunkStore[blockPos(x, y, z)] = id
     }
   }
 
