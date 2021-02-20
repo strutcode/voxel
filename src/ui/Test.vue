@@ -1,8 +1,8 @@
 <template>
   <div class="panel">
-    <div>X: {{ loc.x }}</div>
-    <div>Y: {{ loc.y }}</div>
-    <div>Z: {{ loc.z }}</div>
+    <div>X: {{ loc.x.toFixed(2) }}</div>
+    <div>Y: {{ loc.y.toFixed(2) }}</div>
+    <div>Z: {{ loc.z.toFixed(2) }}</div>
   </div>
 </template>
 
@@ -19,7 +19,7 @@
 
 <style lang="stylus" scoped>
   .panel
-    font-size: 18pt
+    font-size: 14pt
     display: inline-block
     padding: 0.5em 1em
     background: #eee

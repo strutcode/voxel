@@ -7,6 +7,7 @@ import Input from './engine/ui/Input'
 import Hud from './engine/ui/Hud'
 import Database from './engine/Database'
 
+import Reticle from './ui/Reticle.vue'
 import Test from './ui/Test.vue'
 import Inventory from './ui/Inventory.vue'
 
@@ -45,6 +46,7 @@ export default class Game {
     this.player.position.y = 42
     Physics.addPlayer(this.player)
     Renderer.addPlayer(this.player)
+    Hud.addComponent(Reticle)
     Hud.addComponent(Test)
     Hud.addComponent(Inventory)
 
