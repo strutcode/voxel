@@ -5,8 +5,12 @@ import World from './engine/World'
 import Player from './engine/Player'
 import Input from './engine/ui/Input'
 import Hud from './engine/ui/Hud'
+import Database from './engine/Database'
 
 import Test from './Test.vue'
+
+import blockInfo from './blockInfo'
+import itemInfo from './itemInfo'
 
 enum GameState {
   Play,
@@ -27,6 +31,7 @@ export default class Game {
     await Physics.init()
     await Input.init()
     await Hud.init()
+    await Database.init(blockInfo, itemInfo)
 
     this.world = new World()
     ;(globalThis as any).options = {
@@ -62,7 +67,7 @@ export default class Game {
           targetBlock.y,
           targetBlock.z,
         )
-        
+
         if (block) {
           this.world.setBlock(targetBlock.x, targetBlock.y, targetBlock.z, 0)
           this.player.addItem(block)
