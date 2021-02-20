@@ -64,8 +64,8 @@ export default class Game {
         )
         
         if (block) {
-          this.world.removeBlock(targetBlock.x, targetBlock.y, targetBlock.z)
-          this.player.addItem(block.type)
+          this.world.setBlock(targetBlock.x, targetBlock.y, targetBlock.z, 0)
+          this.player.addItem(block)
         }
       }
 

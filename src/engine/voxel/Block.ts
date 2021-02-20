@@ -1,3 +1,3 @@
-export default interface Block {
-  type: number
-}
+type Block = number
+
+export default Block

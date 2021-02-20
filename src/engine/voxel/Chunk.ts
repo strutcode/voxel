@@ -38,23 +38,19 @@ export default class Chunk {
 
   public get(x: number, y: number, z: number): Block {
     if (!this.chunkStore) {
-      return {
-        type: 0,
-      }
+      return 0
     }
 
-    return {
-      type: this.chunkStore[blockPos(x, y, z)],
-    }
+    return this.chunkStore[blockPos(x, y, z)]
   }
 
   public set(x: number, y: number, z: number, block: Block) {
-    if (!this.chunkStore && block.type !== 0) {
+    if (!this.chunkStore && block !== 0) {
       this.chunkStore = new Uint32Array(Chunk.cubeSize)
     }
 
     if (this.chunkStore) {
-      this.chunkStore[blockPos(x, y, z)] = block.type
+      this.chunkStore[blockPos(x, y, z)] = block
     }
   }
 

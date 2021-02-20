@@ -7,9 +7,7 @@ export default class ChunkGenerator {
     for (let y = 0; y < Chunk.size; y++) {
       for (let z = 0; z < Chunk.size; z++) {
         for (let x = 0; x < Chunk.size; x++) {
-          chunk.set(x, y, z, {
-            type: Math.round(Math.random()),
-          })
+          chunk.set(x, y, z, Math.round(Math.random()))
         }
       }
     }
@@ -51,9 +49,7 @@ export default class ChunkGenerator {
 
         for (let y = 0; y < Chunk.size; y++) {
           if (y <= height) {
-            chunk.set(x, y, z, {
-              type: 1,
-            })
+            chunk.set(x, y, z, 1)
           } else {
             if (tree > 1.5 && Math.random() < 0.05) {
               chunk.addObject(
@@ -167,9 +163,7 @@ export default class ChunkGenerator {
 
         for (let y = 0; y < Chunk.size; y++) {
           if (y <= height) {
-            chunk.set(x, y, z, {
-              type,
-            })
+            chunk.set(x, y, z, type)
           } else {
             if (type === 1) {
               const tree =

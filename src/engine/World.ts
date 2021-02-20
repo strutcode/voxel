@@ -59,28 +59,14 @@ export default class World {
     return null
   }
 
-  public removeBlock(x: number, y: number, z: number) {
+  public setBlock(x: number, y: number, z: number, block: Block) {
     const cx = Math.floor(x / Chunk.size)
     const cy = Math.floor(y / Chunk.size)
     const cz = Math.floor(z / Chunk.size)
     const chunk = this.chunks.get(digitKey(cx, cy, cz))
 
     if (chunk) {
-      chunk.set(x % Chunk.size, y % Chunk.size, z % Chunk.size, {
-        type: 0,
-      })
-      this.refreshChunk(cx, cy, cz)
-    }
-  }
-
-  public placeBlock(x: number, y: number, z: number, info: Block) {
-    const cx = Math.floor(x / Chunk.size)
-    const cy = Math.floor(y / Chunk.size)
-    const cz = Math.floor(z / Chunk.size)
-    const chunk = this.chunks.get(digitKey(cx, cy, cz))
-
-    if (chunk) {
-      chunk.set(x % Chunk.size, y % Chunk.size, z % Chunk.size, info)
+      chunk.set(x % Chunk.size, y % Chunk.size, z % Chunk.size, 0)
       this.refreshChunk(cx, cy, cz)
     }
   }
