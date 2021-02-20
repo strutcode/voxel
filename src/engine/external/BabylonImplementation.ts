@@ -294,8 +294,11 @@ export default class BabylonImplementation {
 
   public static async renderDelMob(mob: Mobile) {}
 
-  public static async physicsAddChunk(chunk: Chunk) {
-    const mesh = this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
+  public static async physicsAddChunk(chunk: Chunk | Mesh) {
+    const mesh =
+      chunk instanceof Mesh
+        ? chunk
+        : this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
     if (mesh && !mesh.physicsImpostor) {
       const original = mesh.getChildMeshes
       mesh.getChildMeshes = () => []
@@ -313,12 +316,14 @@ export default class BabylonImplementation {
   }
 
   public static async physicsUpdateChunk(chunk: Chunk) {
-    this.physicsRemChunk(chunk)
-    this.physicsAddChunk(chunk)
+    // Handled by the mesher
   }
 
-  public static async physicsRemChunk(chunk: Chunk) {
-    const mesh = this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
+  public static async physicsRemChunk(chunk: Chunk | Mesh) {
+    const mesh =
+      chunk instanceof Mesh
+        ? chunk
+        : this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
     if (mesh && mesh.physicsImpostor) {
       mesh.physicsImpostor.dispose()
       mesh.physicsImpostor = null
@@ -479,6 +484,11 @@ export default class BabylonImplementation {
           1,
         ),
       )
+
+      if (mesh.physicsImpostor) {
+        this.physicsRemChunk(mesh)
+        this.physicsAddChunk(mesh)
+      }
 
       mesh.material = this.blockMaterial
 
