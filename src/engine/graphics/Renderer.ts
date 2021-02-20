@@ -35,7 +35,12 @@ export default class Renderer {
   }
 
   public static getViewPosition() {
-    BabylonImplementation.getViewPosition().toArray(this.viewPos['storage'])
+    const viewPos = BabylonImplementation.getViewPosition()
+
+    this.viewPos.x = viewPos.x
+    this.viewPos.y = viewPos.y
+    this.viewPos.z = viewPos.z
+
     return this.viewPos
   }
 }

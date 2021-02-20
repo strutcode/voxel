@@ -7,8 +7,6 @@ export default class Vector {
     return new Vector(input)
   }
 
-  private storage = new Float32Array(3)
-
   public constructor(array: number[])
   public constructor(x?: number, y?: number, z?: number)
   public constructor(a?: number | number[], y?: number, z?: number) {

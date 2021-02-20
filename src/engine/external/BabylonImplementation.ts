@@ -106,7 +106,7 @@ export default class BabylonImplementation {
       scene.fogColor.b,
     ])
 
-    const img = await new Promise<Image>((resolve) => {
+    const img = await new Promise<Image>(resolve => {
       const img = new Image()
       img.src = '/tileset.png'
       img.onload = () => resolve(img)
@@ -159,7 +159,7 @@ export default class BabylonImplementation {
     scene.enablePhysics(new Vector3(0, -9.87, 0), physicsPlugin)
 
     // And all was good
-    window.addEventListener('keydown', (ev) => {
+    window.addEventListener('keydown', ev => {
       if (ev.key === 'b') {
         const mesh = MeshBuilder.CreateBox('', {}, scene)
         mesh.position = (scene.activeCamera as TargetCamera).getTarget()
@@ -211,7 +211,7 @@ export default class BabylonImplementation {
         `${name}.glb`,
       )
 
-      const firstMesh = scene.meshes.find((mesh) => mesh.name !== '__root__')
+      const firstMesh = scene.meshes.find(mesh => mesh.name !== '__root__')
 
       firstMesh.isVisible = true
       firstMesh.alwaysSelectAsActiveMesh = true
@@ -309,7 +309,7 @@ export default class BabylonImplementation {
         { mass: 0 },
         this.scene,
       )
-      // mesh.showBoundingBox = true
+      mesh.showBoundingBox = true
 
       mesh.getChildMeshes = original
     }
@@ -327,7 +327,7 @@ export default class BabylonImplementation {
     if (mesh && mesh.physicsImpostor) {
       mesh.physicsImpostor.dispose()
       mesh.physicsImpostor = null
-      // mesh.showBoundingBox = false
+      mesh.showBoundingBox = false
     }
   }
 
@@ -436,7 +436,7 @@ export default class BabylonImplementation {
       this.scene.activeCamera.position,
     )
 
-    this.deleteQueue.forEach((key) => {
+    this.deleteQueue.forEach(key => {
       const mesh = this.scene.getMeshByName(key)
 
       if (mesh) {
@@ -444,7 +444,7 @@ export default class BabylonImplementation {
         this.deleteQueue.delete(key)
       }
 
-      Object.values(this.objects).forEach((objInfo) => {
+      Object.values(this.objects).forEach(objInfo => {
         objInfo.removeRange(key)
       })
     })
