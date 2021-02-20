@@ -53,7 +53,11 @@ export default class World {
     const chunk = this.chunks.get(digitKey(cx, cy, cz))
 
     if (chunk) {
-      return chunk.get(x % Chunk.size, y % Chunk.size, z % Chunk.size)
+      return chunk.get(
+        x - cx * Chunk.size,
+        y - cy * Chunk.size,
+        z - cz * Chunk.size,
+      )
     }
 
     return null
@@ -66,7 +70,12 @@ export default class World {
     const chunk = this.chunks.get(digitKey(cx, cy, cz))
 
     if (chunk) {
-      chunk.set(x % Chunk.size, y % Chunk.size, z % Chunk.size, 0)
+      chunk.set(
+        x - cx * Chunk.size,
+        y - cy * Chunk.size,
+        z - cz * Chunk.size,
+        0,
+      )
       this.refreshChunk(cx, cy, cz)
     }
   }

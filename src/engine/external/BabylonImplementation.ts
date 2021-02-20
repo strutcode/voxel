@@ -403,13 +403,16 @@ export default class BabylonImplementation {
     this.physicsWorld.rayTest(from, to, rayCastResult)
 
     if (rayCastResult.hasHit()) {
-      const f = rayCastResult.get_m_closestHitFraction() + 0.0001
+      const normal = rayCastResult.get_m_hitNormalWorld()
+      const f = rayCastResult.get_m_closestHitFraction() - 0.0001
 
-      return new Vector(
-        Math.floor(camera.position.x + direction.x * f),
-        Math.floor(camera.position.y + direction.y * f),
-        Math.floor(camera.position.z + direction.z * f),
+      const result = new Vector(
+        Math.floor(camera.position.x + direction.x * f - normal.x()),
+        Math.floor(camera.position.y + direction.y * f - normal.y()),
+        Math.floor(camera.position.z + direction.z * f - normal.z()),
       )
+
+      return result
     }
 
     return null
