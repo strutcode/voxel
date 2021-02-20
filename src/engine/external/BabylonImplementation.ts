@@ -369,11 +369,15 @@ export default class BabylonImplementation {
         player.velocity.z,
       ),
     )
+
     const pos = this.playerTransform.getOrigin()
     player.position.x = pos.x()
     player.position.y = pos.y()
     player.position.z = pos.z()
-    this.setViewPosition(player)
+
+    if (player.jumpIntent && this.playerController.canJump()) {
+      this.playerController.jump()
+    }
   }
 
   public static physicsGetAimedVoxel(): Vector | null {

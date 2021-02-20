@@ -5,6 +5,11 @@ export default class Input {
     MoveH: 0,
     MoveV: 0,
   }
+  private static inputMap = {
+    Break: 'mouse0',
+    Place: 'mouse1',
+    Jump: ' ',
+  }
   private static key: Record<string, boolean> = {
     w: false,
     s: false,
@@ -25,8 +30,13 @@ export default class Input {
       this.axis.ViewV += ev.movementY
     })
 
-    window.addEventListener('click', (ev) => {
+    window.addEventListener('pointerdown', (ev) => {
       document.body.requestPointerLock()
+
+      this.key[`mouse${ev.button}`] = true
+    })
+    window.addEventListener('pointerup', (ev) => {
+      this.key[`mouse${ev.button}`] = false
     })
   }
 
@@ -41,5 +51,9 @@ export default class Input {
 
   public static getAxis(name: keyof typeof Input.axis) {
     return this.axis[name]
+  }
+
+  public static getButton(name: keyof typeof Input.inputMap) {
+    return this.key[this.inputMap[name]] ?? false
   }
 }
