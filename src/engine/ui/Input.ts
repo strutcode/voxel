@@ -19,6 +19,7 @@ export default class Input {
   private static keyDown: Record<string, boolean> = {}
   private static key: Record<string, boolean> = {}
   private static lastKey: Record<string, boolean> = {}
+  private static hasPointerLock = false
 
   public static async init() {
     window.addEventListener('keydown', ev => {
@@ -29,8 +30,10 @@ export default class Input {
     })
 
     window.addEventListener('pointermove', ev => {
-      this.axis.ViewH += ev.movementX
-      this.axis.ViewV += ev.movementY
+      if (this.hasPointerLock) {
+        this.axis.ViewH += ev.movementX
+        this.axis.ViewV += ev.movementY
+      }
     })
 
     window.addEventListener('pointerdown', ev => {
@@ -40,6 +43,10 @@ export default class Input {
     })
     window.addEventListener('pointerup', ev => {
       this.key[`mouse${ev.button}`] = false
+    })
+
+    document.addEventListener('pointerlockchange', () => {
+      this.hasPointerLock = document.pointerLockElement === document.body
     })
   }
 
