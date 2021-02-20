@@ -46,6 +46,19 @@ export default class World {
     })
   }
 
+  public getBlock(x: number, y: number, z: number): Block | null {
+    const cx = Math.floor(x / Chunk.size)
+    const cy = Math.floor(y / Chunk.size)
+    const cz = Math.floor(z / Chunk.size)
+    const chunk = this.chunks.get(digitKey(cx, cy, cz))
+
+    if (chunk) {
+      return chunk.get(x % Chunk.size, y % Chunk.size, z % Chunk.size)
+    }
+
+    return null
+  }
+
   public removeBlock(x: number, y: number, z: number) {
     const cx = Math.floor(x / Chunk.size)
     const cy = Math.floor(y / Chunk.size)

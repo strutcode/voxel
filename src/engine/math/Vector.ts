@@ -1,4 +1,8 @@
 export default class Vector {
+  public x = 0
+  public y = 0
+  public z = 0
+
   public static fromArray(input: number[]) {
     return new Vector(input)
   }
@@ -19,29 +23,9 @@ export default class Vector {
     }
   }
 
-  public get x() {
-    return this.storage[0]
-  }
-  public get y() {
-    return this.storage[1]
-  }
-  public get z() {
-    return this.storage[2]
-  }
-
-  public set x(val: number) {
-    this.storage[0] = val
-  }
-  public set y(val: number) {
-    this.storage[1] = val
-  }
-  public set z(val: number) {
-    this.storage[2] = val
-  }
-
   public set(x: number, y: number, z: number) {
-    this.storage[0] = x
-    this.storage[1] = y
-    this.storage[2] = z
+    this.x = x
+    this.y = y
+    this.z = z
   }
 }

@@ -3,7 +3,10 @@ import Physics from './engine/physics/Physics'
 import Vector from './engine/math/Vector'
 import World from './engine/World'
 import Player from './engine/Player'
-import Input from './engine/Input'
+import Input from './engine/ui/Input'
+import Hud from './engine/ui/Hud'
+
+import Test from './Test.vue'
 
 enum GameState {
   Play,
@@ -20,9 +23,10 @@ export default class Game {
   private static boundUpdate = Game.update.bind(Game)
 
   public static async start() {
-    await Input.init()
     await Renderer.init()
     await Physics.init()
+    await Input.init()
+    await Hud.init()
 
     this.world = new World()
     ;(globalThis as any).options = {
@@ -35,6 +39,7 @@ export default class Game {
     this.player.position.y = 42
     Physics.addPlayer(this.player)
     Renderer.addPlayer(this.player)
+    Hud.addComponent(Test)
 
     requestAnimationFrame(this.boundUpdate)
   }
@@ -48,10 +53,20 @@ export default class Game {
       Input.startFrame()
       this.player.update()
       Physics.syncPlayer(this.player)
+      Hud.update()
 
       const targetBlock = Physics.getAimedVoxel()
       if (Input.getButton('Break') && targetBlock) {
-        this.world.removeBlock(targetBlock.x, targetBlock.y, targetBlock.z)
+        const block = this.world.getBlock(
+          targetBlock.x,
+          targetBlock.y,
+          targetBlock.z,
+        )
+        
+        if (block) {
+          this.world.removeBlock(targetBlock.x, targetBlock.y, targetBlock.z)
+          this.player.addItem(block.type)
+        }
       }
 
       this.world.updateView(Renderer.getViewPosition(), new Vector())

@@ -6,23 +6,25 @@ export default class Input {
     MoveV: 0,
   }
   private static inputMap = {
+    Forward: 'w',
+    Back: 's',
+    Left: 'a',
+    Right: 'd',
+    AutoMove: 'numlock',
     Break: 'mouse0',
     Place: 'mouse1',
     Jump: ' ',
   }
-  private static key: Record<string, boolean> = {
-    w: false,
-    s: false,
-    a: false,
-    d: false,
-  }
+  private static keyDown: Record<string, boolean> = {}
+  private static key: Record<string, boolean> = {}
+  private static lastKey: Record<string, boolean> = {}
 
   public static async init() {
     window.addEventListener('keydown', (ev) => {
-      this.key[ev.key.toLowerCase()] = true
+      this.keyDown[ev.key.toLowerCase()] = true
     })
     window.addEventListener('keyup', (ev) => {
-      this.key[ev.key.toLowerCase()] = false
+      this.keyDown[ev.key.toLowerCase()] = false
     })
 
     window.addEventListener('pointermove', (ev) => {
@@ -45,8 +47,11 @@ export default class Input {
   public static endFrame() {
     this.axis.ViewH = this.axis.ViewV = 0
 
-    this.axis.MoveH = +this.key['d'] - +this.key['a']
-    this.axis.MoveV = +this.key['w'] - +this.key['s']
+    this.axis.MoveH = +!!this.keyDown['d'] - +!!this.keyDown['a']
+    this.axis.MoveV = +!!this.keyDown['w'] - +!!this.keyDown['s']
+
+    this.lastKey = this.key
+    this.key = Object.assign({}, this.keyDown)
   }
 
   public static getAxis(name: keyof typeof Input.axis) {
@@ -54,6 +59,17 @@ export default class Input {
   }
 
   public static getButton(name: keyof typeof Input.inputMap) {
-    return this.key[this.inputMap[name]] ?? false
+    const frame = this.key[this.inputMap[name]] ?? false
+    const lastFrame = this.lastKey[this.inputMap[name]] ?? false
+
+    if (frame === lastFrame) {
+      return false
+    }
+
+    return frame
+  }
+
+  public static getButtonDown(name: keyof typeof Input.inputMap) {
+    return this.keyDown[this.inputMap[name]] ?? false
   }
 }
