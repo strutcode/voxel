@@ -10,6 +10,7 @@ export default class Input {
     Back: 's',
     Left: 'a',
     Right: 'd',
+    Run: 'shift',
     AutoMove: 'numlock',
     Break: 'mouse0',
     Place: 'mouse1',
@@ -20,24 +21,24 @@ export default class Input {
   private static lastKey: Record<string, boolean> = {}
 
   public static async init() {
-    window.addEventListener('keydown', (ev) => {
+    window.addEventListener('keydown', ev => {
       this.keyDown[ev.key.toLowerCase()] = true
     })
-    window.addEventListener('keyup', (ev) => {
+    window.addEventListener('keyup', ev => {
       this.keyDown[ev.key.toLowerCase()] = false
     })
 
-    window.addEventListener('pointermove', (ev) => {
+    window.addEventListener('pointermove', ev => {
       this.axis.ViewH += ev.movementX
       this.axis.ViewV += ev.movementY
     })
 
-    window.addEventListener('pointerdown', (ev) => {
+    window.addEventListener('pointerdown', ev => {
       document.body.requestPointerLock()
 
       this.key[`mouse${ev.button}`] = true
     })
-    window.addEventListener('pointerup', (ev) => {
+    window.addEventListener('pointerup', ev => {
       this.key[`mouse${ev.button}`] = false
     })
   }
