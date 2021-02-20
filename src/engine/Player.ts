@@ -21,15 +21,15 @@ export default class Player extends Mobile {
     this.jumpIntent = Input.getButton('Jump')
   }
 
-  public addItem(id: number) {
-    const existing = this.inventory.find((i) => i.id === id)
+  public addItem(id: number, amount = 1) {
+    const existing = this.inventory.find(i => i.id === id)
 
     if (existing) {
-      existing.amount++
+      existing.amount += amount
     } else {
       this.inventory.push({
         id,
-        amount: 1,
+        amount,
       })
     }
   }

@@ -85,9 +85,9 @@
         position: absolute
         bottom: 0
         right: 6px
-        font-size: 20px
+        font-size: 16px
         font-family: monospace
         color: white
         font-weight bold
-        text-shadow: 0 0 5px black, 0 0 5px black
+        text-shadow: 0 0 5px black, 0 0 3px black, 0 0 2px black
 </style>

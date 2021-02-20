@@ -71,8 +71,21 @@ export default class Game {
         )
 
         if (block) {
+          // TODO: needs to become data somehow
+          switch (block) {
+            case 1:
+              this.player.addItem(0)
+              this.player.addItem(1, 2)
+              break
+            case 2:
+              this.player.addItem(3, 3)
+              break
+            case 3:
+              this.player.addItem(4, 3)
+              break
+          }
+
           this.world.setBlock(targetBlock.x, targetBlock.y, targetBlock.z, 0)
-          this.player.addItem(block)
         }
       }
 

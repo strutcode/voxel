@@ -3,7 +3,6 @@
     <div>X: {{ loc.x }}</div>
     <div>Y: {{ loc.y }}</div>
     <div>Z: {{ loc.z }}</div>
-    <div>{{ inv }}</div>
   </div>
 </template>
 
@@ -13,9 +12,6 @@
     computed: {
       loc() {
         return this.gameData.player?.position ?? { x: 0, y: 0, z: 0 }
-      },
-      inv() {
-        return this.gameData.player?.inventory ?? []
       },
     },
   })
