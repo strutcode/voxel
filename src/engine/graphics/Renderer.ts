@@ -3,6 +3,7 @@ import Chunk from '../voxel/Chunk'
 import Vector from '../math/Vector'
 import Player from '../Player'
 import Game from '../../Game'
+import Physics from '../physics/Physics'
 
 export default class Renderer {
   private static viewPos = new Vector()
@@ -13,15 +14,16 @@ export default class Renderer {
 
   public static render() {
     BabylonImplementation.setViewPosition(Game.player)
+    BabylonImplementation.setAimedVoxel(Physics.getAimedVoxel())
     BabylonImplementation.render()
-  }
-
-  public static setAimedVoxel(target: Vector | null) {
-    BabylonImplementation.setAimedVoxel(target)
   }
 
   public static async addChunk(chunk: Chunk) {
     await BabylonImplementation.renderAddChunk(chunk)
+  }
+
+  public static async updateChunk(chunk: Chunk) {
+    await BabylonImplementation.renderUpdateChunk(chunk)
   }
 
   public static async remChunk(chunk: Chunk) {

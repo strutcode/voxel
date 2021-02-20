@@ -3,6 +3,7 @@ import { manhattanDistance3d } from './math/Geometry'
 import Physics from './physics/Physics'
 import Renderer from './graphics/Renderer'
 import Vector from './math/Vector'
+import Block from './voxel/Block'
 
 function signed10bit(n) {
   return (n + 511) & 1023
@@ -43,6 +44,32 @@ export default class World {
         this.unloadChunk(chunk.x, chunk.y, chunk.z)
       }
     })
+  }
+
+  public removeBlock(x: number, y: number, z: number) {
+    const cx = Math.floor(x / Chunk.size)
+    const cy = Math.floor(y / Chunk.size)
+    const cz = Math.floor(z / Chunk.size)
+    const chunk = this.chunks.get(digitKey(cx, cy, cz))
+
+    if (chunk) {
+      chunk.set(x % Chunk.size, y % Chunk.size, z % Chunk.size, {
+        type: 0,
+      })
+      this.refreshChunk(cx, cy, cz)
+    }
+  }
+
+  public placeBlock(x: number, y: number, z: number, info: Block) {
+    const cx = Math.floor(x / Chunk.size)
+    const cy = Math.floor(y / Chunk.size)
+    const cz = Math.floor(z / Chunk.size)
+    const chunk = this.chunks.get(digitKey(cx, cy, cz))
+
+    if (chunk) {
+      chunk.set(x % Chunk.size, y % Chunk.size, z % Chunk.size, info)
+      this.refreshChunk(cx, cy, cz)
+    }
   }
 
   private checkChunk(x: number, y: number, z: number) {
@@ -102,6 +129,15 @@ export default class World {
     this.chunks.set(digitKey(x, y, z), null)
 
     this.chunkWorker.postMessage({ x, y, z })
+  }
+
+  private refreshChunk(x: number, y: number, z: number) {
+    const chunk = this.chunks.get(digitKey(x, y, z))
+
+    if (chunk) {
+      Renderer.updateChunk(chunk)
+      Physics.updateChunk(chunk)
+    }
   }
 
   private unloadChunk(x: number, y: number, z: number) {

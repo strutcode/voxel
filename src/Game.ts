@@ -48,7 +48,12 @@ export default class Game {
       Input.startFrame()
       this.player.update()
       Physics.syncPlayer(this.player)
-      Physics.updateAimedVoxel()
+
+      const targetBlock = Physics.getAimedVoxel()
+      if (Input.getButton('Break') && targetBlock) {
+        this.world.removeBlock(targetBlock.x, targetBlock.y, targetBlock.z)
+      }
+
       this.world.updateView(Renderer.getViewPosition(), new Vector())
       Physics.update()
       Renderer.render()

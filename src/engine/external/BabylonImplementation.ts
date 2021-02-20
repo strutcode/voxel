@@ -32,7 +32,6 @@ import AmmoModule from 'ammo.js'
 import ObjectInfo from '../graphics/ObjectInfo'
 import Player from '../Player'
 import Mobile from '../Mobile'
-import Ammo from 'ammojs-typed'
 import Game from '../../Game'
 import Vector from '../math/Vector'
 
@@ -276,6 +275,10 @@ export default class BabylonImplementation {
     this.meshWorker.postMessage(chunk.serialize())
   }
 
+  public static async renderUpdateChunk(chunk: Chunk) {
+    this.meshWorker.postMessage(chunk.serialize())
+  }
+
   public static async renderRemChunk(chunk: Chunk) {
     this.deleteQueue.add(`${chunk.x},${chunk.y},${chunk.z}`)
   }
@@ -307,6 +310,11 @@ export default class BabylonImplementation {
 
       mesh.getChildMeshes = original
     }
+  }
+
+  public static async physicsUpdateChunk(chunk: Chunk) {
+    this.physicsRemChunk(chunk)
+    this.physicsAddChunk(chunk)
   }
 
   public static async physicsRemChunk(chunk: Chunk) {
@@ -445,11 +453,18 @@ export default class BabylonImplementation {
 
       const key = `${x},${y},${z}`
 
-      const mesh = new Mesh(key, this.scene)
+      let mesh: Mesh = this.scene.getMeshByName(key)
+
+      if (!mesh) {
+        mesh = new Mesh(key, this.scene)
+      }
+
       const vertData = new VertexData()
       vertData.positions = attributes.positions
       vertData.indices = attributes.indices
       vertData.uvs = attributes.uvs
+      vertData.applyToMesh(mesh)
+
       mesh.setVerticesBuffer(
         new Buffer(this.engine, attributes.texInd, false, 1).createVertexBuffer(
           'texInd',
@@ -464,7 +479,6 @@ export default class BabylonImplementation {
           1,
         ),
       )
-      vertData.applyToMesh(mesh)
 
       mesh.material = this.blockMaterial
 

@@ -10,7 +10,7 @@ export default class Mobile {
   public velocity = new Vector()
   public yaw = 0
   public pitch = 0
-  public speed = 8
+  public speed = 4
 
   public moveForward(amount: number) {
     const speed = this.speed * Game.deltaTime
