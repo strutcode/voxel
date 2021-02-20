@@ -7,10 +7,11 @@ import Input from './engine/ui/Input'
 import Hud from './engine/ui/Hud'
 import Database from './engine/Database'
 
-import Test from './Test.vue'
+import Test from './ui/Test.vue'
+import Inventory from './ui/Inventory.vue'
 
-import blockInfo from './blockInfo'
-import itemInfo from './itemInfo'
+import blockInfo from './data/blockInfo'
+import itemInfo from './data/itemInfo'
 
 enum GameState {
   Play,
@@ -45,6 +46,7 @@ export default class Game {
     Physics.addPlayer(this.player)
     Renderer.addPlayer(this.player)
     Hud.addComponent(Test)
+    Hud.addComponent(Inventory)
 
     requestAnimationFrame(this.boundUpdate)
   }

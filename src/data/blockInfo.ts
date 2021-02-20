@@ -1,4 +1,4 @@
-import { BlockInfo } from './engine/Database'
+import { BlockInfo } from '../engine/Database'
 
 export default {
   0: {
