@@ -134,22 +134,11 @@ export default class BabylonImplementation {
     this.aimedVoxelIndicator.alwaysSelectAsActiveMesh = true
     this.aimedVoxelIndicator.isPickable = false
     const mat = new StandardMaterial('', scene)
-    mat.wireframe = true
     mat.disableLighting = true
     mat.emissiveColor = Color3.White()
+    mat.alphaMode = Engine.ALPHA_ADD
+    mat.alpha = 0.1
     this.aimedVoxelIndicator.material = mat
-    // const glowLayer = new GlowLayer('', scene)
-    // glowLayer.addIncludedOnlyMesh(this.aimedVoxelIndicator)
-    // glowLayer.customEmissiveColorSelector = (
-    //   mesh,
-    //   subMesh,
-    //   material,
-    //   result,
-    // ) => {
-    //   if (mesh === this.aimedVoxelIndicator) {
-    //     result.set(1, 1, 1, 1)
-    //   }
-    // }
 
     // And made it move
     Ammo = await AmmoModule()
