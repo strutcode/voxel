@@ -309,7 +309,7 @@ export default class BabylonImplementation {
         { mass: 0 },
         this.scene,
       )
-      mesh.showBoundingBox = true
+      // mesh.showBoundingBox = true
 
       mesh.getChildMeshes = original
     }
@@ -327,7 +327,7 @@ export default class BabylonImplementation {
     if (mesh && mesh.physicsImpostor) {
       mesh.physicsImpostor.dispose()
       mesh.physicsImpostor = null
-      mesh.showBoundingBox = false
+      // mesh.showBoundingBox = false
     }
   }
 
@@ -396,8 +396,8 @@ export default class BabylonImplementation {
   public static physicsGetAimedVoxel(): Vector | null {
     const camera = this.scene.activeCamera as TargetCamera
     const direction = camera.target
-      .subtractInPlace(camera.position)
-      .multiplyInPlace(new Vector3(10, 10, 10))
+      .subtract(camera.position)
+      .multiplyByFloats(10, 10, 10)
 
     const from = new Ammo.btVector3(
       camera.position.x,
