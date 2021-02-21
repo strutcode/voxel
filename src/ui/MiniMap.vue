@@ -44,4 +44,5 @@ export default Vue.extend({
     right: 0
     width: 30vw
     image-rendering: pixelated
+    opacity: 0.5
 </style>
