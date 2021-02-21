@@ -2,11 +2,12 @@ export default class WorldMap {
   private data: Uint16Array
   private _canvas: HTMLCanvasElement = document.createElement('canvas')
   private rgba: Uint8ClampedArray
+  private refineH = false
 
   public constructor(
     public width: number,
     public height: number,
-    private subdivisions = 3,
+    private subdivisions = 4,
   ) {
     this.data = new Uint16Array(width * height)
     this.rgba = new Uint8ClampedArray(width * height * 4)
@@ -41,13 +42,13 @@ export default class WorldMap {
 
     let x, y, ia, ib
 
-    // Fill vertical gaps
+    // Fill gaps on primary axis
     for (x = 0; x < this.width; x++) {
       for (y = 0; y < this.height; y++) {
         ia = Math.floor(y * fy) * oldWidth + Math.floor(x * fx)
         ib = y * this.width + x
 
-        if (x % 2 === 0 || y % 2 === 0) {
+        if ((this.refineH && x % 2 === 0) || (!this.refineH && y % 2 === 0)) {
           this.data[ib] = oldData[ia]
           continue
         }
@@ -55,23 +56,38 @@ export default class WorldMap {
         if (Math.random() < 0.5) {
           this.data[ib] = oldData[ia]
         } else {
-          this.data[ib] = oldData[ia + oldWidth]
+          if (this.refineH) {
+            this.data[ib] = oldData[ia + 1]
+          } else {
+            this.data[ib] = oldData[ia + oldWidth]
+          }
         }
       }
     }
 
-    // Fill horizontal gaps
+    // Fill gaps on secondary axis
     for (y = 0; y < this.height; y++) {
       for (x = 1; x < this.width; x += 2) {
         ia = y * this.width + x
 
-        if (Math.random() < 0.5) {
-          this.data[ia] = this.data[ia - 1]
+        if (this.refineH) {
+          if (Math.random() < 0.5) {
+            this.data[ia] = this.data[ia - 1]
+          } else {
+            this.data[ia] = this.data[ia + 1]
+          }
         } else {
-          this.data[ia] = this.data[ia + 1]
+          if (Math.random() < 0.5) {
+            this.data[ia] = this.data[ia - this.width]
+          } else {
+            this.data[ia] = this.data[ia + this.width]
+          }
         }
       }
     }
+
+    // Flip axis
+    this.refineH = !this.refineH
   }
 
   private updateMinimap() {
