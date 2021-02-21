@@ -2,7 +2,7 @@ export default class WorldMap {
   private data: Uint16Array
   private _canvas: HTMLCanvasElement = document.createElement('canvas')
   private rgba: Uint8ClampedArray
-  private refineH = false
+  private refineH = true
 
   public constructor(
     public width: number,
@@ -11,20 +11,22 @@ export default class WorldMap {
   ) {
     this.data = new Uint16Array(width * height)
     this.rgba = new Uint8ClampedArray(width * height * 4)
-
-    this.initialize()
   }
 
-  private initialize() {
-    for (let i = 0; i < this.data.length; i++) {
-      this.data[i] = Math.random() < 0.5 ? 3 : 2
-    }
+  public generate() {
+    this.initialize()
 
     for (let n = 0; n < this.subdivisions; n++) {
       this.refine()
     }
 
     this.updateMinimap()
+  }
+
+  private initialize() {
+    for (let i = 0; i < this.data.length; i++) {
+      this.data[i] = Math.random() < 0.5 ? 3 : 2
+    }
   }
 
   private refine() {

@@ -25,6 +25,7 @@ export default class World {
 
   public constructor() {
     this.setupWorker()
+    this.map.generate()
   }
 
   public updateView(position: Vector, direction: Vector) {
