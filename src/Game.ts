@@ -38,7 +38,6 @@ export default class Game {
     await Renderer.init()
     await Physics.init()
     await Input.init()
-    await Hud.init()
     await Database.init(blockInfo, itemInfo)
 
     this.world = new World()
@@ -50,6 +49,9 @@ export default class Game {
 
     this.player = new Player()
     this.player.position.y = 42
+
+    await Hud.init()
+
     Physics.addPlayer(this.player)
     Renderer.addPlayer(this.player)
     Hud.addComponent(Debug)

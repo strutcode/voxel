@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import Game from '../../Game'
-import Player from '../Player'
-import World from '../World'
 
 type Component = ReturnType<typeof Vue.extend>
+
+Vue.config.productionTip = false
 
 export default class Hud {
   private static root: HTMLDivElement
@@ -16,6 +16,9 @@ export default class Hud {
   public static async init() {
     this.root = document.createElement('div')
     document.body.appendChild(this.root)
+
+    Hud.gameData.player = Game.player
+    Hud.gameData.map = Game.world.map
 
     Vue.mixin({
       data() {

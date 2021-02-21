@@ -1,5 +1,8 @@
 <template>
-  <canvas ref="map"></canvas>
+  <div class="minimap">
+    <canvas ref="map"></canvas>
+    <div class="marker" :style="tokenOffset">X</div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -9,6 +12,19 @@ export default Vue.extend({
   mounted() {
     this.update()
   },
+
+  computed: {
+    tokenOffset() {
+      const { player, map } = this.gameData
+      const x = (player.position.x / map.width) * 100
+      const y = 100 - (player.position.z / map.height) * 100
+
+      return {
+        top: `${y < 0 ? 100 + y : y % 100}%`,
+        left: `${x < 0 ? 100 + x : x % 100}%`,
+      }
+    }
+  }
 
   methods: {
     update() {
@@ -38,11 +54,21 @@ export default Vue.extend({
 </script>
 
 <style lang="stylus" scoped>
-  canvas
+  .minimap
     position: absolute
     bottom: 0
     right: 0
     width: 30vw
-    image-rendering: pixelated
-    opacity: 0.5
+
+    canvas
+      width: 100%
+      image-rendering: pixelated
+
+    .marker
+      position: absolute
+      top: 50%
+      left: 50%
+      transform: translate(-50%, -50%)
+      color: white
+      text-shadow: 0 0 5px black, 0 0 3px black, 0 0 2px black
 </style>
