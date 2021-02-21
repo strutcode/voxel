@@ -37,7 +37,6 @@
 
     methods: {
       itemStyle(id: number | undefined) {
-        console.log(id)
         if (id == null) {
           return {
             visibility: 'hidden',
@@ -67,17 +66,18 @@
     top: 50%
     left: 0
     transform: translateY(-50%)
+    border: 4px outset #ddd
 
     .slot
       position: relative
-      width: 50px
-      height: 50px
-      background: #ddd
+      width: 5vh
+      height: 5vh
+      background: #bbb
       border: 4px inset #ddd
 
       .icon
-        width: 50px
-        height: 50px
+        width: 5vh
+        height: 5vh
         background-image: url('../../assets/items.png')
         image-rendering: pixelated
 

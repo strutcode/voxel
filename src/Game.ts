@@ -7,9 +7,10 @@ import Input from './engine/ui/Input'
 import Hud from './engine/ui/Hud'
 import Database from './engine/Database'
 
-import Reticle from './ui/Reticle.vue'
-import Test from './ui/Test.vue'
+import Debug from './ui/Debug.vue'
 import Inventory from './ui/Inventory.vue'
+import Compass from './ui/Compass.vue'
+import Reticle from './ui/Reticle.vue'
 
 import blockInfo from './data/blockInfo'
 import itemInfo from './data/itemInfo'
@@ -46,9 +47,10 @@ export default class Game {
     this.player.position.y = 42
     Physics.addPlayer(this.player)
     Renderer.addPlayer(this.player)
-    Hud.addComponent(Reticle)
-    Hud.addComponent(Test)
+    Hud.addComponent(Debug)
     Hud.addComponent(Inventory)
+    Hud.addComponent(Compass)
+    Hud.addComponent(Reticle)
 
     requestAnimationFrame(this.boundUpdate)
   }

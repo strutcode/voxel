@@ -20,6 +20,7 @@
 <style lang="stylus" scoped>
   .panel
     font-size: 14pt
+    font-family: monospace
     display: inline-block
     padding: 0.5em 1em
     background: #eee
