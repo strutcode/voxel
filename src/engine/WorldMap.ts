@@ -1,4 +1,19 @@
+interface SerializedMapData {
+  width: number
+  height: number
+  data: Uint16Array
+}
+
 export default class WorldMap {
+  public static deserialize(serialized: SerializedMapData) {
+    return new WorldMap(
+      serialized.width,
+      serialized.height,
+      undefined,
+      serialized.data,
+    )
+  }
+
   private data: Uint16Array
   private _canvas: HTMLCanvasElement = document.createElement('canvas')
   private rgba: Uint8ClampedArray
@@ -8,8 +23,13 @@ export default class WorldMap {
     public width: number,
     public height: number,
     private subdivisions = 4,
+    referenceData?: Uint16Array,
   ) {
-    this.data = new Uint16Array(width * height)
+    if (referenceData && referenceData.length === width * height) {
+      this.data = referenceData
+    } else {
+      this.data = new Uint16Array(width * height)
+    }
     this.rgba = new Uint8ClampedArray(width * height * 4)
   }
 
@@ -144,5 +164,13 @@ export default class WorldMap {
 
   public get canvas() {
     return this._canvas
+  }
+
+  public serialize(): SerializedMapData {
+    return {
+      width: this.width,
+      height: this.height,
+      data: this.data,
+    }
   }
 }
