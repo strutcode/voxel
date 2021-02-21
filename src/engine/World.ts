@@ -4,6 +4,7 @@ import Physics from './physics/Physics'
 import Renderer from './graphics/Renderer'
 import Vector from './math/Vector'
 import Block from './voxel/Block'
+import WorldMap from './WorldMap'
 
 function signed10bit(n) {
   return (n + 511) & 1023
@@ -16,6 +17,7 @@ function digitKey(x, y, z) {
 export default class World {
   public static viewDistance = 16
 
+  public map = new WorldMap(32, 16)
   private chunks = new Map<number, Chunk | null>()
   private visited = new Set<number>()
   private viewPos = new Vector()

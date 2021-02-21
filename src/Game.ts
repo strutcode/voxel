@@ -10,6 +10,7 @@ import Database from './engine/Database'
 import Debug from './ui/Debug.vue'
 import Inventory from './ui/Inventory.vue'
 import Compass from './ui/Compass.vue'
+import MiniMap from './ui/MiniMap.vue'
 import Reticle from './ui/Reticle.vue'
 
 import blockInfo from './data/blockInfo'
@@ -53,6 +54,7 @@ export default class Game {
     Hud.addComponent(Debug)
     Hud.addComponent(Inventory)
     Hud.addComponent(Compass)
+    Hud.addComponent(MiniMap)
     Hud.addComponent(Reticle)
 
     requestAnimationFrame(this.updateA)

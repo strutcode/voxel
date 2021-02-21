@@ -81,6 +81,7 @@
           transform: translateX(-50%)
           color: white
           font-size: 3vh
+          font-weight: bold
           text-shadow: 0 0 5px black, 0 0 3px black, 0 0 2px black
 
     .pointer
