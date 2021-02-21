@@ -6,7 +6,7 @@ export default class WorldMap {
   public constructor(
     public width: number,
     public height: number,
-    subdivisions = 7,
+    private subdivisions = 3,
   ) {
     this.data = new Uint16Array(width * height)
     this.rgba = new Uint8ClampedArray(width * height * 4)
@@ -16,15 +16,66 @@ export default class WorldMap {
 
   private initialize() {
     for (let i = 0; i < this.data.length; i++) {
-      this.data[i] = Math.round(Math.random())
+      this.data[i] = Math.random() < 0.5 ? 3 : 2
+    }
+
+    for (let n = 0; n < this.subdivisions; n++) {
+      this.refine()
     }
 
     this.updateMinimap()
   }
 
-  private refine() {}
+  private refine() {
+    const oldData = this.data
+    const oldWidth = this.width
+    const oldHeight = this.height
+
+    // Resize the map, we want every in between row to be new so x + (x - 1)
+    this.width = this.width + (this.width - 1)
+    this.height = this.height + (this.height - 1)
+    this.data = new Uint16Array(this.width * this.height)
+
+    const fx = oldWidth / this.width
+    const fy = oldHeight / this.height
+
+    let x, y, ia, ib
+
+    // Fill vertical gaps
+    for (x = 0; x < this.width; x++) {
+      for (y = 0; y < this.height; y++) {
+        ia = Math.floor(y * fy) * oldWidth + Math.floor(x * fx)
+        ib = y * this.width + x
+
+        if (x % 2 === 0 || y % 2 === 0) {
+          this.data[ib] = oldData[ia]
+          continue
+        }
+
+        if (Math.random() < 0.5) {
+          this.data[ib] = oldData[ia]
+        } else {
+          this.data[ib] = oldData[ia + oldWidth]
+        }
+      }
+    }
+
+    // Fill horizontal gaps
+    for (y = 0; y < this.height; y++) {
+      for (x = 1; x < this.width; x += 2) {
+        ia = y * this.width + x
+
+        if (Math.random() < 0.5) {
+          this.data[ia] = this.data[ia - 1]
+        } else {
+          this.data[ia] = this.data[ia + 1]
+        }
+      }
+    }
+  }
 
   private updateMinimap() {
+    this.rgba = new Uint8ClampedArray(this.width * this.height * 4)
     const canvas = this._canvas
 
     canvas.width = this.width
@@ -35,7 +86,24 @@ export default class WorldMap {
     for (y = 0; y < this.height; y++) {
       for (x = 0; x < this.width; x++) {
         i = (y * this.width + x) * 4
-        r = g = b = this.data[y * this.width + x] ? 255 : 0
+        r = g = b = 0
+
+        switch (this.data[y * this.width + x]) {
+          case 0:
+            break
+          case 1:
+            r = 255
+            break
+          case 2:
+            g = 255
+            break
+          case 3:
+            b = 255
+            break
+          case 4:
+            r = g = b = 255
+            break
+        }
 
         this.rgba[i + 0] = r
         this.rgba[i + 1] = g

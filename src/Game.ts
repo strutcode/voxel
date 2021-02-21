@@ -15,6 +15,7 @@ import Reticle from './ui/Reticle.vue'
 
 import blockInfo from './data/blockInfo'
 import itemInfo from './data/itemInfo'
+import WorldMap from './engine/WorldMap'
 
 enum GameState {
   Play,
