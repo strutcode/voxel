@@ -38,8 +38,6 @@
       dialStyle() {
         const sectionWidth = 800
 
-        console.log(this.gameData.player?.yaw, this.heading)
-
         return {
           transform: `translateX(-${(this.heading + 0.25) *
             (sectionWidth * 4)}px)`,

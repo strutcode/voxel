@@ -27,7 +27,10 @@ export default class Game {
   public static deltaTime = 0
   private static lastFrame = performance.now()
 
-  private static boundUpdate = Game.update.bind(Game)
+  // Chrome???
+  // https://stackoverflow.com/questions/17382321/requestanimationframe-garbage-collection
+  private static updateA = (() => Game.update(Game.updateB)).bind(Game)
+  private static updateB = (() => Game.update(Game.updateA)).bind(Game)
 
   public static async start() {
     await Renderer.init()
@@ -52,10 +55,10 @@ export default class Game {
     Hud.addComponent(Compass)
     Hud.addComponent(Reticle)
 
-    requestAnimationFrame(this.boundUpdate)
+    requestAnimationFrame(this.updateA)
   }
 
-  public static update() {
+  public static update(next: () => void) {
     if (this.state === GameState.Play) {
       const time = performance.now()
       this.deltaTime = (time - this.lastFrame) / 1000
@@ -99,7 +102,7 @@ export default class Game {
       Input.endFrame()
     }
 
-    requestAnimationFrame(this.boundUpdate)
+    requestAnimationFrame(next)
   }
 }
 
