@@ -47,6 +47,7 @@ export default class BabylonImplementation {
   private static deleteQueue = new Set<string>()
   private static objects: Record<string, ObjectInfo> = {}
   private static _init = false
+  private static chunkMesh: Record<string, Mesh> = {}
   private static physicsWorld: Ammo.btSoftRigidDynamicsWorld
   private static playerTransform: Ammo.btTransform
   private static playerController: Ammo.btKinematicCharacterController
@@ -183,10 +184,6 @@ export default class BabylonImplementation {
     // Action!
     this.initMeshWorker()
 
-    engine.runRenderLoop(() => {
-      //   this.render()
-    })
-
     window.addEventListener('resize', () => {
       engine.resize()
     })
@@ -284,10 +281,8 @@ export default class BabylonImplementation {
   public static async renderDelMob(mob: Mobile) {}
 
   public static async physicsAddChunk(chunk: Chunk | Mesh) {
-    const mesh =
-      chunk instanceof Mesh
-        ? chunk
-        : this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
+    const mesh = chunk instanceof Mesh ? chunk : this.getChunkMesh(chunk)
+
     if (mesh && !mesh.physicsImpostor) {
       const original = mesh.getChildMeshes
       mesh.getChildMeshes = () => []
@@ -309,10 +304,8 @@ export default class BabylonImplementation {
   }
 
   public static async physicsRemChunk(chunk: Chunk | Mesh) {
-    const mesh =
-      chunk instanceof Mesh
-        ? chunk
-        : this.scene.getMeshByName(`${chunk.x},${chunk.y},${chunk.z}`)
+    const mesh = chunk instanceof Mesh ? chunk : this.getChunkMesh(chunk)
+
     if (mesh && mesh.physicsImpostor) {
       mesh.physicsImpostor.dispose()
       mesh.physicsImpostor = null
@@ -423,25 +416,20 @@ export default class BabylonImplementation {
   public static async physicsDelMob(mob: Mobile) {}
 
   public static render() {
+    this.engine.beginFrame()
+
     this.blockMaterial.setVector3(
       'viewPosition',
       this.scene.activeCamera.position,
     )
 
     this.deleteQueue.forEach(key => {
-      const mesh = this.scene.getMeshByName(key)
-
-      if (mesh) {
-        mesh.dispose()
-        this.deleteQueue.delete(key)
-      }
-
-      Object.values(this.objects).forEach(objInfo => {
-        objInfo.removeRange(key)
-      })
+      this.deleteChunkMesh(key)
     })
 
     this.scene.render()
+
+    this.engine.endFrame()
   }
 
   private static initMeshWorker() {
@@ -450,10 +438,11 @@ export default class BabylonImplementation {
 
       const key = `${x},${y},${z}`
 
-      let mesh: Mesh = this.scene.getMeshByName(key)
+      let mesh: Mesh = this.getChunkMesh(key)
 
       if (!mesh) {
         mesh = new Mesh(key, this.scene)
+        this.setChunkMesh(key, mesh)
       }
 
       const vertData = new VertexData()
@@ -519,5 +508,31 @@ export default class BabylonImplementation {
         }
       })
     }
+  }
+
+  private static getChunkMesh(chunk: Chunk | string) {
+    if (chunk instanceof Chunk) {
+      return this.chunkMesh[`${chunk.x},${chunk.y},${chunk.z}`]
+    }
+
+    return this.chunkMesh[chunk]
+  }
+
+  private static setChunkMesh(key: string, mesh: Mesh) {
+    this.chunkMesh[key] = mesh
+  }
+
+  private static deleteChunkMesh(key: string) {
+    const mesh = this.getChunkMesh(key)
+
+    if (mesh) {
+      mesh.dispose()
+      this.deleteQueue.delete(key)
+      delete this.chunkMesh[key]
+    }
+
+    Object.values(this.objects).forEach(objInfo => {
+      objInfo.removeRange(key)
+    })
   }
 }

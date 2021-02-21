@@ -10,7 +10,6 @@ export default class Hud {
   private static vue: Component
   private static gameData = {
     player: null,
-    world: null,
   }
 
   public static async init() {
@@ -45,7 +44,7 @@ export default class Hud {
               zIndex: '+1',
             },
           },
-          this.components.map((c) => h(c)),
+          this.components.map(c => h(c)),
         )
       },
     })
@@ -53,7 +52,6 @@ export default class Hud {
 
   public static update() {
     Hud.gameData.player = Game.player
-    Hud.gameData.world = Game.world
   }
 
   public static addComponent(component: Component) {
