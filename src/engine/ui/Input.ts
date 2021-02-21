@@ -37,9 +37,11 @@ export default class Input {
     })
 
     window.addEventListener('pointerdown', ev => {
-      document.body.requestPointerLock()
-
-      this.key[`mouse${ev.button}`] = true
+      if (this.hasPointerLock) {
+        this.key[`mouse${ev.button}`] = true
+      } else {
+        document.body.requestPointerLock()
+      }
     })
     window.addEventListener('pointerup', ev => {
       this.key[`mouse${ev.button}`] = false
