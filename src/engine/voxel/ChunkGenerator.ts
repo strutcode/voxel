@@ -1,5 +1,6 @@
 import noise from 'asm-noise'
 import { lerp } from '../math/Interpolation'
+import WorldMap from '../WorldMap'
 import Chunk from './Chunk'
 
 export default class ChunkGenerator {
@@ -228,6 +229,31 @@ export default class ChunkGenerator {
             break
           }
         }
+      }
+    }
+  }
+
+  public overworldBiome(chunk: Chunk, map: WorldMap) {
+    for (let z = 0; z < Chunk.size; z++) {
+      for (let x = 0; x < Chunk.size; x++) {
+        const biome = map.biomeAt(
+          chunk.x * Chunk.size + x,
+          chunk.z * Chunk.size + z,
+        )
+        const type = (() => {
+          switch (biome) {
+            case 1:
+              return 2
+            case 2:
+              return 1
+            case 3:
+              return 3
+            default:
+              return 0
+          }
+        })()
+
+        chunk.set(x, 0, z, type)
       }
     }
   }

@@ -17,15 +17,15 @@ function digitKey(x, y, z) {
 export default class World {
   public static viewDistance = 16
 
-  public map = new WorldMap(32, 16)
+  public map = new WorldMap(16, 8)
   private chunks = new Map<number, Chunk | null>()
   private visited = new Set<number>()
   private viewPos = new Vector()
   private chunkWorker = new Worker('./voxel/ChunkGenerator.worker.ts')
 
   public constructor() {
+    this.setupMap()
     this.setupWorker()
-    this.map.generate()
   }
 
   public updateView(position: Vector, direction: Vector) {
@@ -132,7 +132,7 @@ export default class World {
   private loadChunk(x: number, y: number, z: number) {
     this.chunks.set(digitKey(x, y, z), null)
 
-    this.chunkWorker.postMessage({ x, y, z })
+    this.chunkWorker.postMessage({ type: 'chunk', x, y, z })
   }
 
   private refreshChunk(x: number, y: number, z: number) {
@@ -153,7 +153,16 @@ export default class World {
     }
   }
 
+  private setupMap() {
+    this.map.generate()
+  }
+
   private setupWorker() {
+    this.chunkWorker.postMessage({
+      type: 'map',
+      map: this.map.serialize(),
+    })
+
     this.chunkWorker.onmessage = (ev: MessageEvent) => {
       const { x, y, z } = ev.data
       const chunk = Chunk.deserialize(ev.data)

@@ -370,7 +370,7 @@ export default class BabylonImplementation {
     player.position.y = pos.y()
     player.position.z = pos.z()
 
-    if (player.jumpIntent && this.playerController.canJump()) {
+    if (player.jumpIntent) {
       this.playerController.jump()
     }
   }

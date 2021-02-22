@@ -15,7 +15,7 @@ export default class WorldMap {
   }
 
   private data: Uint16Array
-  private _canvas: HTMLCanvasElement = document.createElement('canvas')
+  private _canvas: HTMLCanvasElement
   private rgba: Uint8ClampedArray
   private refineH = true
 
@@ -25,6 +25,10 @@ export default class WorldMap {
     private subdivisions = 4,
     referenceData?: Uint16Array,
   ) {
+    if (globalThis.document) {
+      this._canvas = document.createElement('canvas')
+    }
+
     if (referenceData && referenceData.length === width * height) {
       this.data = referenceData
     } else {
@@ -123,7 +127,7 @@ export default class WorldMap {
 
     for (y = 0; y < this.height; y++) {
       for (x = 0; x < this.width; x++) {
-        i = (y * this.width + x) * 4
+        i = ((this.height - y - 1) * this.width + x) * 4
         r = g = b = 0
 
         switch (this.data[y * this.width + x]) {
@@ -164,6 +168,14 @@ export default class WorldMap {
 
   public get canvas() {
     return this._canvas
+  }
+
+  public biomeAt(x: number, y: number) {
+    if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+      return 0
+    }
+
+    return this.data[y * this.width + x]
   }
 
   public serialize(): SerializedMapData {

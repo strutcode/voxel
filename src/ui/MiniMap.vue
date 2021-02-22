@@ -1,8 +1,7 @@
 <template>
   <div class="minimap">
-    <canvas ref="map"></canvas>
     <div class="marker" :style="tokenOffset">X</div>
-  </div>
+    <canvas ref="map"></canvas></div>
 </template>
 
 <script lang="ts">
@@ -58,7 +57,7 @@ export default Vue.extend({
     position: absolute
     bottom: 0
     right: 0
-    width: 30vw
+    width: 50vw
 
     canvas
       width: 100%
