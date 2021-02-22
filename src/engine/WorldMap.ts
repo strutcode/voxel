@@ -96,7 +96,7 @@ export default class WorldMap {
       for (x = 1; x < this.width; x += 2) {
         ia = y * this.width + x
 
-        if (this.refineH) {
+        if (this.refineH || y === 0 || y === this.height - 1) {
           if (Math.random() < 0.5) {
             this.data[ia] = this.data[ia - 1]
           } else {
