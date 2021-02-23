@@ -49,6 +49,11 @@ export default class WorldMap {
 
   private initialize() {
     for (let i = 0; i < this.data.length; i++) {
+      if (i < this.width || i > this.data.length - this.width - 1) {
+        this.data[i] = 4
+        continue
+      }
+
       this.data[i] = Math.random() < 0.5 ? 3 : 2
     }
   }
@@ -147,7 +152,8 @@ export default class WorldMap {
             b = 154
             break
           case 4:
-            r = g = b = 255
+            r = g = b = 200
+            b = 222
             break
         }
 
