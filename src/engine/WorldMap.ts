@@ -137,10 +137,14 @@ export default class WorldMap {
             r = 255
             break
           case 2:
-            g = 255
+            r = 46
+            g = 119
+            b = 41
             break
           case 3:
-            b = 255
+            r = 17
+            g = 49
+            b = 154
             break
           case 4:
             r = g = b = 255

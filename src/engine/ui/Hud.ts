@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Game from '../../Game'
+import Input from './Input'
 
 type Component = ReturnType<typeof Vue.extend>
 
@@ -11,6 +12,7 @@ export default class Hud {
   private static gameData = {
     player: null,
     map: null,
+    showMap: false,
   }
 
   public static async init() {
@@ -57,6 +59,10 @@ export default class Hud {
   public static update() {
     Hud.gameData.player = Game.player
     Hud.gameData.map = Game.world.map
+
+    if (Input.getButton('Map')) {
+      Hud.gameData.showMap = !Hud.gameData.showMap
+    }
   }
 
   public static addComponent(component: Component) {

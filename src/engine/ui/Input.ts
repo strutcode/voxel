@@ -16,6 +16,7 @@ export default class Input {
     Place: 'mouse1',
     Jump: ' ',
     Fly: 'f',
+    Map: 'm',
   }
   private static keyDown: Record<string, boolean> = {}
   private static key: Record<string, boolean> = {}

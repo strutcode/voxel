@@ -1,7 +1,8 @@
 <template>
-  <div class="minimap">
-    <div class="marker" :style="tokenOffset">X</div>
-    <canvas ref="map"></canvas></div>
+  <div class="minimap" v-show="gameData.showMap">
+    <div class="marker" :style="markerStyle">⌫</div>
+    <canvas ref="map"></canvas>
+  </div>
 </template>
 
 <script lang="ts">
@@ -13,7 +14,7 @@ export default Vue.extend({
   },
 
   computed: {
-    tokenOffset() {
+    markerStyle() {
       const { player, map } = this.gameData
       const x = (player.position.x / map.width) * 100
       const y = 100 - (player.position.z / map.height) * 100
@@ -21,9 +22,10 @@ export default Vue.extend({
       return {
         top: `${y < 0 ? 100 + y : y % 100}%`,
         left: `${x < 0 ? 100 + x : x % 100}%`,
+        transform: `rotate(${this.gameData.player.yaw + Math.PI / 2}rad)`
       }
-    }
-  }
+    },
+  },
 
   methods: {
     update() {
@@ -42,7 +44,7 @@ export default Vue.extend({
         ctxB.putImageData(ctxA.getImageData(0, 0, source.width, source.height), 0, 0)
       }
     }
-  }
+  },
 
   watch: {
     'gameData.map'() {
@@ -57,11 +59,14 @@ export default Vue.extend({
     position: absolute
     bottom: 0
     right: 0
-    width: 50vw
+    width: 45vw
+    border: 8px ridge #ddd
+    font-size: 0
 
     canvas
       width: 100%
       image-rendering: pixelated
+      opacity: 0.9
 
     .marker
       position: absolute
@@ -69,5 +74,8 @@ export default Vue.extend({
       left: 50%
       transform: translate(-50%, -50%)
       color: white
+      font: 16px sans-serif
       text-shadow: 0 0 5px black, 0 0 3px black, 0 0 2px black
+      z-index: +1
+      transform-origin: 60% 60%
 </style>

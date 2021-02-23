@@ -1,5 +1,5 @@
 <template>
-  <div class="panel">
+  <div class="panel" v-show="false">
     <div>X: {{ loc.x.toFixed(2) }}</div>
     <div>Y: {{ loc.y.toFixed(2) }}</div>
     <div>Z: {{ loc.z.toFixed(2) }}</div>
