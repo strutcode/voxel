@@ -48,7 +48,9 @@ export default class Game {
     }
 
     this.player = new Player()
+    this.player.position.x = this.world.width / 2
     this.player.position.y = 42
+    this.player.position.z = this.world.height / 2
 
     await Hud.init()
 

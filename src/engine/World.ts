@@ -1,9 +1,8 @@
 import Chunk from './voxel/Chunk'
-import { manhattanDistance3d } from './math/Geometry'
+import { manhattanDistance2d } from './math/Geometry'
 import Physics from './physics/Physics'
 import Renderer from './graphics/Renderer'
 import Vector from './math/Vector'
-import Block from './voxel/Block'
 import WorldMap from './WorldMap'
 
 function signed10bit(n) {
@@ -14,10 +13,14 @@ function digitKey(x, y, z) {
   return (signed10bit(x) << 20) + (signed10bit(y) << 10) + signed10bit(z)
 }
 
+function wrap(n, max) {
+  return (n + max) % max
+}
+
 export default class World {
   public static viewDistance = 16
 
-  public map = new WorldMap(16, 8)
+  public map = new WorldMap(16, 8, 7)
   private chunks = new Map<number, Chunk | null>()
   private visited = new Set<number>()
   private viewPos = new Vector()
@@ -26,6 +29,14 @@ export default class World {
   public constructor() {
     this.setupMap()
     this.setupWorker()
+  }
+
+  public get width() {
+    return this.map.width
+  }
+
+  public get height() {
+    return this.map.height
   }
 
   public updateView(position: Vector, direction: Vector) {
@@ -39,8 +50,12 @@ export default class World {
     this.chunks.forEach(chunk => {
       if (!chunk) return
 
-      const distance =
-        Math.abs(chunk.x - this.viewPos.x) + Math.abs(chunk.z - this.viewPos.z)
+      const distance = manhattanDistance2d(
+        chunk.x,
+        chunk.z,
+        this.viewPos.x,
+        this.viewPos.z,
+      )
 
       if (distance > World.viewDistance) {
         this.unloadChunk(chunk.x, chunk.y, chunk.z)
@@ -48,7 +63,10 @@ export default class World {
     })
   }
 
-  public getBlock(x: number, y: number, z: number): Block | null {
+  public getBlock(x: number, y: number, z: number): number | null {
+    x = wrap(x, this.width)
+    z = wrap(z, this.height)
+
     const cx = Math.floor(x / Chunk.size)
     const cy = Math.floor(y / Chunk.size)
     const cz = Math.floor(z / Chunk.size)
@@ -65,7 +83,10 @@ export default class World {
     return null
   }
 
-  public setBlock(x: number, y: number, z: number, block: Block) {
+  public setBlock(x: number, y: number, z: number, block: number) {
+    x = wrap(x, this.width)
+    z = wrap(z, this.height)
+
     const cx = Math.floor(x / Chunk.size)
     const cy = Math.floor(y / Chunk.size)
     const cz = Math.floor(z / Chunk.size)
@@ -85,14 +106,7 @@ export default class World {
   private checkChunk(x: number, y: number, z: number) {
     const key = digitKey(x, y, z)
     this.visited.add(key)
-    const distance = manhattanDistance3d(
-      this.viewPos.x,
-      this.viewPos.y,
-      this.viewPos.z,
-      x,
-      y,
-      z,
-    )
+    const distance = manhattanDistance2d(this.viewPos.x, this.viewPos.z, x, z)
 
     if (this.isLoaded(x, y, z)) {
       if (distance > World.viewDistance) {

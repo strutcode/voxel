@@ -171,9 +171,8 @@ export default class WorldMap {
   }
 
   public biomeAt(x: number, y: number) {
-    if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
-      return 0
-    }
+    x = (x + this.width) % this.width
+    y = (y + this.height) % this.height
 
     return this.data[y * this.width + x]
   }
