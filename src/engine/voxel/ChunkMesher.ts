@@ -56,6 +56,9 @@ export default class ChunkMesher {
                 case 3:
                   texInd.push(4, 4, 4, 4)
                   break
+                case 4:
+                  texInd.push(5, 5, 5, 5)
+                  break
               }
 
               v += 4
@@ -76,6 +79,9 @@ export default class ChunkMesher {
                   break
                 case 3:
                   texInd.push(4, 4, 4, 4)
+                  break
+                case 4:
+                  texInd.push(5, 5, 5, 5)
                   break
               }
 
@@ -111,6 +117,9 @@ export default class ChunkMesher {
                 case 3:
                   texInd.push(4, 4, 4, 4)
                   break
+                case 4:
+                  texInd.push(5, 5, 5, 5)
+                  break
               }
 
               v += 4
@@ -131,6 +140,9 @@ export default class ChunkMesher {
                   break
                 case 3:
                   texInd.push(4, 4, 4, 4)
+                  break
+                case 4:
+                  texInd.push(5, 5, 5, 5)
                   break
               }
 
@@ -166,6 +178,9 @@ export default class ChunkMesher {
                 case 3:
                   texInd.push(4, 4, 4, 4)
                   break
+                case 4:
+                  texInd.push(5, 5, 5, 5)
+                  break
               }
 
               v += 4
@@ -186,6 +201,9 @@ export default class ChunkMesher {
                   break
                 case 3:
                   texInd.push(4, 4, 4, 4)
+                  break
+                case 4:
+                  texInd.push(5, 5, 5, 5)
                   break
               }
 

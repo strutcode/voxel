@@ -247,7 +247,7 @@ export default class ChunkGenerator {
             case 2:
               return 1
             case 3:
-              return 3
+              return 4
             default:
               return 0
           }
