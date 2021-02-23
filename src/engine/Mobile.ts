@@ -12,10 +12,19 @@ export default class Mobile {
   public pitch = 0
   public speed = 4
 
+  public fly = false
+
   public moveForward(amount: number) {
     const speed = this.speed * Game.deltaTime
-    this.velocity.x += Math.sin(this.yaw) * amount * speed
-    this.velocity.z += Math.cos(this.yaw) * amount * speed
+    const pitchFactor = this.fly ? Math.cos(this.pitch) : 1
+
+    this.velocity.x += Math.sin(this.yaw) * pitchFactor * amount * speed
+    this.velocity.z += Math.cos(this.yaw) * pitchFactor * amount * speed
+
+    if (this.fly) {
+      this.velocity.y +=
+        Math.sign(-this.pitch) * (1 - pitchFactor) * amount * speed
+    }
   }
 
   public moveRight(amount: number) {

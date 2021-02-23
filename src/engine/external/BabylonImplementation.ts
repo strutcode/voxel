@@ -34,6 +34,7 @@ import Player from '../Player'
 import Mobile from '../Mobile'
 import Game from '../../Game'
 import Vector from '../math/Vector'
+import Ammo from 'ammojs-typed'
 
 let Ammo: typeof AmmoModule
 let rayCastResult: Ammo.ClosestRayResultCallback
@@ -344,19 +345,22 @@ export default class BabylonImplementation {
     this.physicsWorld.addCollisionObject(ghost, 32, 1 | 2 | 4)
     this.physicsWorld.addAction(this.playerController)
 
-    setTimeout(() => {
-      this.scene.onBeforePhysicsObservable.add(() => {
-        this.playerController.playerStep(
-          this.physicsWorld,
-          Game.deltaTime / 100000,
-        )
-      })
-    }, 2000)
+    // setTimeout(() => {
+    //   this.scene.onBeforePhysicsObservable.add(() => {
+    //     if (!player.fly) {
+    //       this.playerController.playerStep(
+    //         this.physicsWorld,
+    //         Game.deltaTime / 100000,
+    //       )
+    //     }
+    //   })
+    // }, 2000)
   }
 
   public static physicsSyncPlayer(player: Player) {
     if (!this.playerController) return
 
+    this.playerController.setGravity(player.fly ? 0 : 9.87)
     this.playerController.setWalkDirection(
       new Ammo.btVector3(
         player.velocity.x,

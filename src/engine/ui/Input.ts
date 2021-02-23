@@ -15,6 +15,7 @@ export default class Input {
     Break: 'mouse0',
     Place: 'mouse1',
     Jump: ' ',
+    Fly: 'f',
   }
   private static keyDown: Record<string, boolean> = {}
   private static key: Record<string, boolean> = {}

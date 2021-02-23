@@ -19,7 +19,12 @@ export default class Player extends Mobile {
     if (Input.getButton('AutoMove')) {
       this.autoMove = !this.autoMove
     }
+
     this.jumpIntent = Input.getButtonDown('Jump')
+
+    if (Input.getButton('Fly')) {
+      this.fly = !this.fly
+    }
   }
 
   public addItem(id: number, amount = 1) {
