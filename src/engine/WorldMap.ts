@@ -1,3 +1,5 @@
+import { wrap } from './math/Geometry'
+
 interface SerializedMapData {
   width: number
   height: number
@@ -15,9 +17,7 @@ export default class WorldMap {
   }
 
   private data: Uint16Array
-  private _canvas: HTMLCanvasElement
-  private rgba: Uint8ClampedArray
-  private refineH = true
+  private refineH = false
 
   public constructor(
     public width: number,
@@ -25,16 +25,19 @@ export default class WorldMap {
     private subdivisions = 4,
     referenceData?: Uint16Array,
   ) {
-    if (globalThis.document) {
-      this._canvas = document.createElement('canvas')
-    }
-
     if (referenceData && referenceData.length === width * height) {
       this.data = referenceData
     } else {
       this.data = new Uint16Array(width * height)
     }
-    this.rgba = new Uint8ClampedArray(width * height * 4)
+  }
+
+  public get(x: number, y: number) {
+    return this.data[wrap(y, this.height) * this.width + wrap(x, this.width)]
+  }
+
+  public set(x: number, y: number, val: number) {
+    this.data[wrap(y, this.height) * this.width + wrap(x, this.width)] = val
   }
 
   public generate() {
@@ -43,8 +46,6 @@ export default class WorldMap {
     for (let n = 0; n < this.subdivisions; n++) {
       this.refine()
     }
-
-    this.updateMinimap()
   }
 
   private initialize() {
@@ -63,121 +64,65 @@ export default class WorldMap {
     const oldWidth = this.width
     const oldHeight = this.height
 
-    // Resize the map, we want every in between row to be new so x + (x - 1)
-    this.width = this.width + (this.width - 1)
-    this.height = this.height + (this.height - 1)
+    // Resize the map; we'll double the number to create empty space between rows and cols
+    this.width *= 2
+    this.height *= 2
     this.data = new Uint16Array(this.width * this.height)
 
-    const fx = oldWidth / this.width
-    const fy = oldHeight / this.height
-
-    let x, y, ia, ib
+    let x, y, ia, ib, ex, ey
 
     // Fill gaps on primary axis
     for (x = 0; x < this.width; x++) {
       for (y = 0; y < this.height; y++) {
-        ia = Math.floor(y * fy) * oldWidth + Math.floor(x * fx)
+        ia = Math.floor(y / 2) * oldWidth + Math.floor(x / 2)
         ib = y * this.width + x
 
-        if ((this.refineH && x % 2 === 0) || (!this.refineH && y % 2 === 0)) {
+        ex = x % 2 === 0
+        ey = y % 2 === 0
+
+        if (ex && ey) {
           this.data[ib] = oldData[ia]
           continue
         }
 
-        if (Math.random() < 0.5) {
+        if (this.refineH && ey && !ex) {
+          ia =
+            Math.floor(y / 2) * oldWidth +
+            Math.floor(wrap(x / 2 + Math.round(Math.random()), oldWidth))
           this.data[ib] = oldData[ia]
-        } else {
-          if (this.refineH) {
-            this.data[ib] = oldData[ia + 1]
-          } else {
-            this.data[ib] = oldData[ia + oldWidth]
-          }
+        }
+
+        if (!this.refineH && ex && !ey) {
+          ia =
+            Math.floor(wrap(y / 2 + Math.round(Math.random()), oldHeight)) *
+              oldWidth +
+            Math.floor(x / 2)
+          this.data[ib] = oldData[ia]
         }
       }
     }
 
     // Fill gaps on secondary axis
-    for (y = 0; y < this.height; y++) {
-      for (x = 1; x < this.width; x += 2) {
-        ia = y * this.width + x
+    if (this.refineH) {
+      for (y = 1; y < this.height; y += 2) {
+        for (x = 0; x < this.width; x++) {
+          ia = y * this.width + x
 
-        if (this.refineH || y === 0 || y === this.height - 1) {
-          if (Math.random() < 0.5) {
-            this.data[ia] = this.data[ia - 1]
-          } else {
-            this.data[ia] = this.data[ia + 1]
-          }
-        } else {
-          if (Math.random() < 0.5) {
-            this.data[ia] = this.data[ia - this.width]
-          } else {
-            this.data[ia] = this.data[ia + this.width]
-          }
+          this.data[ia] = this.get(x, y + Math.sign(Math.random() - 0.5))
+        }
+      }
+    } else {
+      for (y = 0; y < this.height; y++) {
+        for (x = 1; x < this.width; x += 2) {
+          ia = y * this.width + x
+
+          this.data[ia] = this.get(x + Math.sign(Math.random() - 0.5), y)
         }
       }
     }
 
     // Flip axis
     this.refineH = !this.refineH
-  }
-
-  private updateMinimap() {
-    this.rgba = new Uint8ClampedArray(this.width * this.height * 4)
-    const canvas = this._canvas
-
-    canvas.width = this.width
-    canvas.height = this.height
-
-    let x, y, i, r, g, b
-
-    for (y = 0; y < this.height; y++) {
-      for (x = 0; x < this.width; x++) {
-        i = ((this.height - y - 1) * this.width + x) * 4
-        r = g = b = 0
-
-        switch (this.data[y * this.width + x]) {
-          case 0:
-            break
-          case 1:
-            r = 255
-            break
-          case 2:
-            r = 46
-            g = 119
-            b = 41
-            break
-          case 3:
-            r = 17
-            g = 49
-            b = 154
-            break
-          case 4:
-            r = g = b = 200
-            b = 222
-            break
-        }
-
-        this.rgba[i + 0] = r
-        this.rgba[i + 1] = g
-        this.rgba[i + 2] = b
-        this.rgba[i + 3] = 255
-      }
-    }
-
-    const ctx = canvas.getContext('2d')
-
-    if (ctx) {
-      const img = new ImageData(this.rgba, this.width, this.height)
-      ctx.putImageData(img, 0, 0)
-    }
-  }
-
-  public get asTexture() {
-    return this.rgba
-  }
-
-  public get canvas() {
-    return this._canvas
   }
 
   public biomeAt(x: number, y: number) {

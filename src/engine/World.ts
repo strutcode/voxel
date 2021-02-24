@@ -1,26 +1,15 @@
 import Chunk from './voxel/Chunk'
-import { manhattanDistance2d } from './math/Geometry'
+import { manhattanDistance2d, wrap } from './math/Geometry'
 import Physics from './physics/Physics'
 import Renderer from './graphics/Renderer'
 import Vector from './math/Vector'
 import WorldMap from './WorldMap'
-
-function signed10bit(n) {
-  return (n + 511) & 1023
-}
-
-function digitKey(x, y, z) {
-  return (signed10bit(x) << 20) + (signed10bit(y) << 10) + signed10bit(z)
-}
-
-function wrap(n, max) {
-  return (n + max) % max
-}
+import { digitKey } from './math/Bitwise'
 
 export default class World {
   public static viewDistance = 16
 
-  public map = new WorldMap(16, 8, 7)
+  public map = new WorldMap(24, 10, 7)
   private chunks = new Map<number, Chunk | null>()
   private visited = new Set<number>()
   private viewPos = new Vector()

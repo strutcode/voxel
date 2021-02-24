@@ -12,7 +12,7 @@ export default class Hud {
   private static gameData = {
     player: null,
     map: null,
-    showMap: false,
+    showMap: true,
   }
 
   public static async init() {
