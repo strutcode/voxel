@@ -234,12 +234,14 @@ export default class ChunkGenerator {
   }
 
   public overworldBiome(chunk: Chunk, map: WorldMap) {
-    for (let z = 0; z < Chunk.size; z++) {
-      for (let x = 0; x < Chunk.size; x++) {
-        const biome = map.biomeAt(
-          chunk.x * Chunk.size + x,
-          chunk.z * Chunk.size + z,
-        )
+    let x, y, z, xx, zz
+
+    for (z = 0; z < Chunk.size; z++) {
+      for (x = 0; x < Chunk.size; x++) {
+        xx = chunk.x * Chunk.size + x
+        zz = chunk.z * Chunk.size + z
+
+        const biome = map.biomeAt(xx, zz)
         const type = (() => {
           switch (biome) {
             case 1:
@@ -255,7 +257,9 @@ export default class ChunkGenerator {
           }
         })()
 
-        chunk.set(x, 0, z, type)
+        for (y = 0; y < map.depthAt(xx, zz); y++) {
+          chunk.set(x, y, z, type)
+        }
       }
     }
   }
