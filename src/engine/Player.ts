@@ -10,6 +10,7 @@ export default class Player extends Mobile {
   public update() {
     this.velocity.set(0, 0, 0)
     this.speed = Input.getButtonDown('Run') ? 8 : 4
+    this.speed = Input.getButtonDown('Warp') ? 20 : this.speed
 
     this.moveRight(Input.getAxis('MoveH'))
     this.moveForward(this.autoMove ? 1 : Input.getAxis('MoveV'))

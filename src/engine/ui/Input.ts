@@ -11,6 +11,7 @@ export default class Input {
     Left: 'a',
     Right: 'd',
     Run: 'shift',
+    Warp: 'q',
     AutoMove: 'numlock',
     Break: 'mouse0',
     Place: 'mouse1',
