@@ -36,7 +36,8 @@
         return {
           top: `${y < 0 ? 100 + y : y % 100}%`,
           left: `${x < 0 ? 100 + x : x % 100}%`,
-          transform: `rotate(${this.gameData.player.yaw + Math.PI / 2}rad)`,
+          transform: `translate(-50%, -50%) rotate(${this.gameData.player.yaw +
+            Math.PI / 2}rad)`,
         }
       },
     },
@@ -131,14 +132,22 @@
       image-rendering: pixelated
       opacity: 0.9
 
-    .marker
+    .dot
       position: absolute
       top: 50%
       left: 50%
       transform: translate(-50%, -50%)
+      background: red
+      width: 3px
+      height: 3px
+      z-index: +10
+
+    .marker
+      position: absolute
+      top: 50%
+      left: 50%
       color: white
-      font: 16px sans-serif
+      font: 17px sans-serif
       text-shadow: 0 0 5px black, 0 0 3px black, 0 0 2px black
       z-index: +1
-      transform-origin: 60% 60%
 </style>
