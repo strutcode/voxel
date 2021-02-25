@@ -1,3 +1,4 @@
+import Database from '../Database'
 import Chunk from './Chunk'
 
 interface ChunkMesh {
@@ -14,6 +15,7 @@ export default class ChunkMesher {
     let x,
       y,
       z,
+      block,
       v = 0
 
     const positions: number[] = []
@@ -26,6 +28,10 @@ export default class ChunkMesher {
       for (z = 0; z < Chunk.size; z++) {
         for (x = 0; x < Chunk.size; x++) {
           if (chunk.isOpaque(x, y, z)) {
+            block = Database.blockInfo(chunk.get(x, y, z))
+
+            if (!block?.textureIndex) continue
+
             // +X
             if (x == Chunk.size - 1 || !chunk.isOpaque(x + 1, y, z)) {
               positions.push(
@@ -46,19 +52,20 @@ export default class ChunkMesher {
               uvs.push(0, 1, 1, 1, 1, 0, 0, 0)
               cols.push(200, 200, 200, 200)
 
-              switch (chunk.type(x, y, z)) {
-                case 1:
-                  texInd.push(1, 1, 1, 1)
-                  break
-                case 2:
-                  texInd.push(3, 3, 3, 3)
-                  break
-                case 3:
-                  texInd.push(4, 4, 4, 4)
-                  break
-                case 4:
-                  texInd.push(5, 5, 5, 5)
-                  break
+              if (typeof block.textureIndex === 'number') {
+                texInd.push(
+                  block.textureIndex,
+                  block.textureIndex,
+                  block.textureIndex,
+                  block.textureIndex,
+                )
+              } else {
+                texInd.push(
+                  block.textureIndex.posX,
+                  block.textureIndex.posX,
+                  block.textureIndex.posX,
+                  block.textureIndex.posX,
+                )
               }
 
               v += 4
@@ -70,19 +77,20 @@ export default class ChunkMesher {
               uvs.push(0, 1, 1, 1, 1, 0, 0, 0)
               cols.push(200, 200, 200, 200)
 
-              switch (chunk.type(x, y, z)) {
-                case 1:
-                  texInd.push(1, 1, 1, 1)
-                  break
-                case 2:
-                  texInd.push(3, 3, 3, 3)
-                  break
-                case 3:
-                  texInd.push(4, 4, 4, 4)
-                  break
-                case 4:
-                  texInd.push(5, 5, 5, 5)
-                  break
+              if (typeof block.textureIndex === 'number') {
+                texInd.push(
+                  block.textureIndex,
+                  block.textureIndex,
+                  block.textureIndex,
+                  block.textureIndex,
+                )
+              } else {
+                texInd.push(
+                  block.textureIndex.negX,
+                  block.textureIndex.negX,
+                  block.textureIndex.negX,
+                  block.textureIndex.negX,
+                )
               }
 
               v += 4
@@ -107,19 +115,20 @@ export default class ChunkMesher {
               uvs.push(0, 0, 1, 0, 1, 1, 0, 1)
               cols.push(200, 200, 200, 200)
 
-              switch (chunk.type(x, y, z)) {
-                case 1:
-                  texInd.push(1, 1, 1, 1)
-                  break
-                case 2:
-                  texInd.push(3, 3, 3, 3)
-                  break
-                case 3:
-                  texInd.push(4, 4, 4, 4)
-                  break
-                case 4:
-                  texInd.push(5, 5, 5, 5)
-                  break
+              if (typeof block.textureIndex === 'number') {
+                texInd.push(
+                  block.textureIndex,
+                  block.textureIndex,
+                  block.textureIndex,
+                  block.textureIndex,
+                )
+              } else {
+                texInd.push(
+                  block.textureIndex.posZ,
+                  block.textureIndex.posZ,
+                  block.textureIndex.posZ,
+                  block.textureIndex.posZ,
+                )
               }
 
               v += 4
@@ -131,19 +140,20 @@ export default class ChunkMesher {
               uvs.push(0, 1, 1, 1, 1, 0, 0, 0)
               cols.push(200, 200, 200, 200)
 
-              switch (chunk.type(x, y, z)) {
-                case 1:
-                  texInd.push(1, 1, 1, 1)
-                  break
-                case 2:
-                  texInd.push(3, 3, 3, 3)
-                  break
-                case 3:
-                  texInd.push(4, 4, 4, 4)
-                  break
-                case 4:
-                  texInd.push(5, 5, 5, 5)
-                  break
+              if (typeof block.textureIndex === 'number') {
+                texInd.push(
+                  block.textureIndex,
+                  block.textureIndex,
+                  block.textureIndex,
+                  block.textureIndex,
+                )
+              } else {
+                texInd.push(
+                  block.textureIndex.negZ,
+                  block.textureIndex.negZ,
+                  block.textureIndex.negZ,
+                  block.textureIndex.negZ,
+                )
               }
 
               v += 4
@@ -168,19 +178,20 @@ export default class ChunkMesher {
               uvs.push(0, 0, 1, 0, 1, 1, 0, 1)
               cols.push(255, 255, 255, 255)
 
-              switch (chunk.type(x, y, z)) {
-                case 1:
-                  texInd.push(0, 0, 0, 0)
-                  break
-                case 2:
-                  texInd.push(3, 3, 3, 3)
-                  break
-                case 3:
-                  texInd.push(4, 4, 4, 4)
-                  break
-                case 4:
-                  texInd.push(5, 5, 5, 5)
-                  break
+              if (typeof block.textureIndex === 'number') {
+                texInd.push(
+                  block.textureIndex,
+                  block.textureIndex,
+                  block.textureIndex,
+                  block.textureIndex,
+                )
+              } else {
+                texInd.push(
+                  block.textureIndex.posY,
+                  block.textureIndex.posY,
+                  block.textureIndex.posY,
+                  block.textureIndex.posY,
+                )
               }
 
               v += 4
@@ -192,19 +203,20 @@ export default class ChunkMesher {
               uvs.push(0, 0, 1, 0, 1, 1, 0, 1)
               cols.push(177, 177, 177, 177)
 
-              switch (chunk.type(x, y, z)) {
-                case 1:
-                  texInd.push(2, 2, 2, 2)
-                  break
-                case 2:
-                  texInd.push(3, 3, 3, 3)
-                  break
-                case 3:
-                  texInd.push(4, 4, 4, 4)
-                  break
-                case 4:
-                  texInd.push(5, 5, 5, 5)
-                  break
+              if (typeof block.textureIndex === 'number') {
+                texInd.push(
+                  block.textureIndex,
+                  block.textureIndex,
+                  block.textureIndex,
+                  block.textureIndex,
+                )
+              } else {
+                texInd.push(
+                  block.textureIndex.negY,
+                  block.textureIndex.negY,
+                  block.textureIndex.negY,
+                  block.textureIndex.negY,
+                )
               }
 
               v += 4

@@ -1,7 +1,14 @@
 import Chunk from './Chunk'
 import ChunkMesher from './ChunkMesher'
+import Database from '../Database'
 
-onmessage = function (event: MessageEvent) {
+import biomeInfo from '../../data/biomeInfo'
+import blockInfo from '../../data/blockInfo'
+import itemInfo from '../../data/itemInfo'
+
+Database.init(biomeInfo, blockInfo, itemInfo)
+
+onmessage = function(event: MessageEvent) {
   const chunk = Chunk.deserialize(event.data)
 
   const attributes = ChunkMesher.createMesh(chunk)

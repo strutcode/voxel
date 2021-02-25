@@ -1,4 +1,5 @@
 import noise from 'asm-noise'
+import Database from '../Database'
 import { lerp } from '../math/Interpolation'
 import WorldMap from '../WorldMap'
 import Chunk from './Chunk'
@@ -236,6 +237,17 @@ export default class ChunkGenerator {
   public overworldBiome(chunk: Chunk, map: WorldMap) {
     let x, y, z, xx, zz
 
+    const ocean = Database.biomeId('ocean')
+    const beach = Database.biomeId('beach')
+    const grassland = Database.biomeId('grassland')
+    const arctic = Database.biomeId('arctic')
+
+    const air = Database.blockId('air') ?? 0
+    const grass = Database.blockId('grass') ?? 0
+    const snow = Database.blockId('snow') ?? 0
+    const water = Database.blockId('water') ?? 0
+    const sand = Database.blockId('sand') ?? 0
+
     for (z = 0; z < Chunk.size; z++) {
       for (x = 0; x < Chunk.size; x++) {
         xx = chunk.x * Chunk.size + x
@@ -244,16 +256,16 @@ export default class ChunkGenerator {
         const biome = map.biomeAt(xx, zz)
         const type = (() => {
           switch (biome) {
-            case 1:
-              return 2
-            case 2:
-              return 1
-            case 3:
-              return 4
-            case 4:
-              return 3
+            case ocean:
+              return water
+            case beach:
+              return sand
+            case grassland:
+              return grass
+            case arctic:
+              return snow
             default:
-              return 0
+              return air
           }
         })()
 

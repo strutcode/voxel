@@ -1,4 +1,5 @@
 import noise from 'asm-noise'
+import Database from './Database'
 import { wrap } from './math/Geometry'
 import { clamp } from './math/Interpolation'
 
@@ -75,16 +76,33 @@ export default class WorldMap {
       this.height,
     )
 
-    let x, y, d
+    const ocean = Database.biomeId('ocean')
+    const beach = Database.biomeId('beach')
+    const grassland = Database.biomeId('grassland')
+    const arctic = Database.biomeId('arctic')
+
+    let x, y, d, b
     for (y = 0; y < this.height; y++) {
       for (x = 0; x < this.width; x++) {
-        d = (this.distanceToWater(x, y) / 8) * noise(x / 200, y / 200)
+        d = noise((x / this.height) * 3, (y / this.height) * 3)
+        b = this.biomeMap?.fastGet(x, y)
 
-        if (d < 1 && this.biomeAt(x, y) === 2) {
-          this.biomeMap?.fastSet(x, y, 1)
+        this.depthMap.fastSet(x, y, 1 + d * 31)
+
+        if (d < 0.55 && b !== arctic) {
+          this.biomeMap?.fastSet(x, y, ocean ?? 0)
+          this.depthMap?.fastSet(x, y, 32 * 0.55)
+        } else if (d < 0.57 && b === grassland) {
+          this.biomeMap?.fastSet(x, y, beach ?? 0)
         }
 
-        this.depthMap.fastSet(x, y, clamp(d, 1, 32))
+        // d = (this.distanceToWater(x, y) / 8) * noise(x / 200, y / 200)
+
+        // if (d < 1 && this.biomeAt(x, y) === 2) {
+        //   this.biomeMap?.fastSet(x, y, 1)
+        // }
+
+        // this.depthMap.fastSet(x, y, clamp(d, 1, 32))
       }
     }
   }
@@ -120,14 +138,17 @@ export default class WorldMap {
       this.height,
     )
 
+    const grassland = Database.biomeId('grassland')
+    const arctic = Database.biomeId('arctic')
+
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
         if (y === 0 || y === this.height - 1) {
-          this.biomeMap.fastSet(x, y, 4)
+          this.biomeMap.fastSet(x, y, arctic ?? 0)
           continue
         }
 
-        this.biomeMap.fastSet(x, y, Math.random() < 0.5 ? 3 : 2)
+        this.biomeMap.fastSet(x, y, grassland ?? 0)
       }
     }
   }

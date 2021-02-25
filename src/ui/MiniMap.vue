@@ -8,6 +8,7 @@
 <script lang="ts">
   import Vue from 'vue'
   import WorldMap from '../engine/WorldMap'
+  import Database from '../engine/Database'
 
   export default Vue.extend({
     mounted() {
@@ -54,7 +55,7 @@
         canvas.width = map.width
         canvas.height = map.height
 
-        let x, y, i, r, g, b
+        let x, y, i, r, g, b, biome
 
         // Iterate over the 2d map
         for (y = 0; y < map.height; y++) {
@@ -67,28 +68,12 @@
               r = g = b = (map.depthAt(x, y) / 32) * 255
             } else {
               // Convert biome codes to colors
-              switch (map.biomeAt(x, y)) {
-                case 0:
-                  break
-                case 1:
-                  r = 237
-                  g = 236
-                  b = 161
-                  break
-                case 2:
-                  r = 46
-                  g = 119
-                  b = 41
-                  break
-                case 3:
-                  r = 17
-                  g = 49
-                  b = 154
-                  break
-                case 4:
-                  r = g = b = 200
-                  b = 222
-                  break
+              biome = Database.biomeInfo(map.biomeAt(x, y))
+
+              if (biome) {
+                r = biome.color.r
+                g = biome.color.g
+                b = biome.color.b
               }
             }
 

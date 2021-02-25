@@ -1,6 +1,13 @@
 import Chunk from './Chunk'
 import ChunkGenerator from './ChunkGenerator'
 import WorldMap from '../WorldMap'
+import Database from '../Database'
+
+import biomeInfo from '../../data/biomeInfo'
+import blockInfo from '../../data/blockInfo'
+import itemInfo from '../../data/itemInfo'
+
+Database.init(biomeInfo, blockInfo, itemInfo)
 
 let map: WorldMap
 const generator = new ChunkGenerator()

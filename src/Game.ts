@@ -13,9 +13,9 @@ import Compass from './ui/Compass.vue'
 import MiniMap from './ui/MiniMap.vue'
 import Reticle from './ui/Reticle.vue'
 
+import biomeInfo from './data/biomeInfo'
 import blockInfo from './data/blockInfo'
 import itemInfo from './data/itemInfo'
-import WorldMap from './engine/WorldMap'
 
 enum GameState {
   Play,
@@ -38,7 +38,7 @@ export default class Game {
     await Renderer.init()
     await Physics.init()
     await Input.init()
-    await Database.init(blockInfo, itemInfo)
+    await Database.init(biomeInfo, blockInfo, itemInfo)
 
     this.world = new World()
     ;(globalThis as any).options = {
@@ -118,4 +118,5 @@ Object.assign(globalThis, {
   Physics,
   Renderer,
   Game,
+  Database,
 })
