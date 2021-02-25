@@ -12,6 +12,19 @@
   export default Vue.extend({
     mounted() {
       this.update()
+
+      document.addEventListener('keydown', ev => {
+        if (ev.key === 'h') {
+          this.height = !this.height
+          this.update()
+        }
+      })
+    },
+
+    data() {
+      return {
+        height: false,
+      }
     },
 
     computed: {
@@ -49,29 +62,33 @@
             i = ((map.height - y - 1) * map.width + x) * 4
             r = g = b = 0
 
-            // Convert biome codes to colors
-            switch (map.biomeAt(x, y)) {
-              case 0:
-                break
-              case 1:
-                r = 237
-                g = 236
-                b = 161
-                break
-              case 2:
-                r = 46
-                g = 119
-                b = 41
-                break
-              case 3:
-                r = 17
-                g = 49
-                b = 154
-                break
-              case 4:
-                r = g = b = 200
-                b = 222
-                break
+            if (this.height) {
+              r = g = b = (map.depthAt(x, y) / 32) * 255
+            } else {
+              // Convert biome codes to colors
+              switch (map.biomeAt(x, y)) {
+                case 0:
+                  break
+                case 1:
+                  r = 237
+                  g = 236
+                  b = 161
+                  break
+                case 2:
+                  r = 46
+                  g = 119
+                  b = 41
+                  break
+                case 3:
+                  r = 17
+                  g = 49
+                  b = 154
+                  break
+                case 4:
+                  r = g = b = 200
+                  b = 222
+                  break
+              }
             }
 
             // Set the pixel
