@@ -1,10 +1,12 @@
+import noise from 'asm-noise'
 import { wrap } from './math/Geometry'
+import { clamp } from './math/Interpolation'
 
 interface SerializedMapData {
   width: number
   height: number
-  biome: Uint8ClampedArray
-  depth: Float32Array
+  biome?: Uint8ClampedArray
+  depth?: Float32Array
 }
 
 class MapData<T extends Uint8ClampedArray | Float32Array> {
@@ -66,6 +68,49 @@ export default class WorldMap {
     for (let n = 0; n < this.subdivisions; n++) {
       this.refine()
     }
+
+    this.depthMap = new MapData(
+      new Float32Array(this.width * this.height),
+      this.width,
+      this.height,
+    )
+
+    let x, y, d
+    for (y = 0; y < this.height; y++) {
+      for (x = 0; x < this.width; x++) {
+        d = (this.distanceToWater(x, y) / 8) * noise(x / 200, y / 200)
+
+        if (d < 1 && this.biomeAt(x, y) === 2) {
+          this.biomeMap?.fastSet(x, y, 1)
+        }
+
+        this.depthMap.fastSet(x, y, clamp(d, 1, 32))
+      }
+    }
+  }
+
+  private distanceToWater(x: number, y: number): number {
+    if (this.biomeAt(x, y) === 3) return 0
+
+    let xx,
+      yy,
+      d = 1
+
+    for (let i = 0; i < 400; i++) {
+      xx = i % 2 === 0 ? 0 : d
+      yy = i % 2 === 1 ? 0 : d
+
+      if (i % 3 == 0) xx = -xx
+      if (i % 4 == 0) yy = -yy
+
+      if (this.biomeAt(x + xx, y + yy) === 3) {
+        break
+      }
+
+      if (i % 4 === 0) d++
+    }
+
+    return d
   }
 
   private initialize() {
@@ -74,26 +119,15 @@ export default class WorldMap {
       this.width,
       this.height,
     )
-    this.depthMap = new MapData(
-      new Float32Array(this.width * this.height),
-      this.width,
-      this.height,
-    )
 
     for (let y = 0; y < this.height; y++) {
       for (let x = 0; x < this.width; x++) {
         if (y === 0 || y === this.height - 1) {
           this.biomeMap.fastSet(x, y, 4)
-          this.depthMap.fastSet(x, y, 16)
           continue
         }
 
         this.biomeMap.fastSet(x, y, Math.random() < 0.5 ? 3 : 2)
-        this.depthMap.fastSet(
-          x,
-          y,
-          this.biomeMap.fastGet(x, y) === 3 ? 1 : 16 + Math.random() * 16,
-        )
       }
     }
   }
@@ -112,11 +146,6 @@ export default class WorldMap {
       this.width,
       this.height,
     )
-    this.depthMap = new MapData(
-      new Float32Array(this.width * this.height),
-      this.width,
-      this.height,
-    )
 
     let x, y, xx, yy, ex, ey
 
@@ -131,7 +160,6 @@ export default class WorldMap {
 
         if (ex && ey) {
           this.biomeMap.fastSet(x, y, oldBiome.fastGet(xx, yy))
-          this.depthMap.fastSet(x, y, oldDepth.fastGet(xx, yy))
           continue
         }
 
@@ -141,11 +169,6 @@ export default class WorldMap {
             y,
             oldBiome.get(xx + Math.round(Math.random()), yy),
           )
-          this.depthMap.fastSet(
-            x,
-            y,
-            (oldDepth.get(xx, yy) + oldDepth.get(xx + 1, yy)) / 2,
-          )
         }
 
         if (!this.refineH && ex && !ey) {
@@ -153,11 +176,6 @@ export default class WorldMap {
             x,
             y,
             oldBiome.get(xx, yy + Math.round(Math.random())),
-          )
-          this.depthMap.fastSet(
-            x,
-            y,
-            (oldDepth.get(xx, yy) + oldDepth.get(xx, yy + 1)) / 2,
           )
         }
       }
@@ -172,11 +190,6 @@ export default class WorldMap {
             y,
             this.biomeMap.get(x, y + Math.sign(Math.random() - 0.5)),
           )
-          this.depthMap.fastSet(
-            x,
-            y,
-            (this.depthMap.get(x, y - 1) + this.depthMap.get(x, y + 1)) / 2,
-          )
         }
       }
     } else {
@@ -186,11 +199,6 @@ export default class WorldMap {
             x,
             y,
             this.biomeMap.get(x + Math.sign(Math.random() - 0.5), y),
-          )
-          this.depthMap.fastSet(
-            x,
-            y,
-            (this.depthMap.get(x - 1, y) + this.depthMap.get(x + 1, y)) / 2,
           )
         }
       }
