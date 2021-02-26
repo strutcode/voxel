@@ -36,9 +36,25 @@ export default {
   4: {
     name: 'tundra',
     color: {
-      r: 200,
-      g: 200,
-      b: 222,
+      r: 180,
+      g: 180,
+      b: 202,
+    },
+  },
+  5: {
+    name: 'desert',
+    color: {
+      r: 237,
+      g: 236,
+      b: 161,
+    },
+  },
+  6: {
+    name: 'corruption',
+    color: {
+      r: 97,
+      g: 66,
+      b: 93,
     },
   },
 } as Record<number, BiomeInfo>

@@ -241,12 +241,17 @@ export default class ChunkGenerator {
     const beach = Database.biomeId('beach')
     const grassland = Database.biomeId('grassland')
     const arctic = Database.biomeId('arctic')
+    const desert = Database.biomeId('desert')
+    const tundra = Database.biomeId('tundra')
+    const corruption = Database.biomeId('corruption')
 
     const air = Database.blockId('air') ?? 0
     const grass = Database.blockId('grass') ?? 0
     const snow = Database.blockId('snow') ?? 0
     const water = Database.blockId('water') ?? 0
     const sand = Database.blockId('sand') ?? 0
+    const tundragrass = Database.blockId('tundragrass') ?? 0
+    const corruptgrass = Database.blockId('corruptgrass') ?? 0
 
     for (z = 0; z < Chunk.size; z++) {
       for (x = 0; x < Chunk.size; x++) {
@@ -259,11 +264,16 @@ export default class ChunkGenerator {
             case ocean:
               return water
             case beach:
+            case desert:
               return sand
             case grassland:
               return grass
             case arctic:
               return snow
+            case tundra:
+              return tundragrass
+            case corruption:
+              return corruptgrass
             default:
               return air
           }

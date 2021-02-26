@@ -78,7 +78,7 @@ export default class WorldMap {
 
     const ocean = Database.biomeId('ocean')
     const beach = Database.biomeId('beach')
-    const grassland = Database.biomeId('grassland')
+    const tundra = Database.biomeId('tundra')
     const arctic = Database.biomeId('arctic')
 
     let x, y, d, b
@@ -92,17 +92,9 @@ export default class WorldMap {
         if (d < 0.55 && b !== arctic) {
           this.biomeMap?.fastSet(x, y, ocean ?? 0)
           this.depthMap?.fastSet(x, y, 32 * 0.55)
-        } else if (d < 0.57 && b === grassland) {
+        } else if (d < 0.57 && b !== arctic && b !== tundra) {
           this.biomeMap?.fastSet(x, y, beach ?? 0)
         }
-
-        // d = (this.distanceToWater(x, y) / 8) * noise(x / 200, y / 200)
-
-        // if (d < 1 && this.biomeAt(x, y) === 2) {
-        //   this.biomeMap?.fastSet(x, y, 1)
-        // }
-
-        // this.depthMap.fastSet(x, y, clamp(d, 1, 32))
       }
     }
   }
@@ -138,17 +130,32 @@ export default class WorldMap {
       this.height,
     )
 
-    const grassland = Database.biomeId('grassland')
-    const arctic = Database.biomeId('arctic')
+    const grassland = Database.biomeId('grassland') ?? 0
+    const arctic = Database.biomeId('arctic') ?? 0
+    const tundra = Database.biomeId('tundra') ?? 0
+    const corruption = Database.biomeId('corruption') ?? 0
+    const desert = Database.biomeId('desert') ?? 0
 
-    for (let y = 0; y < this.height; y++) {
-      for (let x = 0; x < this.width; x++) {
+    let x, y, b
+
+    for (y = 0; y < this.height; y++) {
+      for (x = 0; x < this.width; x++) {
         if (y === 0 || y === this.height - 1) {
           this.biomeMap.fastSet(x, y, arctic ?? 0)
           continue
         }
 
-        this.biomeMap.fastSet(x, y, grassland ?? 0)
+        b = Math.random()
+
+        if (b < 0.33) {
+          this.biomeMap.fastSet(x, y, grassland)
+        } else if (b < 0.5) {
+          this.biomeMap.fastSet(x, y, tundra)
+        } else if (b < 0.75) {
+          this.biomeMap.fastSet(x, y, corruption)
+        } else {
+          this.biomeMap.fastSet(x, y, desert)
+        }
       }
     }
   }
