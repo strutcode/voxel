@@ -6,7 +6,7 @@ export default class Player extends Mobile {
   public jumpIntent = false
   private autoMove = false
 
-  public inventory: { id: number; amount: number }[] = []
+  public inventory: { id: number; name: string; amount: number }[] = []
   public recents: {
     id: number
     key: number
@@ -39,9 +39,11 @@ export default class Player extends Mobile {
   public addItem(name: string, amount?: number)
   public addItem(input: string | number, amount = 1) {
     const id = typeof input === 'number' ? input : Database.itemId(input) ?? 0
+    const name = Database.itemInfo(id).name
     const existing = this.inventory.find(i => i.id === id)
     const item = existing ?? {
       id,
+      name,
       amount,
     }
 
@@ -54,7 +56,7 @@ export default class Player extends Mobile {
     this.recents.push({
       id,
       key: performance.now(),
-      name: Database.itemInfo(id).name,
+      name,
       amount,
     })
 

@@ -1,26 +1,36 @@
 <template>
-  <div class="recents">
-    <div
-      class="title"
-      :style="{ opacity: gameData.player.recents.length ? 1 : 0 }"
-    >
-      Acquired
+  <div>
+    <div class="inventory" v-show="showInventory">
+      <template v-for="item in gameData.player.inventory">
+        <div class="icon" :style="itemStyle(item.id)"></div>
+        <div class="name">{{ item.name }}</div>
+        <div class="amount">{{ item.amount }}</div>
+      </template>
     </div>
-    <transition-group name="list">
+
+    <div class="recents">
       <div
-        class="item"
-        v-for="(item, i) in gameData.player.recents"
-        :key="item.key"
+        class="title"
+        :style="{ opacity: gameData.player.recents.length ? 1 : 0 }"
       >
-        <div class="line">
-          <div class="icon" :style="itemStyle(item.id)"></div>
-          <div>
-            <span class="name">{{ item.name }}</span> x{{ item.amount }}
+        Acquired
+      </div>
+      <transition-group name="list">
+        <div
+          class="item"
+          v-for="item in gameData.player.recents"
+          :key="item.key"
+        >
+          <div class="line">
+            <div class="icon" :style="itemStyle(item.id)"></div>
+            <div>
+              <span class="name">{{ item.name }}</span> x{{ item.amount }}
+            </div>
           </div>
         </div>
-      </div>
-    </transition-group>
-    <img src="../../assets/items.png" v-show="false" ref="itemsImg" />
+      </transition-group>
+      <img src="../../assets/items.png" v-show="false" ref="itemsImg" />
+    </div>
   </div>
 </template>
 
@@ -31,6 +41,7 @@
       return {
         imageWidth: 0,
         imageHeight: 0,
+        showInventory: false,
       }
     },
 
@@ -47,6 +58,15 @@
         this.imageHeight = img.height
         this.$forceUpdate()
       }
+
+      window.addEventListener('keydown', ev => {
+        if (ev.key.toLowerCase() === 'tab') {
+          ev.preventDefault()
+          ev.stopPropagation()
+
+          this.showInventory = !this.showInventory
+        }
+      })
     },
 
     methods: {
@@ -78,6 +98,35 @@
     height: 5vh
     background-image: url('../../assets/items.png')
     image-rendering: pixelated
+
+  .inventory
+    position: fixed
+    top: 50%
+    left: 50%
+    transform: translate(-50%, -50%)
+    background: #ddd
+    border: 8px ridge #bbb
+    font: 16pt sans-serif
+    display: grid
+    grid-template-columns: auto auto auto
+    padding: 0.5rem
+    z-index: +10
+
+    .icon
+      width: 4vh
+      height: 4vh
+      grid-column: 1
+      margin-right: 1rem
+
+    .name
+      grid-column: 2
+      align-self: center
+      text-transform: capitalize
+
+    .amount
+      grid-column: 3
+      align-self: center
+      margin-left: 1rem
 
   .recents
     position: absolute
