@@ -1,11 +1,25 @@
 <template>
-  <div class="hotBar">
-    <div class="slot" v-for="i in 10" :key="i">
-      <template v-if="inventory[i - 1]">
-        <div class="icon" :style="itemStyle(inventory[i - 1].id)"></div>
-        <div class="count">{{ inventory[i - 1].amount }}</div>
-      </template>
+  <div class="recents">
+    <div
+      class="title"
+      :style="{ opacity: gameData.player.recents.length ? 1 : 0 }"
+    >
+      Acquired
     </div>
+    <transition-group name="list">
+      <div
+        class="item"
+        v-for="(item, i) in gameData.player.recents"
+        :key="item.key"
+      >
+        <div class="line">
+          <div class="icon" :style="itemStyle(item.id)"></div>
+          <div>
+            <span class="name">{{ item.name }}</span> x{{ item.amount }}
+          </div>
+        </div>
+      </div>
+    </transition-group>
     <img src="../../assets/items.png" v-show="false" ref="itemsImg" />
   </div>
 </template>
@@ -59,35 +73,51 @@
 </script>
 
 <style lang="stylus" scoped>
-  .hotBar
-    display: flex
-    flex-flow: column nowrap
-    position: absolute
-    top: 50%
-    left: 0
-    transform: translateY(-50%)
-    border: 4px outset #ddd
+  .icon
+    width: 5vh
+    height: 5vh
+    background-image: url('../../assets/items.png')
+    image-rendering: pixelated
 
-    .slot
-      position: relative
-      width: 5vh
-      height: 5vh
-      background: #bbb
-      border: 4px inset #ddd
+  .recents
+    position: absolute
+    bottom: 1vh
+    left: 1vh
+    color: white
+    font: 14pt sans-serif
+    text-align: center
+    text-shadow: 0 0 5px black, 0 0 3px black, 0 0 2px black
+
+    .title
+      transition: all 200ms
+      font-size: 18pt
+      font-weight: bold
+      font-variant: small-caps
+
+    .item
+      display: flex
+      flex-flow: column nowrap
+      justify-self: center
 
       .icon
-        width: 5vh
-        height: 5vh
-        background-image: url('../../assets/items.png')
-        image-rendering: pixelated
+        width: 4vh
+        height: 4vh
+        margin-right: 1vh
+        filter: drop-shadow(0 0 2px black)
 
-      .count
-        position: absolute
-        bottom: 0
-        right: 6px
-        font-size: 16px
-        font-family: monospace
-        color: white
-        font-weight bold
-        text-shadow: 0 0 5px black, 0 0 3px black, 0 0 2px black
+      .name
+        text-transform: capitalize
+
+      .line
+        display: flex
+        flex-flow: row nowrap
+        align-items: center
+        text-align: left
+
+  .list-enter-active, .list-leave-active
+    transition: all 200ms
+
+  .list-enter, .list-leave-to
+    transform: translateX(-100%)
+    opacity: 0
 </style>

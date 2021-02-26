@@ -13,4 +13,12 @@ export default {
     name: 'mud',
     iconIndex: 2,
   },
+  3: {
+    name: 'sand',
+    iconIndex: 3,
+  },
+  4: {
+    name: 'snow',
+    iconIndex: 4,
+  },
 } as Record<number, ItemInfo>

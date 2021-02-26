@@ -1,11 +1,18 @@
 import Input from './ui/Input'
 import Mobile from './Mobile'
+import Database from './Database'
 
 export default class Player extends Mobile {
   public jumpIntent = false
   private autoMove = false
 
   public inventory: { id: number; amount: number }[] = []
+  public recents: {
+    id: number
+    key: number
+    name: string
+    amount: number
+  }[] = []
 
   public update() {
     this.velocity.set(0, 0, 0)
@@ -28,16 +35,31 @@ export default class Player extends Mobile {
     }
   }
 
-  public addItem(id: number, amount = 1) {
+  public addItem(id: number, amount?: number)
+  public addItem(name: string, amount?: number)
+  public addItem(input: string | number, amount = 1) {
+    const id = typeof input === 'number' ? input : Database.itemId(input) ?? 0
     const existing = this.inventory.find(i => i.id === id)
+    const item = existing ?? {
+      id,
+      amount,
+    }
 
     if (existing) {
       existing.amount += amount
     } else {
-      this.inventory.push({
-        id,
-        amount,
-      })
+      this.inventory.push(item)
     }
+
+    this.recents.push({
+      id,
+      key: performance.now(),
+      name: Database.itemInfo(id).name,
+      amount,
+    })
+
+    setTimeout(() => {
+      this.recents.shift()
+    }, 2000)
   }
 }

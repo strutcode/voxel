@@ -84,18 +84,22 @@ export default class Game {
           targetBlock.z,
         )
 
+        const grass = Database.blockId('grass') ?? 0
+        const sand = Database.blockId('sand') ?? 0
+        const snow = Database.blockId('snow') ?? 0
+
         if (block) {
           // TODO: needs to become data somehow
           switch (block) {
-            case 1:
-              this.player.addItem(0)
-              this.player.addItem(1, 2)
+            case grass:
+              this.player.addItem('grass')
+              this.player.addItem('dirt', 2)
               break
-            case 2:
-              this.player.addItem(3, 3)
+            case sand:
+              this.player.addItem('sand', 3)
               break
-            case 3:
-              this.player.addItem(4, 3)
+            case snow:
+              this.player.addItem('snow', 3)
               break
           }
 

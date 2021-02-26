@@ -35,6 +35,7 @@ export default class Database {
 
   private static biomeNameMap: Record<string, number> = {}
   private static blockNameMap: Record<string, number> = {}
+  private static itemNameMap: Record<string, number> = {}
 
   public static async init(
     biomeData: typeof Database.biomeData,
@@ -51,6 +52,10 @@ export default class Database {
 
     Object.entries(blockData).forEach(keyValue => {
       this.blockNameMap[keyValue[1]?.name] = +keyValue[0]
+    })
+
+    Object.entries(itemData).forEach(keyValue => {
+      this.itemNameMap[keyValue[1]?.name] = +keyValue[0]
     })
   }
 
@@ -72,5 +77,9 @@ export default class Database {
 
   public static blockId(name: string): number | undefined {
     return this.blockNameMap[name]
+  }
+
+  public static itemId(name: string): number | undefined {
+    return this.itemNameMap[name]
   }
 }
