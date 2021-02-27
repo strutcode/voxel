@@ -1,5 +1,5 @@
 import Chunk from './voxel/Chunk'
-import { manhattanDistance2d, wrap } from './math/Geometry'
+import { euclideanDistance2d, manhattanDistance2d, wrap } from './math/Geometry'
 import Physics from './physics/Physics'
 import Renderer from './graphics/Renderer'
 import Vector from './math/Vector'
@@ -36,10 +36,10 @@ export default class World {
     this.checkChunk(this.viewPos.x, 0, this.viewPos.z)
 
     // HACK: The flood fill algorithm should remove these
-    this.chunks.forEach(chunk => {
+    this.chunks.forEach((chunk) => {
       if (!chunk) return
 
-      const distance = manhattanDistance2d(
+      const distance = euclideanDistance2d(
         chunk.x,
         chunk.z,
         this.viewPos.x,
@@ -95,7 +95,7 @@ export default class World {
   private checkChunk(x: number, y: number, z: number) {
     const key = digitKey(x, y, z)
     this.visited.add(key)
-    const distance = manhattanDistance2d(this.viewPos.x, this.viewPos.z, x, z)
+    const distance = euclideanDistance2d(this.viewPos.x, this.viewPos.z, x, z)
 
     if (this.isLoaded(x, y, z)) {
       if (distance > World.viewDistance) {

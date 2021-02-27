@@ -80,7 +80,7 @@ export default class BabylonImplementation {
     scene.ambientColor = Color3.White()
     scene.clearColor = new Color4(0.7, 0.8, 1, 1)
     scene.fogEnabled = true
-    scene.fogEnd = 11 * 32
+    scene.fogEnd = 16 * 32
     scene.fogStart = scene.fogEnd * 0.75
     scene.fogMode = Scene.FOGMODE_LINEAR
     scene.fogColor.set(
