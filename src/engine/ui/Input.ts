@@ -1,3 +1,5 @@
+import Hud from './Hud'
+
 export default class Input {
   private static axis = {
     ViewH: 0,
@@ -18,15 +20,29 @@ export default class Input {
     Jump: ' ',
     Fly: 'f',
     Map: 'm',
+    Inventory: 'tab',
   }
   private static keyDown: Record<string, boolean> = {}
   private static key: Record<string, boolean> = {}
   private static lastKey: Record<string, boolean> = {}
+  private static wantsPointerLock = true
   private static hasPointerLock = false
 
   public static async init() {
+    const keyMap = Object.entries(this.inputMap).reduce((acc, keyValue) => {
+      acc[keyValue[1]] = keyValue[0]
+      return acc
+    }, {} as Record<string, string>)
+
     window.addEventListener('keydown', ev => {
-      this.keyDown[ev.key.toLowerCase()] = true
+      const key = ev.key.toLowerCase()
+
+      this.keyDown[key] = true
+
+      if (keyMap[key]) {
+        ev.preventDefault()
+        ev.stopPropagation()
+      }
     })
     window.addEventListener('keyup', ev => {
       this.keyDown[ev.key.toLowerCase()] = false
@@ -42,8 +58,8 @@ export default class Input {
     window.addEventListener('pointerdown', ev => {
       if (this.hasPointerLock) {
         this.key[`mouse${ev.button}`] = true
-      } else {
-        document.body.requestPointerLock()
+      } else if (this.wantsPointerLock) {
+        this.capturePointer()
       }
     })
     window.addEventListener('pointerup', ev => {
@@ -53,6 +69,16 @@ export default class Input {
     document.addEventListener('pointerlockchange', () => {
       this.hasPointerLock = document.pointerLockElement === document.body
     })
+  }
+
+  public static capturePointer() {
+    document.body.requestPointerLock()
+    this.wantsPointerLock = true
+  }
+
+  public static releasePointer() {
+    document.exitPointerLock()
+    this.wantsPointerLock = false
   }
 
   public static startFrame() {}

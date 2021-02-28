@@ -13,6 +13,7 @@ export default class Hud {
     player: null,
     map: null,
     showMap: true,
+    showInventory: false,
   }
 
   public static async init() {
@@ -62,6 +63,16 @@ export default class Hud {
 
     if (Input.getButton('Map')) {
       Hud.gameData.showMap = !Hud.gameData.showMap
+    }
+
+    if (Input.getButton('Inventory')) {
+      Hud.gameData.showInventory = !Hud.gameData.showInventory
+
+      if (Hud.gameData.showInventory) {
+        Input.releasePointer()
+      } else {
+        Input.capturePointer()
+      }
     }
   }
 

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="inventory" v-show="showInventory">
+    <div class="inventory" v-show="gameData.showInventory">
       <template v-for="item in gameData.player.inventory">
         <div class="icon" :style="itemStyle(item.id)"></div>
         <div class="name">{{ item.name }}</div>
@@ -41,7 +41,6 @@
       return {
         imageWidth: 0,
         imageHeight: 0,
-        showInventory: false,
       }
     },
 
@@ -58,15 +57,6 @@
         this.imageHeight = img.height
         this.$forceUpdate()
       }
-
-      window.addEventListener('keydown', ev => {
-        if (ev.key.toLowerCase() === 'tab') {
-          ev.preventDefault()
-          ev.stopPropagation()
-
-          this.showInventory = !this.showInventory
-        }
-      })
     },
 
     methods: {
