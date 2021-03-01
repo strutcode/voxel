@@ -36,7 +36,7 @@ export default class World {
     this.checkChunk(this.viewPos.x, 0, this.viewPos.z)
 
     // HACK: The flood fill algorithm should remove these
-    this.chunks.forEach((chunk) => {
+    this.chunks.forEach(chunk => {
       if (!chunk) return
 
       const distance = euclideanDistance2d(

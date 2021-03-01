@@ -84,9 +84,9 @@ export default class Game {
           targetBlock.z,
         )
 
-        const grass = Database.blockId('grass') ?? 0
-        const sand = Database.blockId('sand') ?? 0
-        const snow = Database.blockId('snow') ?? 0
+        const grass = Database.blockId('grass')
+        const sand = Database.blockId('sand')
+        const snow = Database.blockId('snow')
 
         if (block) {
           // TODO: needs to become data somehow

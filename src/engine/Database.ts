@@ -60,26 +60,26 @@ export default class Database {
   }
 
   public static biomeInfo(id: number) {
-    return this.biomeData[id]
+    return this.biomeData[id] ?? this.biomeData[0]
   }
 
   public static blockInfo(id: number) {
-    return this.blockData[id]
+    return this.blockData[id] ?? this.blockData[0]
   }
 
   public static itemInfo(id: number) {
-    return this.itemData[id]
+    return this.itemData[id] ?? this.itemData[0]
   }
 
-  public static biomeId(name: string): number | undefined {
-    return this.biomeNameMap[name]
+  public static biomeId(name: string): number {
+    return this.biomeNameMap[name] ?? 0
   }
 
-  public static blockId(name: string): number | undefined {
-    return this.blockNameMap[name]
+  public static blockId(name: string): number {
+    return this.blockNameMap[name] ?? 0
   }
 
-  public static itemId(name: string): number | undefined {
-    return this.itemNameMap[name]
+  public static itemId(name: string): number {
+    return this.itemNameMap[name] ?? 0
   }
 }

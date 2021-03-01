@@ -44,5 +44,15 @@ describe('ObjectInfo', () => {
 
     expect(info.bufferLength).to.equal(3)
     expect([...info.buffer.slice(0, 3)]).to.deep.equal([8, 9, 10])
+
+    info = new ObjectInfo(fakeMesh)
+    info.addRange('a', new Float32Array([1, 2, 3]))
+    info.addRange('b', new Float32Array([4, 5, 6]))
+    info.removeRange('a')
+    info.addRange('c', new Float32Array([7, 8, 9]))
+    info.removeRange('b')
+
+    expect(info.bufferLength).to.equal(3)
+    expect([...info.buffer.slice(0, 3)]).to.deep.equal([7, 8, 9])
   })
 })

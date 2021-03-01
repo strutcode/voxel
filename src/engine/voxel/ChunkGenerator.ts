@@ -245,13 +245,13 @@ export default class ChunkGenerator {
     const tundra = Database.biomeId('tundra')
     const corruption = Database.biomeId('corruption')
 
-    const air = Database.blockId('air') ?? 0
-    const grass = Database.blockId('grass') ?? 0
-    const snow = Database.blockId('snow') ?? 0
-    const water = Database.blockId('water') ?? 0
-    const sand = Database.blockId('sand') ?? 0
-    const tundragrass = Database.blockId('tundragrass') ?? 0
-    const corruptgrass = Database.blockId('corruptgrass') ?? 0
+    const air = Database.blockId('air')
+    const grass = Database.blockId('grass')
+    const snow = Database.blockId('snow')
+    const water = Database.blockId('water')
+    const sand = Database.blockId('sand')
+    const tundragrass = Database.blockId('tundragrass')
+    const corruptgrass = Database.blockId('corruptgrass')
 
     for (z = 0; z < Chunk.size; z++) {
       for (x = 0; x < Chunk.size; x++) {

@@ -2,11 +2,11 @@ import { BiomeInfo } from '../engine/Database'
 
 export default {
   0: {
-    name: 'ocean',
+    name: 'missing',
     color: {
-      r: 17,
-      g: 49,
-      b: 154,
+      r: 255,
+      g: 0,
+      b: 255,
     },
   },
   1: {
@@ -55,6 +55,14 @@ export default {
       r: 97,
       g: 66,
       b: 93,
+    },
+  },
+  7: {
+    name: 'ocean',
+    color: {
+      r: 17,
+      g: 49,
+      b: 154,
     },
   },
 } as Record<number, BiomeInfo>

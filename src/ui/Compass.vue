@@ -30,7 +30,7 @@
   export default Vue.extend({
     computed: {
       heading() {
-        const yaw = this.gameData.player?.yaw ?? 0
+        const yaw = this.gameData.player.yaw
         const revolution = Math.PI * 2
         const result = yaw / revolution
 

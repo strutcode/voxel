@@ -38,7 +38,7 @@ export default class Player extends Mobile {
   public addItem(id: number, amount?: number)
   public addItem(name: string, amount?: number)
   public addItem(input: string | number, amount = 1) {
-    const id = typeof input === 'number' ? input : Database.itemId(input) ?? 0
+    const id = typeof input === 'number' ? input : Database.itemId(input)
     const name = Database.itemInfo(id).name
     const existing = this.inventory.find(i => i.id === id)
     const item = existing ?? {

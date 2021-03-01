@@ -90,10 +90,10 @@ export default class WorldMap {
         this.depthMap.fastSet(x, y, 1 + d * 31)
 
         if (d < 0.55 && b !== arctic) {
-          this.biomeMap?.fastSet(x, y, ocean ?? 0)
+          this.biomeMap?.fastSet(x, y, ocean)
           this.depthMap?.fastSet(x, y, 32 * 0.55)
         } else if (d < 0.57 && b !== arctic && b !== tundra) {
-          this.biomeMap?.fastSet(x, y, beach ?? 0)
+          this.biomeMap?.fastSet(x, y, beach)
         }
       }
     }
@@ -130,18 +130,18 @@ export default class WorldMap {
       this.height,
     )
 
-    const grassland = Database.biomeId('grassland') ?? 0
-    const arctic = Database.biomeId('arctic') ?? 0
-    const tundra = Database.biomeId('tundra') ?? 0
-    const corruption = Database.biomeId('corruption') ?? 0
-    const desert = Database.biomeId('desert') ?? 0
+    const grassland = Database.biomeId('grassland')
+    const arctic = Database.biomeId('arctic')
+    const tundra = Database.biomeId('tundra')
+    const corruption = Database.biomeId('corruption')
+    const desert = Database.biomeId('desert')
 
     let x, y, b
 
     for (y = 0; y < this.height; y++) {
       for (x = 0; x < this.width; x++) {
         if (y === 0 || y === this.height - 1) {
-          this.biomeMap.fastSet(x, y, arctic ?? 0)
+          this.biomeMap.fastSet(x, y, arctic)
           continue
         }
 
