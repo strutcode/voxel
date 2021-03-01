@@ -7,7 +7,7 @@ import WorldMap from './WorldMap'
 import { digitKey } from './math/Bitwise'
 
 export default class World {
-  public static viewDistance = 16
+  public static viewDistance = 8
 
   public map = new WorldMap(24, 10, 7)
   private chunks = new Map<number, Chunk | null>()

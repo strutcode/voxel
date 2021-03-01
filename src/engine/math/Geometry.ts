@@ -28,5 +28,9 @@ export function euclideanDistance2d(
 }
 
 export function wrap(val: number, max: number) {
-  return (val + max) % max
+  if (val < 0) {
+    return (val % max) + max
+  }
+
+  return val % max
 }

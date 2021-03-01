@@ -220,6 +220,7 @@ export default class BabylonImplementation {
     }
 
     await loadAsset('tree')
+    await loadAsset('tree2')
     await loadAsset('pumpkin')
     await loadAsset('fox')
     await loadAsset('ocelot')
@@ -344,17 +345,6 @@ export default class BabylonImplementation {
 
     this.physicsWorld.addCollisionObject(ghost, 32, 1 | 2 | 4)
     this.physicsWorld.addAction(this.playerController)
-
-    // setTimeout(() => {
-    //   this.scene.onBeforePhysicsObservable.add(() => {
-    //     if (!player.fly) {
-    //       this.playerController.playerStep(
-    //         this.physicsWorld,
-    //         Game.deltaTime / 100000,
-    //       )
-    //     }
-    //   })
-    // }, 2000)
   }
 
   public static physicsSyncPlayer(player: Player) {

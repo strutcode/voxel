@@ -1,9 +1,32 @@
 import noise from 'asm-noise'
 import Database from '../Database'
+import { wrap } from '../math/Geometry'
 import { lerp } from '../math/Interpolation'
 import WorldMap from '../WorldMap'
 import Chunk from './Chunk'
 
+const pattern = `
+#*##*#*
+*##*#*#
+##*#*#*
+**###*#
+##*#*##
+#*####*
+*###*##
+`
+  .replace(/[\s\n]+/gm, '')
+  .split('')
+  .map(c => (c === '*' ? 1 : 0))
+
+function ditherPattern(x: number, y: number, size: number, amount: number) {
+  if (amount < 0.25) return false
+
+  const s = size + size * (1 - amount)
+
+  if (x % s >= 1 || y % s >= 1) return false
+
+  return !!pattern[wrap(Math.round(y / s), 7) * 7 + wrap(Math.round(x / s), 7)]
+}
 export default class ChunkGenerator {
   public randomize(chunk: Chunk) {
     for (let y = 0; y < Chunk.size; y++) {
@@ -235,7 +258,7 @@ export default class ChunkGenerator {
   }
 
   public overworldBiome(chunk: Chunk, map: WorldMap) {
-    let x, y, z, xx, zz
+    let x, y, z, xx, zz, c
 
     const ocean = Database.biomeId('ocean')
     const beach = Database.biomeId('beach')
@@ -281,6 +304,21 @@ export default class ChunkGenerator {
 
         for (y = 0; y < map.depthAt(xx, zz); y++) {
           chunk.set(x, y, z, type)
+        }
+
+        // Clutter
+        c = noise((xx / map.height) * 30, (zz / map.height) * 30)
+
+        if (biome === desert) {
+          if (ditherPattern(xx, zz, 5, c)) {
+            chunk.addObject('cactus', x, y, z)
+          }
+        }
+
+        if (biome === grassland) {
+          if (ditherPattern(xx, zz, 3, c)) {
+            chunk.addObject('tree2', x, y, z)
+          }
         }
       }
     }
