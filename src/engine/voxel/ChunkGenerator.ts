@@ -311,13 +311,25 @@ export default class ChunkGenerator {
 
         if (biome === desert) {
           if (ditherPattern(xx, zz, 5, c)) {
-            chunk.addObject('cactus', x, y, z)
+            chunk.addObject(
+              'cactus',
+              x,
+              y,
+              z,
+              Math.floor(Math.random() * 4) * 90,
+            )
           }
         }
 
         if (biome === grassland) {
           if (ditherPattern(xx, zz, 3, c)) {
-            chunk.addObject('tree2', x, y, z)
+            chunk.addObject(
+              'tree2',
+              x,
+              y,
+              z,
+              Math.floor(Math.random() * 4) * 90,
+            )
           }
         }
       }
