@@ -29,6 +29,7 @@ import vs from '../graphics/vs.glsl'
 import fs from '../graphics/fs.glsl'
 import Chunk from '../voxel/Chunk'
 import AmmoModule from 'ammo.js'
+import Ammo from 'ammojs-typed'
 import ObjectInfo from '../graphics/ObjectInfo'
 import Player from '../Player'
 import Mobile from '../Mobile'
@@ -158,7 +159,7 @@ export default class BabylonImplementation {
         mesh.physicsImpostor = new PhysicsImpostor(
           mesh,
           PhysicsImpostor.BoxImpostor,
-          { mass: 1 },
+          { mass: 1, group: 32, mask: 32 },
           scene,
         )
         mesh.onAfterRenderObservable.add(() => {
@@ -292,9 +293,10 @@ export default class BabylonImplementation {
       mesh.physicsImpostor = new PhysicsImpostor(
         mesh,
         PhysicsImpostor.MeshImpostor,
-        { mass: 0 },
+        { mass: 0, group: 2 | 32, mask: 2 | 32 },
         this.scene,
       )
+      mesh.physicsImpostor.physicsBody.setCollisionFlags(1)
       // mesh.showBoundingBox = true
 
       mesh.getChildMeshes = original
@@ -343,7 +345,7 @@ export default class BabylonImplementation {
       1,
     )
 
-    this.physicsWorld.addCollisionObject(ghost, 32, 1 | 2 | 4)
+    this.physicsWorld.addCollisionObject(ghost, 32, 1 | 2)
     this.physicsWorld.addAction(this.playerController)
   }
 
@@ -386,7 +388,8 @@ export default class BabylonImplementation {
       camera.position.z + direction.z,
     )
     rayCastResult = new Ammo.ClosestRayResultCallback()
-    rayCastResult.set_m_collisionFilterMask(1 | 2 | 4)
+    rayCastResult.set_m_collisionFilterMask(2)
+    rayCastResult.set_m_collisionFilterGroup(2)
     this.physicsWorld.rayTest(from, to, rayCastResult)
 
     if (rayCastResult.hasHit()) {
