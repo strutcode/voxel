@@ -29,15 +29,14 @@ import vs from '../graphics/vs.glsl'
 import fs from '../graphics/fs.glsl'
 import Chunk from '../voxel/Chunk'
 import AmmoModule from 'ammo.js'
-import Ammo from 'ammojs-typed'
+import AmmoTyped from 'ammojs-typed'
 import ObjectInfo from '../graphics/ObjectInfo'
 import Player from '../Player'
 import Mobile from '../Mobile'
 import Game from '../../Game'
 import Vector from '../math/Vector'
-import Ammo from 'ammojs-typed'
 
-let Ammo: typeof AmmoModule
+let Ammo: typeof AmmoTyped
 let rayCastResult: Ammo.ClosestRayResultCallback
 
 export default class BabylonImplementation {
@@ -293,7 +292,7 @@ export default class BabylonImplementation {
       mesh.physicsImpostor = new PhysicsImpostor(
         mesh,
         PhysicsImpostor.MeshImpostor,
-        { mass: 0, group: 2 | 32, mask: 2 | 32 },
+        { mass: 0, move: false, group: 2 | 32, mask: 2 | 32 },
         this.scene,
       )
       mesh.physicsImpostor.physicsBody.setCollisionFlags(1)
@@ -387,9 +386,9 @@ export default class BabylonImplementation {
       camera.position.y + direction.y,
       camera.position.z + direction.z,
     )
-    rayCastResult = new Ammo.ClosestRayResultCallback()
-    rayCastResult.set_m_collisionFilterMask(2)
-    rayCastResult.set_m_collisionFilterGroup(2)
+    rayCastResult = new Ammo.ClosestRayResultCallback(from, to)
+    rayCastResult.set_m_collisionFilterMask(2 | 4)
+    rayCastResult.set_m_collisionFilterGroup(2 | 4)
     this.physicsWorld.rayTest(from, to, rayCastResult)
 
     if (rayCastResult.hasHit()) {
@@ -499,6 +498,23 @@ export default class BabylonImplementation {
             for (let c = 0; c < 16; c++) {
               buffer[i * 16 + c] = mat.m[c]
             }
+
+            const transform = new Ammo.btTransform()
+            transform.setIdentity()
+            transform.setOrigin(
+              new Ammo.btVector3(
+                x * Chunk.size + object.x + 0.5, // Inverse because of gltf coordinates
+                y * Chunk.size + object.y + 1,
+                z * Chunk.size + object.z + 0.5,
+              ),
+            )
+            const info = new Ammo.btRigidBodyConstructionInfo(
+              0,
+              new Ammo.btDefaultMotionState(transform),
+              new Ammo.btBoxShape(new Ammo.btVector3(0.5, 1, 0.5)),
+            )
+            const body = new Ammo.btRigidBody(info)
+            this.physicsWorld.addRigidBody(body, 4 | 32, 4 | 32)
           })
 
           objInfo.addRange(key, buffer)
