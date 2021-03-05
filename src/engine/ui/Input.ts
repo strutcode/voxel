@@ -21,6 +21,7 @@ export default class Input {
     Fly: 'f',
     Map: 'm',
     Inventory: 'tab',
+    DevConsole: '`',
   }
   private static keyDown: Record<string, boolean> = {}
   private static key: Record<string, boolean> = {}
@@ -34,7 +35,7 @@ export default class Input {
       return acc
     }, {} as Record<string, string>)
 
-    window.addEventListener('keydown', ev => {
+    document.addEventListener('keydown', ev => {
       const key = ev.key.toLowerCase()
 
       this.keyDown[key] = true
@@ -44,25 +45,25 @@ export default class Input {
         ev.stopPropagation()
       }
     })
-    window.addEventListener('keyup', ev => {
+    document.addEventListener('keyup', ev => {
       this.keyDown[ev.key.toLowerCase()] = false
     })
 
-    window.addEventListener('pointermove', ev => {
+    document.addEventListener('pointermove', ev => {
       if (this.hasPointerLock) {
         this.axis.ViewH += ev.movementX
         this.axis.ViewV += ev.movementY
       }
     })
 
-    window.addEventListener('pointerdown', ev => {
+    document.addEventListener('pointerdown', ev => {
       if (this.hasPointerLock) {
         this.key[`mouse${ev.button}`] = true
       } else if (this.wantsPointerLock) {
         this.capturePointer()
       }
     })
-    window.addEventListener('pointerup', ev => {
+    document.addEventListener('pointerup', ev => {
       this.key[`mouse${ev.button}`] = false
     })
 

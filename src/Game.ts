@@ -11,6 +11,7 @@ import Debug from './ui/Debug.vue'
 import Inventory from './ui/Inventory.vue'
 import Compass from './ui/Compass.vue'
 import MiniMap from './ui/MiniMap.vue'
+import DevConsole from './ui/DevConsole.vue'
 import Reticle from './ui/Reticle.vue'
 
 import biomeInfo from './data/biomeInfo'
@@ -60,6 +61,7 @@ export default class Game {
     Hud.addComponent(Inventory)
     Hud.addComponent(Compass)
     Hud.addComponent(MiniMap)
+    Hud.addComponent(DevConsole)
     Hud.addComponent(Reticle)
 
     requestAnimationFrame(this.updateA)
@@ -114,6 +116,14 @@ export default class Game {
     }
 
     requestAnimationFrame(next)
+  }
+
+  public static addItem(name: string, quantity = 1) {
+    if (Database.itemId(name) === 0) {
+      throw new Error(`No such item: '${name}'`)
+    }
+
+    this.player.addItem(name, quantity)
   }
 }
 
