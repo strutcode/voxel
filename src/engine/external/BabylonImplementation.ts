@@ -18,6 +18,7 @@ import {
   Scene,
   SceneLoader,
   ShaderMaterial,
+  SSAORenderingPipeline,
   StandardMaterial,
   TargetCamera,
   Texture,
@@ -276,6 +277,21 @@ export default class BabylonImplementation {
     camera.minZ = 0.1
     camera.maxZ = 1000
     this.scene.activeCamera = camera
+
+    const ssao = new SSAORenderingPipeline('ssao', this.scene, {
+      ssaoRatio: 0.5, // Ratio of the SSAO post-process, in a lower resolution
+      combineRatio: 1.0, // Ratio of the combine post-process (combines the SSAO and the scene)
+    })
+    ssao.fallOff = 0.00001
+    ssao.area = 1
+    ssao.radius = 0.001
+    ssao.totalStrength = 1.0
+    ssao.base = 0.5
+
+    this.scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline(
+      'ssao',
+      camera,
+    )
   }
 
   public static async renderAddMob(mob: Mobile) {}
