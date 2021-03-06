@@ -5,7 +5,6 @@
     "@babylonjs/inspector": "^4.2.0",
     "@babylonjs/loaders": "^4.2.0",
     "@babylonjs/materials": "^4.2.0",
-    "ammojs-typed": "^1.0.6",
     "asm-noise": "^1.0.2",
     "vue": "^2.6.12",
     "vue-hot-reload-api": "^2.3.4"

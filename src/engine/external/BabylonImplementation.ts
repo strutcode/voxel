@@ -29,16 +29,15 @@ import '@babylonjs/loaders/glTF/2.0'
 import vs from '../graphics/vs.glsl'
 import fs from '../graphics/fs.glsl'
 import Chunk from '../voxel/Chunk'
-import AmmoModule from 'ammo.js'
-import AmmoTyped from 'ammojs-typed'
+import AmmoModule, { Ammo as AmmoType } from 'ammo.js'
 import ObjectInfo from '../graphics/ObjectInfo'
 import Player from '../Player'
 import Mobile from '../Mobile'
 import Game from '../../Game'
 import Vector from '../math/Vector'
 
-let Ammo: typeof AmmoTyped
-let rayCastResult: Ammo.ClosestRayResultCallback
+let Ammo: typeof AmmoType
+let rayCastResult: AmmoType.ClosestRayResultCallback
 
 export default class BabylonImplementation {
   private static engine: Engine
@@ -50,9 +49,9 @@ export default class BabylonImplementation {
   private static objects: Record<string, ObjectInfo> = {}
   private static _init = false
   private static chunkMesh: Record<string, Mesh> = {}
-  private static physicsWorld: Ammo.btSoftRigidDynamicsWorld
-  private static playerTransform: Ammo.btTransform
-  private static playerController: Ammo.btKinematicCharacterController
+  private static physicsWorld: AmmoType.btSoftRigidDynamicsWorld
+  private static playerTransform: AmmoType.btTransform
+  private static playerController: AmmoType.btKinematicCharacterController
   private static aimedVoxelIndicator: Mesh
 
   public static async init() {
