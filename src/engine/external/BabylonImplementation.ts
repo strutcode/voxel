@@ -363,8 +363,18 @@ export default class BabylonImplementation {
     this.physicsWorld.addAction(this.playerController)
   }
 
+  private static lastFly = false
   public static physicsSyncPlayer(player: Player) {
     if (!this.playerController) return
+
+    // Kill velocity when switching to fly mode
+    if (player.fly && !this.lastFly) {
+      this.playerController.setVelocityForTimeInterval(
+        new Ammo.btVector3(0, 0, 0),
+        1000,
+      )
+    }
+    this.lastFly = player.fly
 
     this.playerController.setGravity(player.fly ? 0 : 9.87)
     this.playerController.setWalkDirection(
