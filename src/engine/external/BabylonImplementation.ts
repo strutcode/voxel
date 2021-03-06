@@ -448,6 +448,8 @@ export default class BabylonImplementation {
     this.meshWorker.onmessage = (event: MessageEvent) => {
       const { x, y, z, attributes, objects } = event.data
 
+      if (!attributes.positions.length) return
+
       const key = `${x},${y},${z}`
 
       let mesh: Mesh = this.getChunkMesh(key)
