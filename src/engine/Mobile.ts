@@ -12,7 +12,7 @@ export default class Mobile {
   public pitch = 0
   public speed = 4
 
-  public fly = false
+  public fly = true
 
   public moveForward(amount: number) {
     const speed = this.speed * Game.deltaTime
