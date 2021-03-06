@@ -515,22 +515,22 @@ export default class BabylonImplementation {
               buffer[i * 16 + c] = mat.m[c]
             }
 
-            const transform = new Ammo.btTransform()
-            transform.setIdentity()
-            transform.setOrigin(
-              new Ammo.btVector3(
-                x * Chunk.size + object.x + 0.5, // Inverse because of gltf coordinates
-                y * Chunk.size + object.y + 1,
-                z * Chunk.size + object.z + 0.5,
-              ),
-            )
-            const info = new Ammo.btRigidBodyConstructionInfo(
-              0,
-              new Ammo.btDefaultMotionState(transform),
-              new Ammo.btBoxShape(new Ammo.btVector3(0.5, 1, 0.5)),
-            )
-            const body = new Ammo.btRigidBody(info)
-            this.physicsWorld.addRigidBody(body, 4 | 32, 4 | 32)
+            // const transform = new Ammo.btTransform()
+            // transform.setIdentity()
+            // transform.setOrigin(
+            //   new Ammo.btVector3(
+            //     x * Chunk.size + object.x + 0.5, // Inverse because of gltf coordinates
+            //     y * Chunk.size + object.y + 1,
+            //     z * Chunk.size + object.z + 0.5,
+            //   ),
+            // )
+            // const info = new Ammo.btRigidBodyConstructionInfo(
+            //   0,
+            //   new Ammo.btDefaultMotionState(transform),
+            //   new Ammo.btBoxShape(new Ammo.btVector3(0.5, 1, 0.5)),
+            // )
+            // const body = new Ammo.btRigidBody(info)
+            // this.physicsWorld.addRigidBody(body, 4 | 32, 4 | 32)
           })
 
           objInfo.addRange(key, buffer)
