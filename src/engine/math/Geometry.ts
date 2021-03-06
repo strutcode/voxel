@@ -27,6 +27,17 @@ export function euclideanDistance2d(
   return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 }
 
+export function euclideanDistance3d(
+  x1: number,
+  y1: number,
+  z1: number,
+  x2: number,
+  y2: number,
+  z2: number,
+) {
+  return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2)
+}
+
 export function wrap(val: number, max: number) {
   if (val < 0) {
     return (val % max) + max

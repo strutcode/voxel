@@ -50,9 +50,13 @@ export default class Game {
 
     this.player = new Player()
     this.player.position.x = this.world.width / 2
-    this.player.position.y = 42
+    this.player.position.y = this.world.map.heightAt(
+      this.world.width / 2,
+      this.world.height / 2,
+    ) + 2
     this.player.position.z = this.world.height / 2
 
+    await this.world.init()
     await Hud.init()
 
     Physics.addPlayer(this.player)

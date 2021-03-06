@@ -1,5 +1,5 @@
 import Chunk from './voxel/Chunk'
-import { euclideanDistance2d, manhattanDistance2d, wrap } from './math/Geometry'
+import { euclideanDistance3d, wrap } from './math/Geometry'
 import Physics from './physics/Physics'
 import Renderer from './graphics/Renderer'
 import Vector from './math/Vector'
@@ -20,6 +20,22 @@ export default class World {
     this.setupWorker()
   }
 
+  public async init() {
+    const { x, y, z } = this.viewPos
+
+    // Just prioritize player's chunk for now
+    this.maybeLoadChunk(x, y, z)
+
+    await new Promise<void>(resolve => {
+      const timer = setInterval(() => {
+        if (this.isReady(x, y, z)) {
+          clearTimeout(timer)
+          resolve()
+        }
+      }, 10)
+    })
+  }
+
   public get width() {
     return this.map.width
   }
@@ -32,24 +48,27 @@ export default class World {
     this.viewPos.x = Math.floor(position.x / Chunk.size)
     this.viewPos.y = Math.floor(position.y / Chunk.size)
     this.viewPos.z = Math.floor(position.z / Chunk.size)
-    this.visited.clear()
-    this.checkChunk(this.viewPos.x, 0, this.viewPos.z)
 
-    // HACK: The flood fill algorithm should remove these
-    this.chunks.forEach(chunk => {
-      if (!chunk) return
-
-      const distance = euclideanDistance2d(
-        chunk.x,
-        chunk.z,
-        this.viewPos.x,
-        this.viewPos.z,
-      )
-
-      if (distance > World.viewDistance) {
-        this.unloadChunk(chunk.x, chunk.y, chunk.z)
+    let x, y, z, distance
+    for (
+      x = this.viewPos.x - World.viewDistance;
+      x < this.viewPos.x + World.viewDistance;
+      x++
+    ) {
+      for (
+        y = this.viewPos.y - World.viewDistance;
+        y < this.viewPos.y + World.viewDistance;
+        y++
+      ) {
+        for (
+          z = this.viewPos.z - World.viewDistance;
+          z < this.viewPos.z + World.viewDistance;
+          z++
+        ) {
+          this.maybeLoadChunk(x, y, z)
+        }
       }
-    })
+    }
   }
 
   public getBlock(x: number, y: number, z: number): number | null {
@@ -92,30 +111,28 @@ export default class World {
     }
   }
 
-  private checkChunk(x: number, y: number, z: number) {
-    const key = digitKey(x, y, z)
-    this.visited.add(key)
-    const distance = euclideanDistance2d(this.viewPos.x, this.viewPos.z, x, z)
+  private maybeLoadChunk(x: number, y: number, z: number) {
+    if (y < 0) return
 
-    if (this.isLoaded(x, y, z)) {
-      if (distance > World.viewDistance) {
+    const distance = euclideanDistance3d(
+      this.viewPos.x,
+      this.viewPos.y,
+      this.viewPos.z,
+      x,
+      y,
+      z,
+    )
+
+    if (distance > World.viewDistance) {
+      if (this.isLoaded(x, y, z)) {
         this.unloadChunk(x, y, z)
-      } else {
-        if (!this.visited.has(digitKey(x - 1, 0, z))) {
-          this.checkChunk(x - 1, 0, z)
-        }
-        if (!this.visited.has(digitKey(x + 1, 0, z))) {
-          this.checkChunk(x + 1, 0, z)
-        }
-        if (!this.visited.has(digitKey(x, 0, z - 1))) {
-          this.checkChunk(x, 0, z - 1)
-        }
-        if (!this.visited.has(digitKey(x, 0, z + 1))) {
-          this.checkChunk(x, 0, z + 1)
-        }
+      }
+    } else {
+      if (!this.isLoaded(x, y, z)) {
+        this.loadChunk(x, y, z)
       }
 
-      const chunk = this.chunks.get(key)
+      const chunk = this.chunks.get(digitKey(x, y, z))
       if (chunk) {
         if (distance < 3) {
           Physics.addChunk(chunk)
@@ -123,13 +140,16 @@ export default class World {
           Physics.remChunk(chunk)
         }
       }
-    } else if (distance <= World.viewDistance) {
-      this.loadChunk(x, y, z)
     }
   }
 
   private isLoaded(x: number, y: number, z: number) {
     return this.chunks.has(digitKey(x, y, z))
+  }
+
+  private isReady(x: number, y: number, z: number) {
+    // TODO: This doesn't account for meshing and physics
+    return !!this.chunks.get(digitKey(x, y, z))
   }
 
   private loadChunk(x: number, y: number, z: number) {

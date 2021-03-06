@@ -258,7 +258,7 @@ export default class ChunkGenerator {
   }
 
   public overworldBiome(chunk: Chunk, map: WorldMap) {
-    let x, y, z, xx, zz, c
+    let x, y, z, xx, yy, zz, c
 
     const ocean = Database.biomeId('ocean')
     const beach = Database.biomeId('beach')
@@ -279,6 +279,7 @@ export default class ChunkGenerator {
     for (z = 0; z < Chunk.size; z++) {
       for (x = 0; x < Chunk.size; x++) {
         xx = chunk.x * Chunk.size + x
+        yy = chunk.y * Chunk.size
         zz = chunk.z * Chunk.size + z
 
         const biome = map.biomeAt(xx, zz)
@@ -302,9 +303,11 @@ export default class ChunkGenerator {
           }
         })()
 
-        for (y = 0; y < map.depthAt(xx, zz); y++) {
+        for (y = 0; yy + y < map.heightAt(xx, zz); y++) {
           chunk.set(x, y, z, type)
         }
+
+        if (y > map.heightAt(xx, zz)) continue
 
         // Clutter
         c = noise((xx / map.height) * 30, (zz / map.height) * 30)

@@ -87,11 +87,11 @@ export default class WorldMap {
         d = noise((x / this.height) * 3, (y / this.height) * 3)
         b = this.biomeMap?.fastGet(x, y)
 
-        this.depthMap.fastSet(x, y, 1 + d * 31)
+        this.depthMap.fastSet(x, y, 1 + d * 255)
 
         if (d < 0.55 && b !== arctic) {
           this.biomeMap?.fastSet(x, y, ocean)
-          this.depthMap?.fastSet(x, y, 32 * 0.55)
+          this.depthMap?.fastSet(x, y, 256 * 0.55)
         } else if (d < 0.57 && b !== arctic && b !== tundra) {
           this.biomeMap?.fastSet(x, y, beach)
         }
@@ -242,7 +242,7 @@ export default class WorldMap {
     return this.biomeMap.get(x, y)
   }
 
-  public depthAt(x: number, y: number) {
+  public heightAt(x: number, y: number) {
     if (!this.depthMap) return 0
 
     return this.depthMap.get(x, y)
