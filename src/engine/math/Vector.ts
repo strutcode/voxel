@@ -1,7 +1,5 @@
 export default class Vector {
-  public x = 0
-  public y = 0
-  public z = 0
+  private data = [0, 0, 0]
 
   public static fromArray(input: number[]) {
     return new Vector(input)
@@ -21,9 +19,72 @@ export default class Vector {
     }
   }
 
+  public get x() {
+    return this.data[0]
+  }
+  public get y() {
+    return this.data[1]
+  }
+  public get z() {
+    return this.data[2]
+  }
+  public set x(val) {
+    this.data[0] = val
+  }
+  public set y(val) {
+    this.data[1] = val
+  }
+  public set z(val) {
+    this.data[2] = val
+  }
+
   public set(x: number, y: number, z: number) {
-    this.x = x
-    this.y = y
-    this.z = z
+    this.data[0] = x
+    this.data[1] = y
+    this.data[2] = z
+  }
+
+  public get asArray() {
+    return this.data
+  }
+
+  public add(other: Vector | number) {
+    if (typeof other === 'number') {
+      return new Vector(this.x + other, this.y + other, this.z + other)
+    }
+
+    return new Vector(this.x + other.x, this.y + other.y, this.z + other.z)
+  }
+
+  public sub(other: Vector | number) {
+    if (typeof other === 'number') {
+      return new Vector(this.x - other, this.y - other, this.z - other)
+    }
+
+    return new Vector(this.x - other.x, this.y - other.y, this.z - other.z)
+  }
+
+  public mul(other: Vector | number) {
+    if (typeof other === 'number') {
+      return new Vector(this.x * other, this.y * other, this.z * other)
+    }
+
+    return new Vector(this.x * other.x, this.y * other.y, this.z * other.z)
+  }
+
+  public div(other: Vector | number) {
+    if (typeof other === 'number') {
+      return new Vector(this.x / other, this.y / other, this.z / other)
+    }
+
+    return new Vector(this.x / other.x, this.y / other.y, this.z / other.z)
+  }
+
+  public cross(other: Vector) {
+    return new Vector(
+      this.y * other.z - this.z * other.y,
+      this.z * other.x - this.x * other.z,
+      this.x * other.y - this.y * other.x,
+    )
   }
 }

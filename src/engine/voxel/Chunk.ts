@@ -1,3 +1,5 @@
+import { digitKey } from '../math/Bitwise'
+
 const blockPos = (x: number, y: number, z: number) =>
   Math.floor(y * Chunk.squareSize + z * Chunk.size + x)
 
@@ -33,6 +35,10 @@ export default class Chunk {
   public objects: Record<string, ChunkObject[]> = {}
 
   constructor(public x = 0, public y = 0, public z = 0) {}
+
+  public get key() {
+    return digitKey(this.x, this.y, this.z)
+  }
 
   public get(x: number, y: number, z: number): number {
     if (!this.chunkStore) {
