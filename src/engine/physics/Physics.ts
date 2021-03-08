@@ -4,6 +4,7 @@ import Player from '../Player'
 import Vector from '../math/Vector'
 import Renderer from '../graphics/Renderer'
 import AmmoModule, { Ammo as AmmoType } from 'ammo.js'
+import Game from '../../Game'
 
 let Ammo: typeof AmmoType
 
@@ -15,10 +16,19 @@ export default class Physics {
 
   public static async init() {
     Ammo = await AmmoModule()
+
+    const collisionConfig = new Ammo.btDefaultCollisionConfiguration()
+    this.world = new Ammo.btDiscreteDynamicsWorld(
+      new Ammo.btCollisionDispatcher(collisionConfig),
+      new Ammo.btDbvtBroadphase(),
+      new Ammo.btSequentialImpulseConstraintSolver(),
+      collisionConfig,
+    )
   }
 
   public static update() {
     this.updateAimedVoxel()
+    this.world.stepSimulation(Game.deltaTimeMs)
   }
 
   public static addChunk(chunk: Chunk) {
@@ -36,7 +46,6 @@ export default class Physics {
   public static addPlayer(player: Player) {
     const shape = new Ammo.btCapsuleShape(0.6 / 2, 1.7 / 2)
     const transform = new Ammo.btTransform()
-
     transform.setIdentity()
     transform.setOrigin(
       new Ammo.btVector3(
@@ -45,7 +54,6 @@ export default class Physics {
         player.position.z,
       ),
     )
-
     const ghost = new Ammo.btPairCachingGhostObject()
     ghost.setWorldTransform(transform)
     ghost.setCollisionShape(shape)
@@ -53,14 +61,12 @@ export default class Physics {
     this.world
       .getPairCache()
       .setInternalGhostPairCallback(new Ammo.btGhostPairCallback())
-
     this.playerTransform = ghost.getWorldTransform()
     this.playerController = new Ammo.btKinematicCharacterController(
       ghost,
       shape,
       1,
     )
-
     this.world.addCollisionObject(ghost, 32, 1 | 2)
     this.world.addAction(this.playerController)
   }

@@ -16,7 +16,7 @@ varying float v_ti;
 varying float v_col;
 
 void main(void) {
-  mat4 worldViewProjection = world * viewProjection;
+  mat4 worldViewProjection = viewProjection * world;
   vec4 worldPosition = world * vec4(position, 1.0);
   viewDistance = distance(viewPosition, worldPosition.xyz);
   gl_Position = worldViewProjection * vec4(position, 1.0);

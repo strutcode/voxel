@@ -22,6 +22,7 @@ export default class Input {
     Map: 'm',
     Inventory: 'tab',
     DevConsole: '`',
+    DebugOverlay: 'f1',
   }
   private static keyDown: Record<string, boolean> = {}
   private static key: Record<string, boolean> = {}

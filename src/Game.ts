@@ -27,6 +27,7 @@ export default class Game {
   public static state: GameState = GameState.Play
   public static world: World
   public static player: Player
+  public static deltaTimeMs = 0
   public static deltaTime = 0
   private static lastFrame = performance.now()
 
@@ -49,12 +50,13 @@ export default class Game {
     }
 
     this.player = new Player()
-    this.player.position.x = this.world.width / 2
-    this.player.position.y = this.world.map.heightAt(
-      this.world.width / 2,
-      this.world.height / 2,
-    ) + 2
-    this.player.position.z = this.world.height / 2
+    this.player.position.x = 0
+    this.player.position.y = 0
+    this.player.position.z = 0
+    // this.player.position.x = this.world.width / 2
+    // this.player.position.y =
+    //   this.world.map.heightAt(this.world.width / 2, this.world.height / 2) + 2
+    // this.player.position.z = this.world.height / 2
 
     await this.world.init()
     await Hud.init()
@@ -74,7 +76,8 @@ export default class Game {
   public static update(next: () => void) {
     if (this.state === GameState.Play) {
       const time = performance.now()
-      this.deltaTime = (time - this.lastFrame) / 1000
+      this.deltaTimeMs = time - this.lastFrame
+      this.deltaTime = this.deltaTimeMs / 1000
       this.lastFrame = time
 
       Input.startFrame()
@@ -114,7 +117,7 @@ export default class Game {
       }
 
       this.world.updateView(Renderer.getViewPosition(), new Vector())
-      Physics.update()
+      Physics.update(this.deltaTimeMs)
       Renderer.render()
       Input.endFrame()
     }
@@ -137,4 +140,5 @@ Object.assign(globalThis, {
   Renderer,
   Game,
   Database,
+  Hud,
 })

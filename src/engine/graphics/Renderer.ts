@@ -5,20 +5,23 @@ import Player from '../Player'
 import Game from '../../Game'
 import Physics from '../physics/Physics'
 import {
+  addExtensionsToContext,
   BufferInfo,
   createBufferInfoFromArrays,
   createProgramInfo,
   drawBufferInfo,
   getContext,
   m4,
+  primitives,
+  ProgramInfo,
   resizeCanvasToDisplaySize,
   setBuffersAndAttributes,
   setUniforms,
 } from 'twgl.js'
 import Camera from './Camera'
 import { digitKey } from '../math/Bitwise'
-import vs from './vs.glsl'
-import fs from './fs.glsl'
+import vs from './shaders/basic.vs.glsl'
+import fs from './shaders/basic.fs.glsl'
 
 interface ChunkMesh {
   x: number
@@ -28,15 +31,15 @@ interface ChunkMesh {
 }
 
 export default class Renderer {
-  private static viewPos = new Vector()
   private static camera = new Camera()
   private static context: WebGLRenderingContext
   private static chunkMeshes = new Map<number, ChunkMesh>()
   private static meshWorker = new Worker('../voxel/ChunkMesher.worker.ts')
-  private static basicShader
+  private static basicShader: ProgramInfo
+  private static sphere: BufferInfo
 
   public static async init() {
-    const container = document.getElementById('app')
+    const container = document.getElementById('game')
     const canvas = document.createElement('canvas')
     Object.assign(container?.style, {
       position: 'fixed',
@@ -52,11 +55,16 @@ export default class Renderer {
     container?.appendChild(canvas)
 
     this.context = getContext(canvas)
+    addExtensionsToContext(this.context)
+    resizeCanvasToDisplaySize(canvas)
+
     this.camera.aspect = this.width / this.height
+    this.camera.position.set(0, 0, 0)
+    this.camera.direction.set(0, 0, 1)
 
     this.basicShader = createProgramInfo(this.context, [vs, fs])
 
-    resizeCanvasToDisplaySize(canvas)
+    this.sphere = primitives.createSphereBufferInfo(this.context, 1, 16, 16)
 
     window.addEventListener('resize', () => {
       this.camera.aspect = this.width / this.height
@@ -79,29 +87,42 @@ export default class Renderer {
 
     if (Game.player) {
       this.camera.position = Game.player.position
+      this.camera.direction.set(
+        Math.sin(Game.player.yaw) * Math.cos(Game.player.pitch),
+        -Math.sin(Game.player.pitch),
+        Math.cos(Game.player.yaw) * Math.cos(Game.player.pitch),
+      )
     }
 
     // const aimPos = Physics.getAimedVoxel()
 
-    gl.enable(gl.DEPTH_TEST)
-    gl.enable(gl.CULL_FACE)
+    // gl.enable(gl.DEPTH_TEST)
+    // gl.enable(gl.CULL_FACE)
     gl.viewport(0, 0, this.width, this.height)
 
     // Render color/depth
     gl.clearColor(0.7, 0.8, 1, 1)
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-    this.camera.render(gl)
+    this.camera.render()
 
     gl.useProgram(this.basicShader.program)
     const uniforms = {
-      world: m4.identity(),
+      world: m4.translation([0, 0, 0]),
       viewProjection: this.camera.viewProjection,
       viewPosition: this.camera.position.asArray,
     }
 
+    setBuffersAndAttributes(gl, this.basicShader, this.sphere)
+    setUniforms(this.basicShader, uniforms)
+    drawBufferInfo(gl, this.sphere)
+
     for (let chunk of this.chunkMeshes.values()) {
-      uniforms.world = m4.translation([chunk.x, chunk.y, chunk.z])
+      uniforms.world = m4.translation([
+        chunk.x * Chunk.size,
+        chunk.y * Chunk.size,
+        chunk.z * Chunk.size,
+      ])
       setBuffersAndAttributes(gl, this.basicShader, chunk.bufferInfo)
       setUniforms(this.basicShader, uniforms)
       drawBufferInfo(gl, chunk.bufferInfo)
@@ -109,15 +130,15 @@ export default class Renderer {
   }
 
   public static async addChunk(chunk: Chunk) {
-    // await BabylonImplementation.renderAddChunk(chunk)
+    this.meshWorker.postMessage(chunk.serialize())
   }
 
   public static async updateChunk(chunk: Chunk) {
-    // await BabylonImplementation.renderUpdateChunk(chunk)
+    this.meshWorker.postMessage(chunk.serialize())
   }
 
   public static async remChunk(chunk: Chunk) {
-    // await BabylonImplementation.renderRemChunk(chunk)
+    this.chunkMeshes.delete(chunk.key)
   }
 
   public static addPlayer(player: Player) {
@@ -145,9 +166,16 @@ export default class Renderer {
         bufferInfo: createBufferInfoFromArrays(this.context, {
           positions: attributes.positions,
           indices: attributes.indices,
-          uvs: attributes.uvs,
+          uvs: {
+            data: attributes.uvs,
+            numComponents: 2,
+          },
           colors: attributes.colors,
-          texInd: attributes.texInds,
+          normals: attributes.normals,
+          texInd: {
+            data: attributes.texInds,
+            numComponents: 1,
+          },
         }),
       })
     }

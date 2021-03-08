@@ -5,16 +5,23 @@ import Input from './Input'
 type Component = ReturnType<typeof Vue.extend>
 
 Vue.config.productionTip = false
+Vue.config.devtools = false
 
 export default class Hud {
   private static root: HTMLDivElement
   private static vue: Component
   private static gameData = {
     player: null,
+    position: {
+      x: 0,
+      y: 0,
+      z: 0,
+    },
     map: null,
     showMap: false,
     showInventory: false,
     showConsole: false,
+    showDebug: true,
   }
 
   public static async init() {
@@ -61,6 +68,9 @@ export default class Hud {
   public static update() {
     Hud.gameData.player = Game.player
     Hud.gameData.map = Game.world.map
+    Hud.gameData.position.x = Game.player.position.x
+    Hud.gameData.position.y = Game.player.position.y
+    Hud.gameData.position.z = Game.player.position.z
 
     if (Input.getButton('Map')) {
       Hud.gameData.showMap = !Hud.gameData.showMap
@@ -68,6 +78,10 @@ export default class Hud {
 
     if (Input.getButton('DevConsole')) {
       Hud.gameData.showConsole = !Hud.gameData.showConsole
+    }
+
+    if (Input.getButton('DebugOverlay')) {
+      Hud.gameData.showDebug = !Hud.gameData.showDebug
     }
 
     if (Input.getButton('Inventory')) {

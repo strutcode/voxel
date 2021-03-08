@@ -2,10 +2,11 @@ import { m4 } from 'twgl.js'
 import Vector from '../math/Vector'
 
 const worldUp = new Vector(0, 1, 0)
+const fovToRadians = 0.008726646259971648 // Baked degrees to radians divided by 2
 
 export default class Camera {
-  public position: Vector = new Vector()
-  public direction: Vector = new Vector(0, -0.5, 0.5)
+  public position = new Vector()
+  public direction = new Vector(0, 0, 1)
   public right!: Vector
   public up!: Vector
   public eye: m4.Mat4 = m4.identity()
@@ -34,16 +35,19 @@ export default class Camera {
     )
     m4.inverse(this.eye, this.view)
     m4.perspective(
-      ((this.fov / 2) * Math.PI) / 180,
-      this.aspect,
+      this.fov * fovToRadians,
+      -this.aspect,
       this.near,
       this.far,
       this.projection,
     )
+    // this.projection[11] = 1
+    // this.projection[10] = -this.projection[10]
+    // this.projection[14] = -this.projection[14]
     m4.multiply(this.projection, this.view, this.viewProjection)
   }
 
-  render(gl: WebGLRenderingContext) {
+  render() {
     this.updateProjection()
   }
 }
