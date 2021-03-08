@@ -1,19 +1,20 @@
+#version 300 es
 #ifdef GL_ES
-    precision highp float;
+  precision highp float;
 #endif
 
-attribute vec3 position;
-attribute vec2 uv;
-attribute float shade;
-attribute float texInd;
+in vec3 position;
+in vec2 uv;
+in float shade;
+in float texInd;
 uniform mat4 world;
 uniform mat4 viewProjection;
 uniform vec3 viewPosition;
 
-varying float viewDistance;
-varying vec2 v_uv;
-varying float v_ti;
-varying float v_col;
+out float viewDistance;
+out vec2 v_uv;
+out float v_ti;
+out float v_col;
 
 void main(void) {
   mat4 worldViewProjection = viewProjection * world;

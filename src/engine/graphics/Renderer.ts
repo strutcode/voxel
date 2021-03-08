@@ -9,6 +9,7 @@ import {
   BufferInfo,
   createBufferInfoFromArrays,
   createProgramInfo,
+  createTexture,
   drawBufferInfo,
   getContext,
   m4,
@@ -20,8 +21,9 @@ import {
 } from 'twgl.js'
 import Camera from './Camera'
 import { digitKey } from '../math/Bitwise'
-import vs from './shaders/basic.vs.glsl'
-import fs from './shaders/basic.fs.glsl'
+import vs from './vs.glsl'
+import fs from './fs.glsl'
+import World from '../World'
 
 interface ChunkMesh {
   x: number
@@ -36,7 +38,7 @@ export default class Renderer {
   private static chunkMeshes = new Map<number, ChunkMesh>()
   private static meshWorker = new Worker('../voxel/ChunkMesher.worker.ts')
   private static basicShader: ProgramInfo
-  private static sphere: BufferInfo
+  private static texture
 
   public static async init() {
     const container = document.getElementById('game')
@@ -58,13 +60,22 @@ export default class Renderer {
     addExtensionsToContext(this.context)
     resizeCanvasToDisplaySize(canvas)
 
+    const gl = this.context
+
     this.camera.aspect = this.width / this.height
+    this.camera.far = 32 * 17
     this.camera.position.set(0, 0, 0)
     this.camera.direction.set(0, 0, 1)
 
-    this.basicShader = createProgramInfo(this.context, [vs, fs])
-
-    this.sphere = primitives.createSphereBufferInfo(this.context, 1, 16, 16)
+    this.basicShader = createProgramInfo(gl, [vs, fs])
+    this.texture = createTexture(gl, {
+      src: '/tileset.png',
+      target: gl.TEXTURE_2D_ARRAY,
+      min: gl.LINEAR,
+      mag: gl.NEAREST,
+      width: 16,
+      height: 16,
+    })
 
     window.addEventListener('resize', () => {
       this.camera.aspect = this.width / this.height
@@ -96,8 +107,8 @@ export default class Renderer {
 
     // const aimPos = Physics.getAimedVoxel()
 
-    // gl.enable(gl.DEPTH_TEST)
-    // gl.enable(gl.CULL_FACE)
+    gl.enable(gl.DEPTH_TEST)
+    gl.enable(gl.CULL_FACE)
     gl.viewport(0, 0, this.width, this.height)
 
     // Render color/depth
@@ -108,25 +119,24 @@ export default class Renderer {
 
     gl.useProgram(this.basicShader.program)
     const uniforms = {
-      world: m4.translation([0, 0, 0]),
+      world: m4.identity(),
+      tiles: this.texture,
       viewProjection: this.camera.viewProjection,
       viewPosition: this.camera.position.asArray,
+      fogEnd: (World.viewDistance - 1) * Chunk.size,
+      fogStart: (World.viewDistance - 1) * Chunk.size * 0.75,
+      fogColor: [0.7, 0.8, 1],
     }
 
-    setBuffersAndAttributes(gl, this.basicShader, this.sphere)
-    setUniforms(this.basicShader, uniforms)
-    drawBufferInfo(gl, this.sphere)
-
-    for (let chunk of this.chunkMeshes.values()) {
-      uniforms.world = m4.translation([
-        chunk.x * Chunk.size,
-        chunk.y * Chunk.size,
-        chunk.z * Chunk.size,
-      ])
+    this.chunkMeshes.forEach(chunk => {
+      m4.translation(
+        [chunk.x * Chunk.size, chunk.y * Chunk.size, chunk.z * Chunk.size],
+        uniforms.world,
+      )
       setBuffersAndAttributes(gl, this.basicShader, chunk.bufferInfo)
       setUniforms(this.basicShader, uniforms)
       drawBufferInfo(gl, chunk.bufferInfo)
-    }
+    })
   }
 
   public static async addChunk(chunk: Chunk) {
@@ -154,6 +164,8 @@ export default class Renderer {
   }
 
   private static initWorker() {
+    const gl = this.context
+
     this.meshWorker.onmessage = (event: MessageEvent) => {
       const { x, y, z, attributes, objects } = event.data
 
@@ -164,14 +176,26 @@ export default class Renderer {
         y,
         z,
         bufferInfo: createBufferInfoFromArrays(this.context, {
-          positions: attributes.positions,
+          position: {
+            data: attributes.positions,
+            type: gl.UNSIGNED_BYTE,
+            numComponents: 3,
+            normalize: false,
+          },
           indices: attributes.indices,
-          uvs: {
+          uv: {
             data: attributes.uvs,
+            type: gl.BYTE,
+            normalize: false,
             numComponents: 2,
           },
-          colors: attributes.colors,
-          normals: attributes.normals,
+          shade: {
+            data: attributes.colors,
+            type: gl.BYTE,
+            normalize: false,
+            numComponents: 1,
+          }
+          normal: attributes.normals,
           texInd: {
             data: attributes.texInds,
             numComponents: 1,
