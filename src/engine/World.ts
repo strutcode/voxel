@@ -134,7 +134,7 @@ export default class World {
 
       const chunk = this.chunks.get(digitKey(x, y, z))
       if (chunk) {
-        if (distance < 3) {
+        if (distance < 1) {
           Physics.addChunk(chunk)
         } else {
           Physics.remChunk(chunk)

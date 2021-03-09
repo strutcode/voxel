@@ -32,10 +32,16 @@ interface ChunkMesh {
   bufferInfo: BufferInfo
 }
 
+interface ChunkAttributes {
+  positions: Uint8Array
+  indices: Uint32Array
+}
+
 export default class Renderer {
   private static camera = new Camera()
   private static context: WebGLRenderingContext
   private static chunkMeshes = new Map<number, ChunkMesh>()
+  private static chunkAttrs = new Map<number, ChunkAttributes>()
   private static meshWorker = new Worker('../voxel/ChunkMesher.worker.ts')
   private static basicShader: ProgramInfo
   private static texture
@@ -97,7 +103,11 @@ export default class Renderer {
     const gl = this.context
 
     if (Game.player) {
-      this.camera.position = Game.player.position
+      this.camera.position.set(
+        Game.player.position.x,
+        Game.player.position.y + 0.8,
+        Game.player.position.z,
+      )
       this.camera.direction.set(
         Math.sin(Game.player.yaw) * Math.cos(Game.player.pitch),
         -Math.sin(Game.player.pitch),
@@ -171,30 +181,33 @@ export default class Renderer {
 
       if (!attributes.positions.length) return
 
-      this.chunkMeshes.set(digitKey(x, y, z), {
+      const key = digitKey(x, y, z)
+      this.chunkAttrs.set(key, attributes)
+
+      this.chunkMeshes.set(key, {
         x,
         y,
         z,
         bufferInfo: createBufferInfoFromArrays(this.context, {
           position: {
             data: attributes.positions,
-            type: gl.UNSIGNED_BYTE,
+            type: (gl.UNSIGNED_BYTE as unknown) as Function,
             numComponents: 3,
             normalize: false,
           },
           indices: attributes.indices,
           uv: {
             data: attributes.uvs,
-            type: gl.BYTE,
+            type: (gl.BYTE as unknown) as Function,
             normalize: false,
             numComponents: 2,
           },
           shade: {
             data: attributes.colors,
-            type: gl.BYTE,
+            type: (gl.BYTE as unknown) as Function,
             normalize: false,
             numComponents: 1,
-          }
+          },
           normal: attributes.normals,
           texInd: {
             data: attributes.texInds,
@@ -203,5 +216,9 @@ export default class Renderer {
         }),
       })
     }
+  }
+
+  public static getChunkAttributes(key: number) {
+    return this.chunkAttrs.get(key)
   }
 }

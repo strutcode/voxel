@@ -8,11 +8,16 @@ import Game from '../../Game'
 
 let Ammo: typeof AmmoType
 
+interface ChunkBody {
+  body: AmmoType.btRigidBody
+}
+
 export default class Physics {
-  private static aimedBlock: Vector | null = new Vector()
+  private static aimedBlock: Vector | null = null
   private static world: AmmoType.btDiscreteDynamicsWorld
   private static playerTransform: AmmoType.btTransform
   private static playerController: AmmoType.btKinematicCharacterController
+  private static chunkObjects = new Map<number, ChunkBody>()
 
   public static async init() {
     Ammo = await AmmoModule()
@@ -27,21 +32,64 @@ export default class Physics {
   }
 
   public static update() {
+    this.world.stepSimulation(0.016666666666666666, 0)
     this.updateAimedVoxel()
-    this.world.stepSimulation(Game.deltaTimeMs)
   }
 
   public static addChunk(chunk: Chunk) {
-    // BabylonImplementation.physicsAddChunk(chunk)
+    const key = chunk.key
+
+    if (this.chunkObjects.has(key)) return
+
+    const buffers = Renderer.getChunkAttributes(key)
+    if (!buffers) return
+
+    const mesh = new Ammo.btTriangleMesh()
+    const indices = buffers.indices
+    const vertices = buffers.positions
+    const pointA = new Ammo.btVector3()
+    const pointB = new Ammo.btVector3()
+    const pointC = new Ammo.btVector3()
+
+    let a, b, c, i
+    for (i = 0; i < indices.length; i++) {
+      a = indices[i] * 3
+      b = indices[i + 1] * 3
+      c = indices[i + 2] * 3
+
+      pointA.setValue(vertices[a], vertices[a + 1], vertices[a + 2])
+      pointB.setValue(vertices[b], vertices[b + 1], vertices[b + 2])
+      pointC.setValue(vertices[c], vertices[c + 1], vertices[c + 2])
+
+      mesh.addTriangle(pointA, pointB, pointC)
+    }
+
+    const shape = new Ammo.btBvhTriangleMeshShape(mesh, true, true)
+    const transform = new Ammo.btTransform()
+    transform.setIdentity()
+    transform.setOrigin(
+      new Ammo.btVector3(
+        chunk.x * Chunk.size,
+        chunk.y * Chunk.size,
+        chunk.z * Chunk.size,
+      ),
+    )
+    const constInfo = new Ammo.btRigidBodyConstructionInfo(
+      0,
+      new Ammo.btDefaultMotionState(transform),
+      shape,
+    )
+    const body = new Ammo.btRigidBody(constInfo)
+    this.world.addRigidBody(body, 2 | 32, 2 | 32)
+
+    this.chunkObjects.set(key, {
+      body,
+    })
   }
 
-  public static updateChunk(chunk: Chunk) {
-    // BabylonImplementation.physicsUpdateChunk(chunk)
-  }
+  public static updateChunk(chunk: Chunk) {}
 
-  public static remChunk(chunk: Chunk) {
-    // BabylonImplementation.physicsRemChunk(chunk)
-  }
+  public static remChunk(chunk: Chunk) {}
 
   public static addPlayer(player: Player) {
     const shape = new Ammo.btCapsuleShape(0.6 / 2, 1.7 / 2)
@@ -79,7 +127,7 @@ export default class Physics {
     if (player.fly && !this.lastFly) {
       this.playerController.setVelocityForTimeInterval(
         new Ammo.btVector3(0, 0, 0),
-        1000,
+        0,
       )
     }
     this.lastFly = player.fly
@@ -109,9 +157,9 @@ export default class Physics {
 
     const from = new Ammo.btVector3(position.x, position.y, position.z)
     const to = new Ammo.btVector3(
-      position.x + direction.x,
-      position.y + direction.y,
-      position.z + direction.z,
+      position.x + direction.x * 10,
+      position.y + direction.y * 10,
+      position.z + direction.z * 10,
     )
     const rayCastResult = new Ammo.ClosestRayResultCallback(from, to)
     rayCastResult.set_m_collisionFilterMask(2 | 4)
@@ -119,19 +167,17 @@ export default class Physics {
     this.world.rayTest(from, to, rayCastResult)
 
     if (rayCastResult.hasHit()) {
+      const hit = rayCastResult.get_m_hitPointWorld()
       const normal = rayCastResult.get_m_hitNormalWorld()
-      const f = rayCastResult.get_m_closestHitFraction() - 0.0001
 
-      const result = new Vector(
-        Math.floor(position.x + direction.x * f - normal.x()),
-        Math.floor(position.y + direction.y * f - normal.y()),
-        Math.floor(position.z + direction.z * f - normal.z()),
+      this.aimedBlock = new Vector(
+        Math.floor(hit.x() - normal.x() * 0.5),
+        Math.floor(hit.y() - normal.y() * 0.5),
+        Math.floor(hit.z() - normal.z() * 0.5),
       )
-
-      return result
+    } else {
+      this.aimedBlock = null
     }
-
-    return null
   }
 
   public static getAimedVoxel() {
