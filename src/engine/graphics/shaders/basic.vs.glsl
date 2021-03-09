@@ -1,9 +1,14 @@
-precision mediump float;
+#version 300 es
+#ifdef GL_ES
+  precision highp float;
+#endif
 
-attribute vec3 position;
+in vec3 position;
+
 uniform mat4 world;
 uniform mat4 viewProjection;
 
-void main() {
-  gl_Position = viewProjection * world * vec4(position, 1.0);
+void main(void) {
+  mat4 worldViewProjection = viewProjection * world;
+  gl_Position = worldViewProjection * vec4(position, 1.0);
 }

@@ -23,6 +23,8 @@ import Camera from './Camera'
 import { digitKey } from '../math/Bitwise'
 import vs from './vs.glsl'
 import fs from './fs.glsl'
+import vsBasic from './shaders/basic.vs.glsl'
+import fsBasic from './shaders/basic.fs.glsl'
 import World from '../World'
 
 interface ChunkMesh {
@@ -44,6 +46,11 @@ export default class Renderer {
   private static chunkAttrs = new Map<number, ChunkAttributes>()
   private static meshWorker = new Worker('../voxel/ChunkMesher.worker.ts')
   private static basicShader: ProgramInfo
+  private static chunkShader: ProgramInfo
+  private static blockHighlight = {
+    world: m4.identity(),
+    bufferInfo: null,
+  }
   private static texture
 
   public static async init() {
@@ -73,7 +80,8 @@ export default class Renderer {
     this.camera.position.set(0, 0, 0)
     this.camera.direction.set(0, 0, 1)
 
-    this.basicShader = createProgramInfo(gl, [vs, fs])
+    this.basicShader = createProgramInfo(gl, [vsBasic, fsBasic])
+    this.chunkShader = createProgramInfo(gl, [vs, fs])
     this.texture = createTexture(gl, {
       src: '/tileset.png',
       target: gl.TEXTURE_2D_ARRAY,
@@ -82,6 +90,8 @@ export default class Renderer {
       width: 16,
       height: 16,
     })
+
+    this.blockHighlight.bufferInfo = primitives.createCubeBufferInfo(gl, 1.005)
 
     window.addEventListener('resize', () => {
       this.camera.aspect = this.width / this.height
@@ -115,8 +125,7 @@ export default class Renderer {
       )
     }
 
-    // const aimPos = Physics.getAimedVoxel()
-
+    gl.disable(gl.BLEND)
     gl.enable(gl.DEPTH_TEST)
     gl.enable(gl.CULL_FACE)
     gl.viewport(0, 0, this.width, this.height)
@@ -127,7 +136,7 @@ export default class Renderer {
 
     this.camera.render()
 
-    gl.useProgram(this.basicShader.program)
+    gl.useProgram(this.chunkShader.program)
     const uniforms = {
       world: m4.identity(),
       tiles: this.texture,
@@ -136,6 +145,7 @@ export default class Renderer {
       fogEnd: (World.viewDistance - 1) * Chunk.size,
       fogStart: (World.viewDistance - 1) * Chunk.size * 0.75,
       fogColor: [0.7, 0.8, 1],
+      color: [0.1, 0.1, 0.1, 1],
     }
 
     this.chunkMeshes.forEach(chunk => {
@@ -143,10 +153,31 @@ export default class Renderer {
         [chunk.x * Chunk.size, chunk.y * Chunk.size, chunk.z * Chunk.size],
         uniforms.world,
       )
-      setBuffersAndAttributes(gl, this.basicShader, chunk.bufferInfo)
-      setUniforms(this.basicShader, uniforms)
+      setBuffersAndAttributes(gl, this.chunkShader, chunk.bufferInfo)
+      setUniforms(this.chunkShader, uniforms)
       drawBufferInfo(gl, chunk.bufferInfo)
     })
+
+    const aimPos = Physics.getAimedVoxel()
+
+    if (aimPos) {
+      m4.translation(
+        [aimPos.x + 0.5, aimPos.y + 0.5, aimPos.z + 0.5],
+        uniforms.world,
+      )
+
+      gl.enable(gl.BLEND)
+      gl.disable(gl.CULL_FACE)
+      gl.blendFunc(gl.ONE, gl.ONE)
+      gl.useProgram(this.basicShader.program)
+      setBuffersAndAttributes(
+        gl,
+        this.basicShader,
+        this.blockHighlight.bufferInfo,
+      )
+      setUniforms(this.basicShader, uniforms)
+      drawBufferInfo(gl, this.blockHighlight.bufferInfo)
+    }
   }
 
   public static async addChunk(chunk: Chunk) {
