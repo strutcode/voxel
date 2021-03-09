@@ -52,6 +52,16 @@ export default class Renderer {
     bufferInfo: null,
   }
   private static texture
+  private static uniforms = {
+    world: m4.identity(),
+    tiles: null,
+    viewProjection: m4.identity(),
+    viewPosition: new Float32Array(3),
+    fogEnd: (World.viewDistance - 1) * Chunk.size,
+    fogStart: (World.viewDistance - 1) * Chunk.size * 0.75,
+    fogColor: new Float32Array([0.7, 0.8, 1]),
+    color: new Float32Array([0.1, 0.1, 0.1, 1]),
+  }
 
   public static async init() {
     const container = document.getElementById('game')
@@ -81,7 +91,11 @@ export default class Renderer {
     this.camera.direction.set(0, 0, 1)
 
     this.basicShader = createProgramInfo(gl, [vsBasic, fsBasic])
-    this.chunkShader = createProgramInfo(gl, [vs, fs])
+    this.chunkShader = createProgramInfo(
+      gl,
+      [vs, fs],
+      ['position', 'indices', 'uv', 'shade', 'normal', 'texInd'],
+    )
     this.texture = createTexture(gl, {
       src: '/tileset.png',
       target: gl.TEXTURE_2D_ARRAY,
@@ -136,25 +150,24 @@ export default class Renderer {
 
     this.camera.render()
 
+    this.uniforms.tiles = this.texture
+    m4.copy(this.camera.viewProjection, this.uniforms.viewProjection)
+    this.uniforms.viewPosition[0] = this.camera.position.x
+    this.uniforms.viewPosition[1] = this.camera.position.y
+    this.uniforms.viewPosition[2] = this.camera.position.z
+
     gl.useProgram(this.chunkShader.program)
-    const uniforms = {
-      world: m4.identity(),
-      tiles: this.texture,
-      viewProjection: this.camera.viewProjection,
-      viewPosition: this.camera.position.asArray,
-      fogEnd: (World.viewDistance - 1) * Chunk.size,
-      fogStart: (World.viewDistance - 1) * Chunk.size * 0.75,
-      fogColor: [0.7, 0.8, 1],
-      color: [0.1, 0.1, 0.1, 1],
-    }
+    setUniforms(this.chunkShader, this.uniforms)
 
     this.chunkMeshes.forEach(chunk => {
       m4.translation(
         [chunk.x * Chunk.size, chunk.y * Chunk.size, chunk.z * Chunk.size],
-        uniforms.world,
+        this.uniforms.world,
       )
       setBuffersAndAttributes(gl, this.chunkShader, chunk.bufferInfo)
-      setUniforms(this.chunkShader, uniforms)
+      setUniforms(this.chunkShader, {
+        world: this.uniforms.world,
+      })
       drawBufferInfo(gl, chunk.bufferInfo)
     })
 
@@ -163,7 +176,7 @@ export default class Renderer {
     if (aimPos) {
       m4.translation(
         [aimPos.x + 0.5, aimPos.y + 0.5, aimPos.z + 0.5],
-        uniforms.world,
+        this.uniforms.world,
       )
 
       gl.enable(gl.BLEND)
@@ -175,7 +188,7 @@ export default class Renderer {
         this.basicShader,
         this.blockHighlight.bufferInfo,
       )
-      setUniforms(this.basicShader, uniforms)
+      setUniforms(this.basicShader, this.uniforms)
       drawBufferInfo(gl, this.blockHighlight.bufferInfo)
     }
   }
@@ -192,9 +205,7 @@ export default class Renderer {
     this.chunkMeshes.delete(chunk.key)
   }
 
-  public static addPlayer(player: Player) {
-    // BabylonImplementation.renderAddPlayer(player)
-  }
+  public static addPlayer(player: Player) {}
 
   public static getViewPosition() {
     return this.camera.position
