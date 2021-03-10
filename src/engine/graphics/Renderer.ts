@@ -198,6 +198,17 @@ export default class Renderer {
   }
 
   public static async updateChunk(chunk: Chunk) {
+    const callback = event => {
+      if (
+        event.data.x === chunk.x &&
+        event.data.y === chunk.y &&
+        event.data.z === chunk.z
+      ) {
+        Physics.updateChunk(chunk)
+        this.meshWorker.removeEventListener('message', callback)
+      }
+    }
+    this.meshWorker.addEventListener('message', callback)
     this.meshWorker.postMessage(chunk.serialize())
   }
 

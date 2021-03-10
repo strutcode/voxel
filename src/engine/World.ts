@@ -134,7 +134,7 @@ export default class World {
 
       const chunk = this.chunks.get(digitKey(x, y, z))
       if (chunk) {
-        if (distance < 1) {
+        if (distance < 3) {
           Physics.addChunk(chunk)
         } else {
           Physics.remChunk(chunk)
@@ -163,7 +163,8 @@ export default class World {
 
     if (chunk) {
       Renderer.updateChunk(chunk)
-      Physics.updateChunk(chunk)
+      // FIXME: Tied to the renderer for now
+      // Physics.updateChunk(chunk)
     }
   }
 

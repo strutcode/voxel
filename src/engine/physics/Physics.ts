@@ -9,7 +9,10 @@ import Game from '../../Game'
 let Ammo: typeof AmmoType
 
 interface ChunkBody {
+  mesh: AmmoType.btTriangleMesh
+  shape: AmmoType.btBvhTriangleMeshShape
   body: AmmoType.btRigidBody
+  motionState: AmmoType.btDefaultMotionState
 }
 
 export default class Physics {
@@ -43,6 +46,7 @@ export default class Physics {
 
     const buffers = Renderer.getChunkAttributes(key)
     if (!buffers) return
+    if (!buffers.positions.length) return
 
     const mesh = new Ammo.btTriangleMesh()
     const indices = buffers.indices
@@ -74,22 +78,52 @@ export default class Physics {
         chunk.z * Chunk.size,
       ),
     )
+    const motionState = new Ammo.btDefaultMotionState(transform)
     const constInfo = new Ammo.btRigidBodyConstructionInfo(
       0,
-      new Ammo.btDefaultMotionState(transform),
+      motionState,
       shape,
     )
     const body = new Ammo.btRigidBody(constInfo)
+    body.setCollisionFlags(1)
     this.world.addRigidBody(body, 2 | 32, 2 | 32)
 
     this.chunkObjects.set(key, {
+      mesh,
+      shape,
       body,
+      motionState,
     })
+
+    // Clean up
+    Ammo.destroy(transform)
+    Ammo.destroy(constInfo)
+    Ammo.destroy(pointA)
+    Ammo.destroy(pointB)
+    Ammo.destroy(pointC)
   }
 
-  public static updateChunk(chunk: Chunk) {}
+  public static updateChunk(chunk: Chunk) {
+    this.remChunk(chunk)
+    this.addChunk(chunk)
+  }
 
-  public static remChunk(chunk: Chunk) {}
+  public static remChunk(chunk: Chunk) {
+    const ref = this.chunkObjects.get(chunk.key)
+
+    if (!ref) return
+
+    this.world.removeRigidBody(ref.body)
+
+    // Clean up
+    // TODO: For some reason these all crash because the objects don't have destructors?
+    // Ammo.destroy(ref.mesh)
+    // Ammo.destroy(ref.shape)
+    // Ammo.destroy(ref.body)
+    // Ammo.destroy(ref.motionState)
+
+    this.chunkObjects.delete(chunk.key)
+  }
 
   public static addPlayer(player: Player) {
     const shape = new Ammo.btCapsuleShape(0.6 / 2, 1.7 / 2)
