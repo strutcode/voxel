@@ -9,7 +9,7 @@ import { digitKey } from './math/Bitwise'
 export default class World {
   public static viewDistance = 8
 
-  public map = new WorldMap(24, 10, 7)
+  public map = new WorldMap(48, 24, 7)
   private chunks = new Map<number, Chunk | null>()
   private visited = new Set<number>()
   private viewPos = new Vector()

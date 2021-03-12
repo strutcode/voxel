@@ -28,9 +28,9 @@ export default {
   3: {
     name: 'arctic',
     color: {
-      r: 200,
-      g: 200,
-      b: 222,
+      r: 222,
+      g: 222,
+      b: 245,
     },
   },
   4: {

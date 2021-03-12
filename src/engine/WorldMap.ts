@@ -84,15 +84,16 @@ export default class WorldMap {
     let x, y, d, b
     for (y = 0; y < this.height; y++) {
       for (x = 0; x < this.width; x++) {
-        d = noise((x / this.height) * 3, (y / this.height) * 3)
+        noise.octaves = 9
+        d = noise((x / this.height) * 4, (y / this.height) * 4)
         b = this.biomeMap?.fastGet(x, y)
 
         this.depthMap.fastSet(x, y, 1 + d * 255)
 
-        if (d < 0.55 && b !== arctic) {
+        if (d < 0.53 && b !== arctic) {
           this.biomeMap?.fastSet(x, y, ocean)
-          this.depthMap?.fastSet(x, y, 256 * 0.55)
-        } else if (d < 0.57 && b !== arctic && b !== tundra) {
+          this.depthMap?.fastSet(x, y, 256 * 0.53)
+        } else if (d < 0.55 && b !== arctic && b !== tundra) {
           this.biomeMap?.fastSet(x, y, beach)
         }
       }
