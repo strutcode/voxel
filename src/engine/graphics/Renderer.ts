@@ -1,6 +1,4 @@
-import BabylonImplementation from '../external/BabylonImplementation'
 import Chunk from '../voxel/Chunk'
-import Vector from '../math/Vector'
 import Player from '../Player'
 import Game from '../../Game'
 import Physics from '../physics/Physics'

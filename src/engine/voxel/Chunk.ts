@@ -58,6 +58,14 @@ export default class Chunk {
     }
   }
 
+  public get isEmpty() {
+    return !this.chunkStore
+  }
+
+  public get isFull() {
+    return false
+  }
+
   public addObject(
     name: string,
     x: number,

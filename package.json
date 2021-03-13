@@ -31,7 +31,7 @@
   },
   "assetsPath": "./assets",
   "alias": {
-    "ammo.js": "./ammojs/builds/ammo.wasm.js"
+    "ammo.js": "./ammojs/builds/ammo.js"
   },
   "scripts": {
     "dev": "parcel serve --hmr-port 1235 src/index.html",
