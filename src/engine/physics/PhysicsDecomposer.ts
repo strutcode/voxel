@@ -1,4 +1,5 @@
 import Chunk from '../voxel/Chunk'
+import { Ammo as AmmoType } from 'ammo.js'
 
 interface Cube {
   minX: number
@@ -8,8 +9,6 @@ interface Cube {
   minZ: number
   maxZ: number
 }
-
-let output = true
 
 export default class PhysicsDecomposer {
   public static boxDecomposition(chunk: Chunk): Cube[] {
@@ -102,11 +101,76 @@ export default class PhysicsDecomposer {
       }
     }
 
-    // if (output) {
-    //   console.log(chunk, boxes[0], boxes[1])
-    //   output = false
-    // }
-
     return boxes
+  }
+
+  public static meshDecomposition(chunk: Chunk, Ammo: AmmoType) {
+    const mesh = new Ammo.btTriangleMesh()
+    const pointA = new Ammo.btVector3()
+    const pointB = new Ammo.btVector3()
+    const pointC = new Ammo.btVector3()
+
+    let x,
+      y,
+      z,
+      t = 0
+    const add = (
+      x1: number,
+      y1: number,
+      z1: number,
+      x2: number,
+      y2: number,
+      z2: number,
+      x3: number,
+      y3: number,
+      z3: number,
+    ) => {
+      pointA.setValue(x1, y1, z1)
+      pointB.setValue(x2, y2, z2)
+      pointC.setValue(x3, y3, z3)
+      mesh.addTriangle(pointA, pointB, pointC)
+      t++
+    }
+
+    for (x = 0; x < Chunk.size; x++) {
+      for (y = 0; y < Chunk.size; y++) {
+        for (z = 0; z < Chunk.size; z++) {
+          if (chunk.isSolid(x, y, z)) {
+            if (!chunk.isSolid(x - 1, y, z)) {
+              add(x, y, z, x, y + 1, z, x, y + 1, z + 1)
+              add(x, y, z, x, y, z + 1, x, y + 1, z + 1)
+            }
+            if (!chunk.isSolid(x + 1, y, z)) {
+              add(x + 1, y, z, x, y + 1, z, x, y + 1, z + 1)
+              add(x + 1, y, z, x, y, z + 1, x, y + 1, z + 1)
+            }
+            if (!chunk.isSolid(x, y - 1, z)) {
+              add(x, y, z, x + 1, y, z, x + 1, y, z + 1)
+              add(x, y, z, x, y, z + 1, x + 1, y, z + 1)
+            }
+            if (!chunk.isSolid(x, y + 1, z)) {
+              add(x, y + 1, z, x + 1, y, z, x + 1, y, z + 1)
+              add(x, y + 1, z, x, y, z + 1, x + 1, y, z + 1)
+            }
+            if (!chunk.isSolid(x, y, z - 1)) {
+              add(x, y, z, x + 1, y, z, x + 1, y + 1, z)
+              add(x, y, z, x, y + 1, z, x + 1, y + 1, z)
+            }
+            if (!chunk.isSolid(x, y, z + 1)) {
+              add(x, y, z + 1, x + 1, y, z, x + 1, y + 1, z)
+              add(x, y, z + 1, x, y + 1, z, x + 1, y + 1, z)
+            }
+          }
+        }
+      }
+    }
+
+    Ammo.destroy(pointA)
+    Ammo.destroy(pointB)
+    Ammo.destroy(pointC)
+
+    console.log(t)
+
+    return mesh
   }
 }

@@ -8,10 +8,10 @@ import { digitKey } from './math/Bitwise'
 
 export default class World {
   public static viewDistance = 8
+  public static physicsDistance = 2
 
   public map = new WorldMap(48, 24, 7)
   private chunks = new Map<number, Chunk | null>()
-  private visited = new Set<number>()
   private viewPos = new Vector()
   private chunkWorker = new Worker('./voxel/ChunkGenerator.worker.ts')
 
@@ -138,7 +138,7 @@ export default class World {
 
       const chunk = this.chunks.get(digitKey(x, y, z))
       if (chunk) {
-        if (distance < 1) {
+        if (distance < World.physicsDistance) {
           Physics.addChunk(chunk)
         } else {
           Physics.remChunk(chunk)

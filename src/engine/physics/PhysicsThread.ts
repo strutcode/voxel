@@ -40,44 +40,59 @@ export default class PhysicsThread {
     if (this.chunkObjects.has(key)) return
     this.chunkObjects.set(key, [])
 
-    const cubes = PhysicsDecomposer.boxDecomposition(chunk)
+    if (chunk.isEmpty) return
 
     const transform = new Ammo.btTransform()
     const refs = [] as ChunkBody
 
-    cubes.forEach(cube => {
-      const shape = new Ammo.btBoxShape(
-        new Ammo.btVector3(
-          (cube.maxX - cube.minX) / 2,
-          (cube.maxY - cube.minY) / 2,
-          (cube.maxZ - cube.minZ) / 2,
-        ),
+    let shape
+
+    if (chunk.isFull) {
+      shape = new Ammo.btBoxShape(
+        new Ammo.btVector3(Chunk.size / 2, Chunk.size / 2, Chunk.size / 2),
       )
 
       transform.setIdentity()
       transform.setOrigin(
         new Ammo.btVector3(
-          chunk.x * Chunk.size + (cube.maxX - cube.minX) / 2,
-          chunk.y * Chunk.size + (cube.maxY - cube.minY) / 2,
-          chunk.z * Chunk.size + (cube.maxZ - cube.minZ) / 2,
+          chunk.x * Chunk.size + Chunk.size / 2,
+          chunk.y * Chunk.size + Chunk.size / 2,
+          chunk.z * Chunk.size + Chunk.size / 2,
         ),
       )
-      const motionState = new Ammo.btDefaultMotionState(transform)
-      const constInfo = new Ammo.btRigidBodyConstructionInfo(
-        0,
-        motionState,
-        shape,
+    } else {
+      shape = new Ammo.btBvhTriangleMeshShape(
+        PhysicsDecomposer.meshDecomposition(chunk, Ammo),
+        true,
+        true,
       )
-      const body = new Ammo.btRigidBody(constInfo)
-      body.setCollisionFlags(1)
-      this.world.addRigidBody(body, 2 | 32, 2 | 32)
 
-      refs.push({
-        body,
-        motionState,
-      })
-      Ammo.destroy(constInfo)
+      const transform = new Ammo.btTransform()
+      transform.setIdentity()
+      transform.setOrigin(
+        new Ammo.btVector3(
+          chunk.x * Chunk.size,
+          chunk.y * Chunk.size,
+          chunk.z * Chunk.size,
+        ),
+      )
+    }
+
+    const motionState = new Ammo.btDefaultMotionState(transform)
+    const constInfo = new Ammo.btRigidBodyConstructionInfo(
+      0,
+      motionState,
+      shape,
+    )
+    const body = new Ammo.btRigidBody(constInfo)
+    body.setCollisionFlags(1)
+    this.world.addRigidBody(body, 2 | 32, 2 | 32)
+
+    refs.push({
+      body,
+      motionState,
     })
+    Ammo.destroy(constInfo)
 
     this.chunkObjects.set(key, refs)
 
@@ -142,13 +157,13 @@ export default class PhysicsThread {
     if (!this.playerController) return
 
     // Kill velocity when switching to fly mode
-    // if (fly && !this.lastFly) {
-    //   this.playerController.setVelocityForTimeInterval(
-    //     new Ammo.btVector3(0, 0, 0),
-    //     1000,
-    //   )
-    // }
-    // this.lastFly = fly
+    if (fly && !this.lastFly) {
+      this.playerController.setVelocityForTimeInterval(
+        new Ammo.btVector3(0, 0, 0),
+        1000,
+      )
+    }
+    this.lastFly = fly
 
     this.playerController.setGravity(fly ? 0 : 9.87)
     this.playerController.setWalkDirection(
