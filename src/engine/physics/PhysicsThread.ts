@@ -65,7 +65,6 @@ export default class PhysicsThread {
 
       shape = new Ammo.btBvhTriangleMeshShape(mesh, true, true)
 
-      const transform = new Ammo.btTransform()
       transform.setIdentity()
       transform.setOrigin(
         new Ammo.btVector3(
