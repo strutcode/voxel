@@ -38,6 +38,7 @@ export default class PhysicsThread {
     const key = chunk.key
 
     if (this.chunkObjects.has(key)) return
+    this.chunkObjects.set(key, [])
 
     const cubes = PhysicsDecomposer.boxDecomposition(chunk)
 
@@ -47,9 +48,9 @@ export default class PhysicsThread {
     cubes.forEach(cube => {
       const shape = new Ammo.btBoxShape(
         new Ammo.btVector3(
-          cube.maxX - cube.minX,
-          cube.maxY - cube.minY,
-          cube.maxZ - cube.minZ,
+          (cube.maxX - cube.minX) / 2,
+          (cube.maxY - cube.minY) / 2,
+          (cube.maxZ - cube.minZ) / 2,
         ),
       )
 
@@ -90,7 +91,8 @@ export default class PhysicsThread {
   }
 
   public static remChunk(chunk: Chunk) {
-    const refs = this.chunkObjects.get(chunk.key)
+    const key = chunk.key
+    const refs = this.chunkObjects.get(key)
 
     if (!refs) return
 
@@ -100,7 +102,7 @@ export default class PhysicsThread {
       // Ammo.destroy(ref.motionState)
     })
 
-    this.chunkObjects.delete(chunk.key)
+    this.chunkObjects.delete(key)
   }
 
   public static addPlayer(position: Vector) {

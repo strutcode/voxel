@@ -55,6 +55,7 @@ export default class Game {
       this.world.map.heightAt(this.world.width / 2, this.world.height / 2) + 2
     this.player.position.z = this.world.height / 2
 
+    this.world.updateView(this.player.position, new Vector())
     await this.world.init()
     await Hud.init()
 

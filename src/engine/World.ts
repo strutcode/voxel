@@ -24,7 +24,11 @@ export default class World {
     const { x, y, z } = this.viewPos
 
     // Just prioritize player's chunk for now
-    this.maybeLoadChunk(x, y, z)
+    this.maybeLoadChunk(
+      Math.floor(x / Chunk.size),
+      Math.floor(y / Chunk.size),
+      Math.floor(z / Chunk.size),
+    )
 
     await new Promise<void>(resolve => {
       const timer = setInterval(() => {
@@ -49,7 +53,7 @@ export default class World {
     this.viewPos.y = Math.floor(position.y / Chunk.size)
     this.viewPos.z = Math.floor(position.z / Chunk.size)
 
-    let x, y, z, distance
+    let x, y, z
     for (
       x = this.viewPos.x - World.viewDistance;
       x < this.viewPos.x + World.viewDistance;
@@ -134,7 +138,7 @@ export default class World {
 
       const chunk = this.chunks.get(digitKey(x, y, z))
       if (chunk) {
-        if (distance < 3) {
+        if (distance < 1) {
           Physics.addChunk(chunk)
         } else {
           Physics.remChunk(chunk)
@@ -163,8 +167,7 @@ export default class World {
 
     if (chunk) {
       Renderer.updateChunk(chunk)
-      // FIXME: Tied to the renderer for now
-      // Physics.updateChunk(chunk)
+      Physics.updateChunk(chunk)
     }
   }
 

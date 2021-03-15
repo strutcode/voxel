@@ -9,6 +9,7 @@ type ChunkData = {
   z: number
   objects: Record<string, ChunkObject[]>
   data: Uint32Array | undefined
+  solidCount: number
 }
 
 type ChunkObject = {
@@ -28,10 +29,12 @@ export default class Chunk {
     const chunk = new Chunk(serialized.x, serialized.y, serialized.z)
     chunk.objects = serialized.objects
     chunk.chunkStore = serialized.data
+    chunk.solidCount = serialized.solidCount
     return chunk
   }
 
   private chunkStore?: Uint32Array
+  private solidCount = 0
   public objects: Record<string, ChunkObject[]> = {}
 
   constructor(public x = 0, public y = 0, public z = 0) {}
@@ -53,6 +56,18 @@ export default class Chunk {
       this.chunkStore = new Uint32Array(Chunk.cubeSize)
     }
 
+    // Bookkeeping
+    if (id === 0) {
+      if (this.get(x, y, z) !== 0) {
+        this.solidCount--
+      }
+    }
+    else {
+      if (this.get(x, y, z) === 0) {
+        this.solidCount++
+      }
+    }
+    
     if (this.chunkStore) {
       this.chunkStore[blockPos(x, y, z)] = id
     }
@@ -63,7 +78,7 @@ export default class Chunk {
   }
 
   public get isFull() {
-    return false
+    return this.solidCount === Chunk.cubeSize
   }
 
   public addObject(
@@ -109,6 +124,7 @@ export default class Chunk {
       z: this.z,
       objects: this.objects,
       data: this.chunkStore,
+      solidCount: this.solidCount
     }
   }
 }
