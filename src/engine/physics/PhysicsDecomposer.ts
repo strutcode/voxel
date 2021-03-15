@@ -137,24 +137,24 @@ export default class PhysicsDecomposer {
               add(x, y, z, x, y, z + 1, x, y + 1, z + 1)
             }
             if (!chunk.isSolid(x + 1, y, z)) {
-              add(x + 1, y, z, x, y + 1, z, x, y + 1, z + 1)
-              add(x + 1, y, z, x, y, z + 1, x, y + 1, z + 1)
+              add(x + 1, y, z, x + 1, y + 1, z, x + 1, y + 1, z + 1)
+              add(x + 1, y, z, x + 1, y, z + 1, x + 1, y + 1, z + 1)
             }
             if (!chunk.isSolid(x, y - 1, z)) {
               add(x, y, z, x + 1, y, z, x + 1, y, z + 1)
               add(x, y, z, x, y, z + 1, x + 1, y, z + 1)
             }
             if (!chunk.isSolid(x, y + 1, z)) {
-              add(x, y + 1, z, x + 1, y, z, x + 1, y, z + 1)
-              add(x, y + 1, z, x, y, z + 1, x + 1, y, z + 1)
+              add(x, y + 1, z, x + 1, y + 1, z + 1, x + 1, y + 1, z)
+              add(x, y + 1, z, x, y + 1, z + 1, x + 1, y + 1, z + 1)
             }
             if (!chunk.isSolid(x, y, z - 1)) {
               add(x, y, z, x + 1, y, z, x + 1, y + 1, z)
               add(x, y, z, x, y + 1, z, x + 1, y + 1, z)
             }
             if (!chunk.isSolid(x, y, z + 1)) {
-              add(x, y, z + 1, x + 1, y, z, x + 1, y + 1, z)
-              add(x, y, z + 1, x, y + 1, z, x + 1, y + 1, z)
+              add(x, y, z + 1, x + 1, y, z + 1, x + 1, y + 1, z + 1)
+              add(x, y, z + 1, x, y + 1, z + 1, x + 1, y + 1, z + 1)
             }
           }
         }
