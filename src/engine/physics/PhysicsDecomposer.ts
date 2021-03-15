@@ -110,10 +110,7 @@ export default class PhysicsDecomposer {
     const pointB = new Ammo.btVector3()
     const pointC = new Ammo.btVector3()
 
-    let x,
-      y,
-      z,
-      t = 0
+    let x, y, z
     const add = (
       x1: number,
       y1: number,
@@ -129,7 +126,6 @@ export default class PhysicsDecomposer {
       pointB.setValue(x2, y2, z2)
       pointC.setValue(x3, y3, z3)
       mesh.addTriangle(pointA, pointB, pointC)
-      t++
     }
 
     for (x = 0; x < Chunk.size; x++) {
@@ -168,8 +164,6 @@ export default class PhysicsDecomposer {
     Ammo.destroy(pointA)
     Ammo.destroy(pointB)
     Ammo.destroy(pointC)
-
-    console.log(t)
 
     return mesh
   }
