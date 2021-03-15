@@ -41,9 +41,6 @@ export default class Camera {
       this.far,
       this.projection,
     )
-    // this.projection[11] = 1
-    // this.projection[10] = -this.projection[10]
-    // this.projection[14] = -this.projection[14]
     m4.multiply(this.projection, this.view, this.viewProjection)
   }
 

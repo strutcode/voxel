@@ -80,6 +80,10 @@ export default class Vector {
     return new Vector(this.x / other.x, this.y / other.y, this.z / other.z)
   }
 
+  public dot(other: Vector) {
+    return this.x * other.x + this.y * other.y + this.z * other.z
+  }
+
   public cross(other: Vector) {
     return new Vector(
       this.y * other.z - this.z * other.y,

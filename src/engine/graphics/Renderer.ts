@@ -1,6 +1,7 @@
 import Chunk from '../voxel/Chunk'
 import Player from '../Player'
 import Game from '../../Game'
+import Vector from '../math/Vector'
 import Physics from '../physics/Physics'
 import {
   addExtensionsToContext,
@@ -157,7 +158,19 @@ export default class Renderer {
     gl.useProgram(this.chunkShader.program)
     setUniforms(this.chunkShader, this.uniforms)
 
+    const chunkDir = new Vector()
+
     this.chunkMeshes.forEach(chunk => {
+      chunkDir.set(
+        chunk.x * Chunk.size + Chunk.size / 2 - this.camera.position.x,
+        chunk.y * Chunk.size + Chunk.size / 2 - this.camera.position.y,
+        chunk.z * Chunk.size + Chunk.size / 2 - this.camera.position.z,
+      )
+
+      if (this.camera.direction.dot(chunkDir) <= 0) {
+        return
+      }
+
       m4.translation(
         [chunk.x * Chunk.size, chunk.y * Chunk.size, chunk.z * Chunk.size],
         this.uniforms.world,
