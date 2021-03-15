@@ -61,11 +61,9 @@ export default class PhysicsThread {
         ),
       )
     } else {
-      shape = new Ammo.btBvhTriangleMeshShape(
-        PhysicsDecomposer.meshDecomposition(chunk, Ammo),
-        true,
-        true,
-      )
+      const mesh = PhysicsDecomposer.meshDecomposition(chunk, Ammo)
+
+      shape = new Ammo.btBvhTriangleMeshShape(mesh, true, true)
 
       const transform = new Ammo.btTransform()
       transform.setIdentity()

@@ -35,8 +35,8 @@ export default class Player extends Mobile {
     }
   }
 
-  public addItem(id: number, amount?: number)
-  public addItem(name: string, amount?: number)
+  public addItem(id: number, amount?: number): void
+  public addItem(name: string, amount?: number): void
   public addItem(input: string | number, amount = 1) {
     const id = typeof input === 'number' ? input : Database.itemId(input)
     const name = Database.itemInfo(id).name

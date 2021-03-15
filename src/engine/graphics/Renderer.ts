@@ -50,7 +50,7 @@ export default class Renderer {
     world: m4.identity(),
     bufferInfo: null,
   }
-  private static texture
+  private static texture: WebGLTexture
   private static uniforms = {
     world: m4.identity(),
     tiles: null,

@@ -33,7 +33,7 @@ export default class ChunkMesher {
     const cols: number[] = []
     const texInd: number[] = []
 
-    const aoShade = (side1, corner, side2) => {
+    const aoShade = (side1: boolean, corner: boolean, side2: boolean) => {
       if (side1 && side2) {
         return 0
       }

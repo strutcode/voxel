@@ -1,4 +1,4 @@
-import { ItemInfo } from './engine/Database'
+import { ItemInfo } from '../engine/Database'
 
 export default {
   0: {
