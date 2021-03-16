@@ -30,6 +30,7 @@ type PhysicsMessage = ChunkMessage | AddPlayerMessage | SyncPlayerMessage
 
 const position = new Vector()
 const direction = new Vector()
+let positionSet = false
 
 onmessage = function(event: PhysicsMessage) {
   switch (event.data.type) {
@@ -68,11 +69,7 @@ onmessage = function(event: PhysicsMessage) {
 
       if (result) {
         position.set(result.x, result.y + 0.8, result.z)
-
-        postMessage({
-          type: 'syncPlayer',
-          position: [result.x, result.y, result.z],
-        })
+        positionSet = true
       }
 
       break
@@ -88,6 +85,15 @@ async function start() {
     PhysicsThread.update()
     PhysicsThread.updateAimedVoxel(position, direction)
   }, 1000 / 60)
+
+  setInterval(() => {
+    if (!positionSet) return
+
+    postMessage({
+      type: 'syncPlayer',
+      position: [position.x, position.y - 0.8, position.z],
+    })
+  }, 10)
 }
 
 start()
