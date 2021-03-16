@@ -91,4 +91,16 @@ export default class Vector {
       this.x * other.y - this.y * other.x,
     )
   }
+
+  public normalize() {
+    const div = this.length
+
+    if (div === 0) return this
+
+    this.x /= div
+    this.y /= div
+    this.z /= div
+
+    return this
+  }
 }

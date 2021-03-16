@@ -166,6 +166,7 @@ export default class Renderer {
         chunk.y * Chunk.size + Chunk.size / 2 - this.camera.position.y,
         chunk.z * Chunk.size + Chunk.size / 2 - this.camera.position.z,
       )
+      chunkDir.normalize()
 
       if (this.camera.direction.dot(chunkDir) <= 0) {
         return
