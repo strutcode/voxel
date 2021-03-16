@@ -6,6 +6,7 @@ import Physics from '../physics/Physics'
 import {
   addExtensionsToContext,
   BufferInfo,
+  createBufferFromTypedArray,
   createBufferInfoFromArrays,
   createProgramInfo,
   createTexture,
@@ -18,6 +19,7 @@ import {
   setBuffersAndAttributes,
   setUniforms,
 } from 'twgl.js'
+import GltfLoader from '../util/GltfLoader'
 import Camera from './Camera'
 import { digitKey } from '../math/Bitwise'
 import vs from './vs.glsl'
@@ -36,6 +38,10 @@ interface ChunkMesh {
 interface ChunkAttributes {
   positions: Uint8Array
   indices: Uint32Array
+}
+
+interface ObjectModel {
+  bufferInfo: BufferInfo
 }
 
 export default class Renderer {
@@ -61,6 +67,7 @@ export default class Renderer {
     fogColor: new Float32Array([0.7, 0.8, 1]),
     color: new Float32Array([0.1, 0.1, 0.1, 1]),
   }
+  private static models: Record<string, ObjectModel> = {}
 
   public static async init() {
     const container = document.getElementById('game')
@@ -113,6 +120,8 @@ export default class Renderer {
     })
 
     this.initWorker()
+
+    await this.loadModels()
   }
 
   public static get width() {
@@ -185,6 +194,21 @@ export default class Renderer {
       drawBufferInfo(gl, chunk.bufferInfo)
     })
 
+    if (this.models['cactus']) {
+      gl.useProgram(this.basicShader.program)
+      setBuffersAndAttributes(
+        gl,
+        this.basicShader,
+        this.models['cactus'].bufferInfo,
+      )
+      setUniforms(this.basicShader, {
+        world: m4.translation([3072, 138, 1536]),
+        viewProjection: this.uniforms.viewProjection,
+        color: [0, 1, 0, 1],
+      })
+      drawBufferInfo(gl, this.models['cactus'].bufferInfo)
+    }
+
     const aimPos = Physics.getAimedVoxel()
 
     if (aimPos) {
@@ -227,6 +251,36 @@ export default class Renderer {
 
   public static getViewDirection() {
     return this.camera.direction
+  }
+
+  private static async loadModel(name: string) {
+    const loader = new GltfLoader(`/${name}.glb`)
+    await loader.ready
+
+    const buffers = loader.getBuffers(0)[0]
+    const arrays = Object.entries(buffers).reduce((acc, entry) => {
+      if (entry[1]) {
+        acc[entry[0]] = entry[1].buffer
+      }
+
+      return acc
+    }, {})
+
+    this.models[name] = {
+      bufferInfo: createBufferInfoFromArrays(this.context, arrays),
+    }
+  }
+
+  private static async loadModels() {
+    await Promise.all([
+      this.loadModel('tree'),
+      this.loadModel('tree2'),
+      this.loadModel('pumpkin'),
+      this.loadModel('fox'),
+      this.loadModel('ocelot'),
+      this.loadModel('grass2'),
+      this.loadModel('cactus'),
+    ])
   }
 
   private static initWorker() {
