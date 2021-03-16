@@ -192,13 +192,19 @@ export default class PhysicsThread {
       const hit = rayCastResult.get_m_hitPointWorld()
       const normal = rayCastResult.get_m_hitNormalWorld()
 
-      this.aimedBlock = new Vector(
-        Math.floor(hit.x() - normal.x() * 0.5),
-        Math.floor(hit.y() - normal.y() * 0.5),
-        Math.floor(hit.z() - normal.z() * 0.5),
-      )
+      postMessage({
+        type: 'updateAimedVoxel',
+        result: [
+          Math.floor(hit.x() - normal.x() * 0.5),
+          Math.floor(hit.y() - normal.y() * 0.5),
+          Math.floor(hit.z() - normal.z() * 0.5),
+        ],
+      })
     } else {
-      this.aimedBlock = null
+      postMessage({
+        type: 'updateAimedVoxel',
+        result: null,
+      })
     }
   }
 

@@ -19,6 +19,17 @@ export default class Physics {
             ev.data.position[2],
           )
           break
+        case 'updateAimedVoxel':
+          if (ev.data.result) {
+            this.aimedBlock = new Vector(
+              ev.data.result[0],
+              ev.data.result[1],
+              ev.data.result[2],
+            )
+          } else {
+            this.aimedBlock = null
+          }
+          break
       }
     })
 
@@ -76,6 +87,7 @@ export default class Physics {
     this.workerThread.postMessage({
       type: 'syncPlayer',
       velocity: player.velocity.asArray,
+      direction: player.direction.asArray,
       fly: player.fly,
       jumpIntent: player.jumpIntent,
     })

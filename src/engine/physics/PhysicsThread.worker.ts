@@ -20,12 +20,16 @@ interface SyncPlayerMessage extends MessageEvent {
   data: {
     type: 'syncPlayer'
     velocity: [number, number, number]
+    direction: [number, number, number]
     fly: boolean
     jumpIntent: boolean
   }
 }
 
 type PhysicsMessage = ChunkMessage | AddPlayerMessage | SyncPlayerMessage
+
+const position = new Vector()
+const direction = new Vector()
 
 onmessage = function(event: PhysicsMessage) {
   switch (event.data.type) {
@@ -56,7 +60,15 @@ onmessage = function(event: PhysicsMessage) {
         event.data.jumpIntent,
       )
 
+      direction.set(
+        event.data.direction[0],
+        event.data.direction[1],
+        event.data.direction[2],
+      )
+
       if (result) {
+        position.set(result.x, result.y + 0.8, result.z)
+
         postMessage({
           type: 'syncPlayer',
           position: [result.x, result.y, result.z],
@@ -74,7 +86,7 @@ async function start() {
 
   setInterval(() => {
     PhysicsThread.update()
-    // PhysicsThread.updateAimedVoxel(position, direction)
+    PhysicsThread.updateAimedVoxel(position, direction)
   }, 1000 / 60)
 }
 
