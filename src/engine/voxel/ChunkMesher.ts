@@ -272,7 +272,7 @@ export default class ChunkMesher {
     return {
       positions: new Uint8Array(positions),
       indices: new Uint32Array(indices),
-      uvs: new Int8Array(uvs),
+      uvs: new Uint8Array(uvs),
       colors: new Uint8Array(cols),
       normals: new Uint8Array(normals),
       texInds: new Uint32Array(texInd),

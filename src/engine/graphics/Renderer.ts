@@ -93,7 +93,7 @@ export default class Renderer {
     this.chunkShader = createProgramInfo(
       gl,
       [vs, fs],
-      ['position', 'indices', 'uv', 'shade', 'normal', 'texInd'],
+      ['position', 'indices', 'uv', 'shade', 'texInd'],
     )
     this.texture = createTexture(gl, {
       src: '/tileset.png',
@@ -109,6 +109,7 @@ export default class Renderer {
     window.addEventListener('resize', () => {
       this.camera.aspect = this.width / this.height
       this.camera.updateProjection()
+      resizeCanvasToDisplaySize(canvas)
     })
 
     this.initWorker()
@@ -159,6 +160,9 @@ export default class Renderer {
     setUniforms(this.chunkShader, this.uniforms)
 
     const chunkDir = new Vector()
+    const chunkUniforms = {
+      world: m4.identity(),
+    }
 
     this.chunkMeshes.forEach(chunk => {
       chunkDir.set(
@@ -174,12 +178,10 @@ export default class Renderer {
 
       m4.translation(
         [chunk.x * Chunk.size, chunk.y * Chunk.size, chunk.z * Chunk.size],
-        this.uniforms.world,
+        chunkUniforms.world,
       )
       setBuffersAndAttributes(gl, this.chunkShader, chunk.bufferInfo)
-      setUniforms(this.chunkShader, {
-        world: this.uniforms.world,
-      })
+      setUniforms(this.chunkShader, chunkUniforms)
       drawBufferInfo(gl, chunk.bufferInfo)
     })
 
@@ -252,19 +254,21 @@ export default class Renderer {
           indices: attributes.indices,
           uv: {
             data: attributes.uvs,
-            type: (gl.BYTE as unknown) as Function,
+            type: (gl.UNSIGNED_BYTE as unknown) as Function,
             normalize: false,
             numComponents: 2,
           },
           shade: {
             data: attributes.colors,
-            type: (gl.BYTE as unknown) as Function,
+            type: (gl.UNSIGNED_BYTE as unknown) as Function,
             normalize: false,
             numComponents: 1,
           },
-          normal: attributes.normals,
+          // normal: attributes.normals,
           texInd: {
             data: attributes.texInds,
+            type: (gl.UNSIGNED_BYTE as unknown) as Function,
+            normalize: false,
             numComponents: 1,
           },
         }),

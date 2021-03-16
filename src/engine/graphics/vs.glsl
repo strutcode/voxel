@@ -3,10 +3,10 @@
   precision highp float;
 #endif
 
-in vec3 position;
-in vec2 uv;
-in float shade;
-in float texInd;
+in uvec3 position;
+in uvec2 uv;
+in uint shade;
+in uint texInd;
 uniform mat4 world;
 uniform mat4 viewProjection;
 uniform vec3 viewPosition;
@@ -17,12 +17,13 @@ out float v_ti;
 out float v_col;
 
 void main(void) {
+  vec4 modelPosition = vec4(float(position.x), float(position.y), float(position.z), 1.0);
   mat4 worldViewProjection = viewProjection * world;
-  vec4 worldPosition = world * vec4(position, 1.0);
+  vec4 worldPosition = world * modelPosition;
   viewDistance = distance(viewPosition, worldPosition.xyz);
-  gl_Position = worldViewProjection * vec4(position, 1.0);
+  gl_Position = worldViewProjection * modelPosition;
 
-  v_uv = uv;
-  v_ti = texInd;
-  v_col = shade / 255.0;
+  v_uv = vec2(uv);
+  v_ti = float(texInd);
+  v_col = float(shade) / 255.0;
 }
