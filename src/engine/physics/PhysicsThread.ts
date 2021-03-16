@@ -140,6 +140,7 @@ export default class PhysicsThread {
       1.1,
     )
     this.playerController.setGravity(0)
+    this.playerController.setJumpSpeed(30)
 
     this.world.addCollisionObject(ghost, 32, 1 | 2)
     this.world.addAction(this.playerController)
@@ -162,7 +163,7 @@ export default class PhysicsThread {
     }
     this.lastFly = fly
 
-    this.playerController.setGravity(fly ? 0 : 9.87)
+    this.playerController.setGravity(fly ? 0 : 9.87 ** 2)
     this.playerController.setWalkDirection(
       new Ammo.btVector3(velocity.x, velocity.y, velocity.z),
     )
