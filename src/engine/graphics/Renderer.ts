@@ -132,9 +132,9 @@ export default class Renderer {
         Game.player.position.z,
       )
       this.camera.direction.set(
-        Math.sin(Game.player.yaw) * Math.cos(Game.player.pitch),
-        -Math.sin(Game.player.pitch),
-        Math.cos(Game.player.yaw) * Math.cos(Game.player.pitch),
+        Game.player.direction.x,
+        Game.player.direction.y,
+        Game.player.direction.z,
       )
     }
 
