@@ -1,9 +1,14 @@
 import { Mesh } from '@babylonjs/core'
 
 export default class ObjectInfo {
-  ranges: { key: string; start: number; end: number; length: number }[] = []
-  buffer = new Float32Array(1024)
-  bufferLength = 0
+  public ranges: {
+    key: string
+    start: number
+    end: number
+    length: number
+  }[] = []
+  public buffer = new Float32Array(1024)
+  public bufferLength = 0
 
   constructor(public mesh: Mesh) {}
 
@@ -35,7 +40,7 @@ export default class ObjectInfo {
   }
 
   public removeRange(key) {
-    const index = this.ranges.findIndex((r) => r.key === key)
+    const index = this.ranges.findIndex(r => r.key === key)
     const range = this.ranges[index]
 
     if (index === -1) return

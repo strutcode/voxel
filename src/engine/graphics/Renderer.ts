@@ -6,7 +6,6 @@ import Physics from '../physics/Physics'
 import {
   addExtensionsToContext,
   BufferInfo,
-  createBufferFromTypedArray,
   createBufferInfoFromArrays,
   createProgramInfo,
   createTexture,
@@ -22,8 +21,8 @@ import {
 import GltfLoader from '../util/GltfLoader'
 import Camera from './Camera'
 import { digitKey } from '../math/Bitwise'
-import vs from './vs.glsl'
-import fs from './fs.glsl'
+import vsChunk from './shaders/chunk.vs.glsl'
+import fsChunk from './shaders/chunk.fs.glsl'
 import vsBasic from './shaders/basic.vs.glsl'
 import fsBasic from './shaders/basic.fs.glsl'
 import World from '../World'
@@ -99,7 +98,7 @@ export default class Renderer {
     this.basicShader = createProgramInfo(gl, [vsBasic, fsBasic])
     this.chunkShader = createProgramInfo(
       gl,
-      [vs, fs],
+      [vsChunk, fsChunk],
       ['position', 'indices', 'uv', 'shade', 'texInd'],
     )
     this.texture = createTexture(gl, {
