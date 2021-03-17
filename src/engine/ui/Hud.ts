@@ -21,7 +21,7 @@ export default class Hud {
     showMap: false,
     showInventory: false,
     showConsole: false,
-    showDebug: true,
+    showDebug: false,
   }
 
   public static async init() {

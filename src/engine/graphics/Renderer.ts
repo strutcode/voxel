@@ -31,7 +31,16 @@ interface ChunkMesh {
   x: number
   y: number
   z: number
+  objects: Record<string, ObjectSummary>
   bufferInfo: BufferInfo
+}
+
+interface ObjectSummary {
+  x: number
+  y: number
+  z: number
+  rotation?: number
+  scale?: number
 }
 
 interface ChunkAttributes {
@@ -164,9 +173,6 @@ export default class Renderer {
     this.uniforms.viewPosition[1] = this.camera.position.y
     this.uniforms.viewPosition[2] = this.camera.position.z
 
-    gl.useProgram(this.chunkShader.program)
-    setUniforms(this.chunkShader, this.uniforms)
-
     const chunkDir = new Vector()
     const chunkHalfSize = Chunk.size / 2
     const chunkUniforms = {
@@ -186,6 +192,20 @@ export default class Renderer {
 
       return false
     }
+    const drawObject = (name: string, x: number, y: number, z: number) => {
+      const model = this.models[name]
+
+      if (model) {
+        gl.useProgram(this.basicShader.program)
+        setBuffersAndAttributes(gl, this.basicShader, model.bufferInfo)
+        setUniforms(this.basicShader, {
+          world: m4.translation([x, y, z]),
+          viewProjection: this.uniforms.viewProjection,
+          color: [1, 0, 1, 1],
+        })
+        drawBufferInfo(gl, model.bufferInfo)
+      }
+    }
 
     this.chunkMeshes.forEach(chunk => {
       chunkDir.set(
@@ -196,6 +216,8 @@ export default class Renderer {
 
       if (!chunkVisible()) return
 
+      gl.useProgram(this.chunkShader.program)
+      setUniforms(this.chunkShader, this.uniforms)
       m4.translation(
         [chunk.x * Chunk.size, chunk.y * Chunk.size, chunk.z * Chunk.size],
         chunkUniforms.world,
@@ -203,22 +225,18 @@ export default class Renderer {
       setBuffersAndAttributes(gl, this.chunkShader, chunk.bufferInfo)
       setUniforms(this.chunkShader, chunkUniforms)
       drawBufferInfo(gl, chunk.bufferInfo)
-    })
 
-    if (this.models['cactus']) {
-      gl.useProgram(this.basicShader.program)
-      setBuffersAndAttributes(
-        gl,
-        this.basicShader,
-        this.models['cactus'].bufferInfo,
-      )
-      setUniforms(this.basicShader, {
-        world: m4.translation([3072, 138, 1536]),
-        viewProjection: this.uniforms.viewProjection,
-        color: [0, 1, 0, 1],
-      })
-      drawBufferInfo(gl, this.models['cactus'].bufferInfo)
-    }
+      for (let name in chunk.objects) {
+        chunk.objects[name].forEach(info => {
+          drawObject(
+            name,
+            chunk.x * Chunk.size + info.x + 0.5,
+            chunk.y * Chunk.size + info.y,
+            chunk.z * Chunk.size + info.z + 0.5,
+          )
+        })
+      }
+    })
 
     const aimPos = Physics.getAimedVoxel()
 
@@ -309,6 +327,7 @@ export default class Renderer {
         x,
         y,
         z,
+        objects,
         bufferInfo: createBufferInfoFromArrays(this.context, {
           position: {
             data: attributes.positions,
