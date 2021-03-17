@@ -18,6 +18,12 @@ import biomeInfo from './data/biomeInfo'
 import blockInfo from './data/blockInfo'
 import itemInfo from './data/itemInfo'
 
+if (module.hot) {
+  module.hot.accept(() => {
+    location.reload()
+  })
+}
+
 enum GameState {
   Play,
 }
