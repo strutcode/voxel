@@ -10,13 +10,11 @@ export default class World {
   public static viewDistance = 8
   public static physicsDistance = 2
 
-  public map = new WorldMap(48, 24, 7)
   private chunks = new Map<number, Chunk | null>()
   private viewPos = new Vector()
   private chunkWorker = new Worker('./voxel/ChunkGenerator.worker.ts')
 
-  public constructor() {
-    this.setupMap()
+  public constructor(public map: WorldMap) {
     this.setupWorker()
   }
 
@@ -178,10 +176,6 @@ export default class World {
       Renderer.remChunk(chunk)
       this.chunks.delete(digitKey(x, y, z))
     }
-  }
-
-  private setupMap() {
-    this.map.generate()
   }
 
   private setupWorker() {
