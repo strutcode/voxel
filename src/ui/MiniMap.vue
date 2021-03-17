@@ -12,8 +12,6 @@
 
   export default Vue.extend({
     mounted() {
-      this.update()
-
       document.addEventListener('keydown', ev => {
         if (ev.key === 'h') {
           this.height = !this.height
@@ -24,6 +22,7 @@
 
     data() {
       return {
+        ready: false,
         height: false,
       }
     },
@@ -92,12 +91,19 @@
           const img = new ImageData(rgba, map.width, map.height)
           ctx.putImageData(img, 0, 0)
         }
+
+        this.ready = true
       },
     },
 
     watch: {
       'gameData.map'() {
         this.update()
+      },
+      'gameData.showMap'() {
+        if (!this.ready) {
+          this.update()
+        }
       },
     },
   })
