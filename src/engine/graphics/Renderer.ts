@@ -168,8 +168,23 @@ export default class Renderer {
     setUniforms(this.chunkShader, this.uniforms)
 
     const chunkDir = new Vector()
+    const chunkHalfSize = Chunk.size / 2
     const chunkUniforms = {
       world: m4.identity(),
+    }
+    const chunkVisible = () => {
+      // Checks if the center of any of the four cardinal planes are in front of the camera, if so assume the chunk is visible
+      chunkDir.x += chunkHalfSize
+      if (this.camera.direction.dot(chunkDir) >= 0) return true
+      chunkDir.x -= Chunk.size
+      if (this.camera.direction.dot(chunkDir) >= 0) return true
+      chunkDir.x += chunkHalfSize
+      chunkDir.z += chunkHalfSize
+      if (this.camera.direction.dot(chunkDir) >= 0) return true
+      chunkDir.z -= Chunk.size
+      if (this.camera.direction.dot(chunkDir) >= 0) return true
+
+      return false
     }
 
     this.chunkMeshes.forEach(chunk => {
@@ -178,11 +193,8 @@ export default class Renderer {
         chunk.y * Chunk.size + Chunk.size / 2 - this.camera.position.y,
         chunk.z * Chunk.size + Chunk.size / 2 - this.camera.position.z,
       )
-      chunkDir.normalize()
 
-      if (this.camera.direction.dot(chunkDir) <= 0) {
-        return
-      }
+      if (!chunkVisible()) return
 
       m4.translation(
         [chunk.x * Chunk.size, chunk.y * Chunk.size, chunk.z * Chunk.size],

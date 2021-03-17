@@ -48,6 +48,10 @@ export default class Vector {
     return this.data
   }
 
+  public get length() {
+    return Math.sqrt(this.data[0] ** 2 + this.data[1] ** 2 + this.data[2] ** 2)
+  }
+
   public add(other: Vector | number) {
     if (typeof other === 'number') {
       return new Vector(this.x + other, this.y + other, this.z + other)
