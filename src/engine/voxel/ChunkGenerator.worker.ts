@@ -6,8 +6,9 @@ import Database from '../Database'
 import biomeInfo from '../../data/biomeInfo'
 import blockInfo from '../../data/blockInfo'
 import itemInfo from '../../data/itemInfo'
+import objectInfo from '../../data/objectInfo'
 
-Database.init(biomeInfo, blockInfo, itemInfo)
+Database.init(biomeInfo, blockInfo, itemInfo, objectInfo)
 
 let map: WorldMap
 const generator = new ChunkGenerator()

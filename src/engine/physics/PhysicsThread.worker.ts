@@ -1,6 +1,14 @@
 import Vector from '../math/Vector'
 import Chunk from '../voxel/Chunk'
 import PhysicsThread from './PhysicsThread'
+import Database from '../Database'
+
+import biomeInfo from '../../data/biomeInfo'
+import blockInfo from '../../data/blockInfo'
+import itemInfo from '../../data/itemInfo'
+import objectInfo from '../../data/objectInfo'
+
+Database.init(biomeInfo, blockInfo, itemInfo, objectInfo)
 
 interface ChunkMessage extends MessageEvent {
   data: {

@@ -19,6 +19,7 @@ import Reticle from './ui/Reticle.vue'
 import biomeInfo from './data/biomeInfo'
 import blockInfo from './data/blockInfo'
 import itemInfo from './data/itemInfo'
+import objectInfo from './data/objectInfo'
 import WorldMap from './engine/WorldMap'
 
 if (module.hot) {
@@ -49,7 +50,7 @@ export default class Game {
     await Renderer.init()
     await Physics.init()
     await Input.init()
-    await Database.init(biomeInfo, blockInfo, itemInfo)
+    await Database.init(biomeInfo, blockInfo, itemInfo, objectInfo)
 
     const db = await openDB('voxelgame', 1, {
       upgrade(db) {

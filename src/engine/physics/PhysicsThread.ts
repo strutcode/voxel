@@ -3,10 +3,16 @@ import Mobile from '../Mobile'
 import Vector from '../math/Vector'
 import AmmoModule, { Ammo as AmmoType } from 'ammo.js'
 import PhysicsDecomposer from './PhysicsDecomposer'
+import Database from '../Database'
 
 let Ammo: typeof AmmoType
 
 type ChunkBody = Array<{
+  body: AmmoType.btRigidBody
+  motionState: AmmoType.btDefaultMotionState
+}>
+
+type ObjectBody = Array<{
   body: AmmoType.btRigidBody
   motionState: AmmoType.btDefaultMotionState
 }>
@@ -28,7 +34,7 @@ enum CollisionFlags {
 enum PhysicsFilter {
   Ground = 0b10,
   Object = 0b100,
-  Character = 0b100000,
+  Player = 0b100000,
 }
 
 export default class PhysicsThread {
@@ -36,7 +42,8 @@ export default class PhysicsThread {
   private static world: AmmoType.btDiscreteDynamicsWorld
   private static playerTransform: AmmoType.btTransform
   private static playerController: AmmoType.btKinematicCharacterController
-  private static chunkObjects = new Map<number, ChunkBody>()
+  private static chunkColliders = new Map<number, ChunkBody>()
+  private static chunkObjects = new Map<number, ObjectBody>()
 
   public static async init() {
     Ammo = await AmmoModule()
@@ -57,8 +64,8 @@ export default class PhysicsThread {
   public static addChunk(chunk: Chunk) {
     const key = chunk.key
 
-    if (this.chunkObjects.has(key)) return
-    this.chunkObjects.set(key, [])
+    if (this.chunkColliders.has(key)) return
+    this.chunkColliders.set(key, [])
 
     if (chunk.isEmpty) return
 
@@ -103,7 +110,7 @@ export default class PhysicsThread {
     )
     const body = new Ammo.btRigidBody(constInfo)
     body.setCollisionFlags(CollisionFlags.Static)
-    this.world.addRigidBody(body, PhysicsFilter.Ground, PhysicsFilter.Character)
+    this.world.addRigidBody(body, PhysicsFilter.Ground, PhysicsFilter.Player)
 
     refs.push({
       body,
@@ -111,7 +118,51 @@ export default class PhysicsThread {
     })
     Ammo.destroy(constInfo)
 
-    this.chunkObjects.set(key, refs)
+    this.chunkColliders.set(key, refs)
+
+    const chunkObjects: ObjectBody = []
+
+    for (let name in chunk.objects) {
+      chunk.objects[name].forEach(object => {
+        const info = Database.objectInfo(Database.objectId(name))
+
+        info.colliders.forEach(collider => {
+          shape = new Ammo.btBoxShape(
+            new Ammo.btVector3(collider.sizeX, collider.sizeY, collider.sizeZ),
+          )
+
+          transform.setIdentity()
+          transform.setOrigin(
+            new Ammo.btVector3(
+              chunk.x * Chunk.size + object.x + 0.5 + collider.x,
+              chunk.y * Chunk.size + object.y + collider.y,
+              chunk.z * Chunk.size + object.z + 0.5 + collider.z,
+            ),
+          )
+
+          const motionState = new Ammo.btDefaultMotionState(transform)
+          const constInfo = new Ammo.btRigidBodyConstructionInfo(
+            0,
+            motionState,
+            shape,
+          )
+          const body = new Ammo.btRigidBody(constInfo)
+          body.setCollisionFlags(CollisionFlags.Static)
+          this.world.addRigidBody(
+            body,
+            PhysicsFilter.Object,
+            PhysicsFilter.Player,
+          )
+
+          chunkObjects.push({
+            body,
+            motionState,
+          })
+          Ammo.destroy(constInfo)
+        })
+      })
+    }
+    this.chunkObjects.set(key, chunkObjects)
 
     // Clean up
     Ammo.destroy(transform)
@@ -124,7 +175,7 @@ export default class PhysicsThread {
 
   public static remChunk(chunk: Chunk) {
     const key = chunk.key
-    const refs = this.chunkObjects.get(key)
+    const refs = this.chunkColliders.get(key)
 
     if (!refs) return
 
@@ -134,7 +185,7 @@ export default class PhysicsThread {
       // Ammo.destroy(ref.motionState)
     })
 
-    this.chunkObjects.delete(key)
+    this.chunkColliders.delete(key)
   }
 
   public static addPlayer(position: Vector) {
@@ -164,8 +215,8 @@ export default class PhysicsThread {
 
     this.world.addCollisionObject(
       ghost,
-      PhysicsFilter.Character,
-      PhysicsFilter.Ground,
+      PhysicsFilter.Player,
+      PhysicsFilter.Ground | PhysicsFilter.Object,
     )
     this.world.addAction(this.playerController)
   }
