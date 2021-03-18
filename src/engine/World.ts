@@ -7,9 +7,6 @@ import WorldMap from './WorldMap'
 import { digitKey } from './math/Bitwise'
 
 export default class World {
-  public static viewDistance = 8
-  public static physicsDistance = 2
-
   private chunks = new Map<number, Chunk | null>()
   private viewPos = new Vector()
   private chunkWorker = new Worker('./voxel/ChunkGenerator.worker.ts')
@@ -53,18 +50,18 @@ export default class World {
 
     let x, y, z
     for (
-      x = this.viewPos.x - World.viewDistance;
-      x < this.viewPos.x + World.viewDistance;
+      x = this.viewPos.x - Renderer.viewDistance;
+      x < this.viewPos.x + Renderer.viewDistance;
       x++
     ) {
       for (
-        y = this.viewPos.y - World.viewDistance;
-        y < this.viewPos.y + World.viewDistance;
+        y = this.viewPos.y - Renderer.viewDistance;
+        y < this.viewPos.y + Renderer.viewDistance;
         y++
       ) {
         for (
-          z = this.viewPos.z - World.viewDistance;
-          z < this.viewPos.z + World.viewDistance;
+          z = this.viewPos.z - Renderer.viewDistance;
+          z < this.viewPos.z + Renderer.viewDistance;
           z++
         ) {
           this.maybeLoadChunk(x, y, z)
@@ -125,7 +122,7 @@ export default class World {
       z,
     )
 
-    if (distance > World.viewDistance) {
+    if (distance > Renderer.viewDistance) {
       if (this.isLoaded(x, y, z)) {
         this.unloadChunk(x, y, z)
       }
@@ -136,7 +133,7 @@ export default class World {
 
       const chunk = this.chunks.get(digitKey(x, y, z))
       if (chunk) {
-        if (distance < World.physicsDistance) {
+        if (distance < Physics.activeDistance) {
           Physics.addChunk(chunk)
         } else {
           Physics.remChunk(chunk)

@@ -5,6 +5,8 @@ import Vector from '../math/Vector'
 import Game from '../../Game'
 
 export default class Physics {
+  public static activeDistance = 2
+
   private static aimedBlock: Vector | null = null
   private static activeChunks = new Set<number>()
   private static workerThread = new Worker('./PhysicsThread.worker.ts')

@@ -75,7 +75,7 @@ export default class Game {
 
     ;(globalThis as any).options = {
       set viewDistance(num: number) {
-        World.viewDistance = num
+        Renderer.viewDistance = num
       },
     }
 

@@ -27,7 +27,6 @@ import vsBasic from './shaders/basic.vs.glsl'
 import fsBasic from './shaders/basic.fs.glsl'
 import vsObject from './shaders/object.vs.glsl'
 import fsObject from './shaders/object.fs.glsl'
-import World from '../World'
 
 interface ChunkMesh {
   x: number
@@ -57,6 +56,8 @@ interface ObjectModel {
 }
 
 export default class Renderer {
+  public static viewDistance = 8
+
   private static camera = new Camera()
   private static context: WebGLRenderingContext
   private static chunkMeshes = new Map<number, ChunkMesh>()
@@ -73,11 +74,11 @@ export default class Renderer {
   private static noTexture: WebGLTexture
   private static uniforms = {
     world: m4.identity(),
-    tiles: null,
+    tiles: Renderer.noTexture,
     viewProjection: m4.identity(),
     viewPosition: new Float32Array(3),
-    fogEnd: (World.viewDistance - 1) * Chunk.size,
-    fogStart: (World.viewDistance - 1) * Chunk.size * 0.75,
+    fogEnd: (Renderer.viewDistance - 1) * Chunk.size,
+    fogStart: (Renderer.viewDistance - 1) * Chunk.size * 0.75,
     fogColor: new Float32Array([0.7, 0.8, 1]),
     color: new Float32Array([0.1, 0.1, 0.1, 1]),
   }
@@ -181,7 +182,10 @@ export default class Renderer {
 
     this.camera.render()
 
-    this.uniforms.tiles = this.tileTexture
+    ;(this.uniforms.fogEnd = (Renderer.viewDistance - 1) * Chunk.size),
+      (this.uniforms.fogStart =
+        (Renderer.viewDistance - 1) * Chunk.size * 0.75),
+      (this.uniforms.tiles = this.tileTexture)
     m4.copy(this.camera.viewProjection, this.uniforms.viewProjection)
     this.uniforms.viewPosition[0] = this.camera.position.x
     this.uniforms.viewPosition[1] = this.camera.position.y
