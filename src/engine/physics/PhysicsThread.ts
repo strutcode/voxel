@@ -11,6 +11,26 @@ type ChunkBody = Array<{
   motionState: AmmoType.btDefaultMotionState
 }>
 
+enum CollisionFlags {
+  Static = 1,
+  Kinematic = 2,
+  NoContactResponse = 4,
+  CustomMaterialCallback = 8,
+  CharacterObject = 16,
+  DisableVisualize = 32,
+  DisableSpuProcessing = 64,
+  HasContactStiffnessDamping = 128,
+  HasCustomDebugColor = 256,
+  HasFrictionAnchor = 512,
+  HasCollisionSoundTrigger = 1024,
+}
+
+enum PhysicsFilter {
+  Ground = 0b10,
+  Object = 0b100,
+  Character = 0b100000,
+}
+
 export default class PhysicsThread {
   private static aimedBlock: Vector | null = null
   private static world: AmmoType.btDiscreteDynamicsWorld
@@ -82,8 +102,8 @@ export default class PhysicsThread {
       shape,
     )
     const body = new Ammo.btRigidBody(constInfo)
-    body.setCollisionFlags(1)
-    this.world.addRigidBody(body, 2 | 32, 2 | 32)
+    body.setCollisionFlags(CollisionFlags.Static)
+    this.world.addRigidBody(body, PhysicsFilter.Ground, PhysicsFilter.Character)
 
     refs.push({
       body,
@@ -127,7 +147,7 @@ export default class PhysicsThread {
     const ghost = new Ammo.btPairCachingGhostObject()
     ghost.setWorldTransform(transform)
     ghost.setCollisionShape(shape)
-    ghost.setCollisionFlags(16)
+    ghost.setCollisionFlags(CollisionFlags.CharacterObject)
 
     this.world
       .getPairCache()
@@ -142,7 +162,11 @@ export default class PhysicsThread {
     this.playerController.setGravity(0)
     this.playerController.setJumpSpeed(30)
 
-    this.world.addCollisionObject(ghost, 32, 1 | 2)
+    this.world.addCollisionObject(
+      ghost,
+      PhysicsFilter.Character,
+      PhysicsFilter.Ground,
+    )
     this.world.addAction(this.playerController)
   }
 
@@ -185,8 +209,8 @@ export default class PhysicsThread {
       position.z + direction.z * 10,
     )
     const rayCastResult = new Ammo.ClosestRayResultCallback(from, to)
-    rayCastResult.set_m_collisionFilterMask(2 | 4)
-    rayCastResult.set_m_collisionFilterGroup(2 | 4)
+    rayCastResult.set_m_collisionFilterMask(0b110)
+    rayCastResult.set_m_collisionFilterGroup(0b110)
     this.world.rayTest(from, to, rayCastResult)
 
     if (rayCastResult.hasHit()) {
