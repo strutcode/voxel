@@ -25,6 +25,8 @@ import vsChunk from './shaders/chunk.vs.glsl'
 import fsChunk from './shaders/chunk.fs.glsl'
 import vsBasic from './shaders/basic.vs.glsl'
 import fsBasic from './shaders/basic.fs.glsl'
+import vsObject from './shaders/object.vs.glsl'
+import fsObject from './shaders/object.fs.glsl'
 import World from '../World'
 
 interface ChunkMesh {
@@ -50,6 +52,8 @@ interface ChunkAttributes {
 
 interface ObjectModel {
   bufferInfo: BufferInfo
+  texture?: WebGLTexture
+  alphaCutoff?: number
 }
 
 export default class Renderer {
@@ -60,11 +64,13 @@ export default class Renderer {
   private static meshWorker = new Worker('../voxel/ChunkMesher.worker.ts')
   private static basicShader: ProgramInfo
   private static chunkShader: ProgramInfo
+  private static objectShader: ProgramInfo
   private static blockHighlight = {
     world: m4.identity(),
     bufferInfo: null,
   }
-  private static texture: WebGLTexture
+  private static tileTexture: WebGLTexture
+  private static noTexture: WebGLTexture
   private static uniforms = {
     world: m4.identity(),
     tiles: null,
@@ -105,18 +111,26 @@ export default class Renderer {
     this.camera.direction.set(0, 0, 1)
 
     this.basicShader = createProgramInfo(gl, [vsBasic, fsBasic])
+    this.objectShader = createProgramInfo(
+      gl,
+      [vsObject, fsObject],
+      ['position', 'indices', 'uv'],
+    )
     this.chunkShader = createProgramInfo(
       gl,
       [vsChunk, fsChunk],
       ['position', 'indices', 'uv', 'shade', 'texInd'],
     )
-    this.texture = createTexture(gl, {
+    this.tileTexture = createTexture(gl, {
       src: '/tileset.png',
       target: gl.TEXTURE_2D_ARRAY,
       min: gl.LINEAR,
       mag: gl.NEAREST,
       width: 16,
       height: 16,
+    })
+    this.noTexture = createTexture(gl, {
+      src: [255, 0, 255, 255],
     })
 
     this.blockHighlight.bufferInfo = primitives.createCubeBufferInfo(gl, 1.005)
@@ -167,7 +181,7 @@ export default class Renderer {
 
     this.camera.render()
 
-    this.uniforms.tiles = this.texture
+    this.uniforms.tiles = this.tileTexture
     m4.copy(this.camera.viewProjection, this.uniforms.viewProjection)
     this.uniforms.viewPosition[0] = this.camera.position.x
     this.uniforms.viewPosition[1] = this.camera.position.y
@@ -196,14 +210,17 @@ export default class Renderer {
       const model = this.models[name]
 
       if (model) {
-        gl.useProgram(this.basicShader.program)
-        setBuffersAndAttributes(gl, this.basicShader, model.bufferInfo)
-        setUniforms(this.basicShader, {
+        gl.disable(gl.CULL_FACE)
+        gl.useProgram(this.objectShader.program)
+        setBuffersAndAttributes(gl, this.objectShader, model.bufferInfo)
+        setUniforms(this.objectShader, {
+          ...this.uniforms,
+          diffuse: model.texture,
+          alphaCutoff: model.alphaCutoff ?? 1,
           world: m4.translation([x, y, z]),
-          viewProjection: this.uniforms.viewProjection,
-          color: [1, 0, 1, 1],
         })
         drawBufferInfo(gl, model.bufferInfo)
+        gl.enable(gl.CULL_FACE)
       }
     }
 
@@ -297,6 +314,25 @@ export default class Renderer {
 
     this.models[name] = {
       bufferInfo: createBufferInfoFromArrays(this.context, arrays),
+    }
+
+    const textureData = loader.getTextureData(0)
+    if (textureData) {
+      const texture = createTexture(this.context, {
+        src: `data:${textureData.mimeType};base64,${btoa(
+          String.fromCharCode.apply(null, textureData.buffer),
+        )}`,
+        min: this.context.LINEAR,
+        mag: this.context.NEAREST,
+      })
+
+      this.models[name].texture = texture
+
+      if ('tree grass'.includes(name)) {
+        this.models[name].alphaCutoff = 0.5
+      }
+    } else {
+      this.models[name].texture = this.noTexture
     }
   }
 

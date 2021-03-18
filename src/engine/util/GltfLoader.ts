@@ -92,7 +92,10 @@ interface GltfPrimitive {
   mode: GltfPrimitiveMode
 }
 
-interface GltfTexture {}
+interface GltfTexture {
+  source?: number
+  sampler?: number
+}
 
 interface GltfImage {
   uri?: string
@@ -270,6 +273,41 @@ export default class GltfLoader {
     } else {
       this.state = LoaderState.Failed
     }
+  }
+
+  public getTextureData(index?: number) {
+    if (index == null) return undefined
+
+    const texture = this.textures[index]
+
+    if (texture?.source != null) {
+      const image = this.images[texture.source]
+
+      return {
+        buffer: this.getBufferViewData(image?.bufferView),
+        mimeType: image?.mimeType,
+      }
+    }
+
+    return undefined
+  }
+
+  public getBufferViewData(index?: number) {
+    if (index == null) return undefined
+
+    const bufferView = this.bufferViews[index]
+
+    if (bufferView) {
+      const buffer = new Uint8Array(
+        this.bufferData[bufferView.buffer],
+        bufferView.byteOffset ?? 0,
+        bufferView.byteLength,
+      )
+
+      return buffer
+    }
+
+    return undefined
   }
 
   public getAccessorData(index?: number) {
