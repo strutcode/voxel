@@ -1,7 +1,7 @@
 import noise from 'asm-noise'
-import Database from './Database'
-import { wrap } from './math/Geometry'
-import { clamp } from './math/Interpolation'
+import Database from '../Database'
+import { wrap } from '../math/Geometry'
+import { clamp } from '../math/Interpolation'
 
 interface SerializedMapData {
   width: number

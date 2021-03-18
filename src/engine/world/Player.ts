@@ -1,6 +1,6 @@
-import Input from './ui/Input'
+import Input from '../ui/Input'
 import Mobile from './Mobile'
-import Database from './Database'
+import Database from '../Database'
 
 export default class Player extends Mobile {
   public jumpIntent = false

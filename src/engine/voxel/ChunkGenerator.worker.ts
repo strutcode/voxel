@@ -1,6 +1,6 @@
 import Chunk from './Chunk'
 import ChunkGenerator from './ChunkGenerator'
-import WorldMap from '../WorldMap'
+import WorldMap from '../world/WorldMap'
 import Database from '../Database'
 
 import biomeInfo from '../../data/biomeInfo'

@@ -1,6 +1,6 @@
 import Chunk from '../voxel/Chunk'
-import Mobile from '../Mobile'
-import Player from '../Player'
+import Mobile from '../world/Mobile'
+import Player from '../world/Player'
 import Vector from '../math/Vector'
 import Game from '../../Game'
 

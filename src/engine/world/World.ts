@@ -1,15 +1,15 @@
-import Chunk from './voxel/Chunk'
-import { euclideanDistance3d, wrap } from './math/Geometry'
-import Physics from './physics/Physics'
-import Renderer from './graphics/Renderer'
-import Vector from './math/Vector'
+import Chunk from '../voxel/Chunk'
+import { euclideanDistance3d, wrap } from '../math/Geometry'
+import Physics from '../physics/Physics'
+import Renderer from '../graphics/Renderer'
+import Vector from '../math/Vector'
 import WorldMap from './WorldMap'
-import { digitKey } from './math/Bitwise'
+import { digitKey } from '../math/Bitwise'
 
 export default class World {
   private chunks = new Map<number, Chunk | null>()
   private viewPos = new Vector()
-  private chunkWorker = new Worker('./voxel/ChunkGenerator.worker.ts')
+  private chunkWorker = new Worker('../voxel/ChunkGenerator.worker.ts')
 
   public constructor(public map: WorldMap) {
     this.setupWorker()

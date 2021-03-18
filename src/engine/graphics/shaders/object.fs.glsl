@@ -1,9 +1,7 @@
 #version 300 es
 
-#ifdef GL_ES
-  precision highp float;
-  precision highp sampler2DArray;
-#endif
+precision highp float;
+precision highp sampler2DArray;
 
 uniform sampler2D diffuse;
 uniform float fogStart;

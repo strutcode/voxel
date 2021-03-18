@@ -1,5 +1,5 @@
-import Game from '../Game'
-import Vector from './math/Vector'
+import Game from '../../Game'
+import Vector from '../math/Vector'
 
 const ninetyDegrees = Math.PI / 2
 const threeSixtyDegrees = Math.PI * 2

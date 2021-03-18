@@ -1,5 +1,5 @@
 import Chunk from '../voxel/Chunk'
-import Mobile from '../Mobile'
+import Mobile from '../world/Mobile'
 import Vector from '../math/Vector'
 import AmmoModule, { Ammo as AmmoType } from 'ammo.js'
 import PhysicsDecomposer from './PhysicsDecomposer'

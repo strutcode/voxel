@@ -1,5 +1,5 @@
 import Chunk from '../voxel/Chunk'
-import Player from '../Player'
+import Player from '../world/Player'
 import Game from '../../Game'
 import Vector from '../math/Vector'
 import Physics from '../physics/Physics'
@@ -181,7 +181,6 @@ export default class Renderer {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
     this.camera.render()
-
     ;(this.uniforms.fogEnd = (Renderer.viewDistance - 1) * Chunk.size),
       (this.uniforms.fogStart =
         (Renderer.viewDistance - 1) * Chunk.size * 0.75),

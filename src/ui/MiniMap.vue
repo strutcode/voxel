@@ -7,7 +7,7 @@
 
 <script lang="ts">
   import Vue from 'vue'
-  import WorldMap from '../engine/WorldMap'
+  import WorldMap from '../engine/world/WorldMap'
   import Database from '../engine/Database'
 
   export default Vue.extend({
