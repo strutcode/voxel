@@ -8,6 +8,7 @@ import Player from './engine/world/Player'
 import Input from './engine/ui/Input'
 import Hud from './engine/ui/Hud'
 import Database from './engine/Database'
+import Doodad from './engine/world/Doodad'
 
 import Debug from './ui/Debug.vue'
 import Inventory from './ui/Inventory.vue'
@@ -83,8 +84,11 @@ export default class Game {
     this.player = new Player()
     this.player.position.x = this.world.width / 2
     this.player.position.y =
-      this.world.map.heightAt(this.world.width / 2, this.world.height / 2) + 2
-    this.player.position.z = this.world.height / 2
+      this.world.map.heightAt(
+        this.world.width / 2,
+        this.world.height / 2 - 300,
+      ) + 2
+    this.player.position.z = this.world.height / 2 - 300
 
     this.world.updateView(this.player.position, new Vector())
     await this.world.init()
@@ -114,14 +118,15 @@ export default class Game {
       Physics.syncPlayer(this.player)
       Hud.update()
 
-      const targetBlock = Physics.getAimedVoxel()
-      if (Input.getButton('Break') && targetBlock) {
+      const target = Physics.getAimedItem()
+      if (Input.getButton('Break') && target?.type === 'voxel') {
         const block = this.world.getBlock(
-          targetBlock.x,
-          targetBlock.y,
-          targetBlock.z,
+          target.position[0],
+          target.position[1],
+          target.position[2],
         )
 
+        const air = Database.blockId('air')
         const grass = Database.blockId('grass')
         const sand = Database.blockId('sand')
         const snow = Database.blockId('snow')
@@ -141,7 +146,12 @@ export default class Game {
               break
           }
 
-          this.world.setBlock(targetBlock.x, targetBlock.y, targetBlock.z, 0)
+          this.world.setBlock(
+            target.position[0],
+            target.position[1],
+            target.position[2],
+            air,
+          )
         }
       }
 
@@ -170,4 +180,5 @@ Object.assign(globalThis, {
   Game,
   Database,
   Hud,
+  Doodad,
 })

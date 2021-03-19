@@ -13,6 +13,7 @@ type ChunkData = {
 }
 
 type ChunkObject = {
+  id?: number
   x: number
   y: number
   z: number

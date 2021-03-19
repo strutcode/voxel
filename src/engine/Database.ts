@@ -29,7 +29,6 @@ export interface ItemInfo {
 }
 
 export interface ObjectInfo {
-  name: string
   modelName?: string
   colliders: {
     x: number
@@ -45,12 +44,11 @@ export default class Database {
   private static biomeData: Record<number, BiomeInfo> = {}
   private static blockData: Record<number, BlockInfo> = {}
   private static itemData: Record<number, ItemInfo> = {}
-  private static objectData: Record<number, ObjectInfo> = {}
+  private static objectData: Record<string, ObjectInfo> = {}
 
   private static biomeNameMap: Record<string, number> = {}
   private static blockNameMap: Record<string, number> = {}
   private static itemNameMap: Record<string, number> = {}
-  private static objectNameMap: Record<string, number> = {}
 
   public static async init(
     biomeData: typeof Database.biomeData,
@@ -74,10 +72,6 @@ export default class Database {
     Object.entries(itemData).forEach(keyValue => {
       this.itemNameMap[keyValue[1]?.name] = +keyValue[0]
     })
-
-    Object.entries(objectData).forEach(keyValue => {
-      this.objectNameMap[keyValue[1]?.name] = +keyValue[0]
-    })
   }
 
   public static biomeInfo(id: number) {
@@ -92,8 +86,8 @@ export default class Database {
     return this.itemData[id] ?? this.itemData[0]
   }
 
-  public static objectInfo(id: number) {
-    return this.objectData[id] ?? this.objectData[0]
+  public static objectInfo(id: string) {
+    return this.objectData[id] ?? this.objectData['none']
   }
 
   public static biomeId(name: string): number {
@@ -106,9 +100,5 @@ export default class Database {
 
   public static itemId(name: string): number {
     return this.itemNameMap[name] ?? 0
-  }
-
-  public static objectId(name: string) {
-    return this.objectNameMap[name] ?? 0
   }
 }

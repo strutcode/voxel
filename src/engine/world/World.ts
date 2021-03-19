@@ -4,6 +4,7 @@ import Physics from '../physics/Physics'
 import Renderer from '../graphics/Renderer'
 import Vector from '../math/Vector'
 import WorldMap from './WorldMap'
+import Doodad from './Doodad'
 import { digitKey } from '../math/Bitwise'
 
 export default class World {
@@ -185,8 +186,23 @@ export default class World {
       const { x, y, z } = ev.data
       const chunk = Chunk.deserialize(ev.data)
 
+      this.registerObjects(chunk)
       Renderer.addChunk(chunk)
+
       this.chunks.set(digitKey(x, y, z), chunk)
+    }
+  }
+
+  private registerObjects(chunk: Chunk) {
+    for (let name in chunk.objects) {
+      chunk.objects[name].forEach(object => {
+        const doodad = new Doodad(name)
+
+        doodad.position.set(object.x, object.y, object.z)
+        doodad.rotation = object.rotation ?? 0
+
+        object.id = doodad.id
+      })
     }
   }
 }

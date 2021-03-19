@@ -1,8 +1,10 @@
 import { ObjectInfo } from '../engine/Database'
 
 export default {
-  0: {
-    name: 'cactus',
+  none: {
+    colliders: []
+  },
+  cactus: {
     colliders: [
       {
         x: 0,
@@ -14,8 +16,7 @@ export default {
       },
     ],
   },
-  1: {
-    name: 'tree',
+  tree: {
     modelName: 'tree2',
     colliders: [
       {
@@ -28,8 +29,7 @@ export default {
       },
     ],
   },
-  2: {
-    name: 'tree2',
+  tree2: {
     modelName: 'tree2',
     colliders: [
       {
@@ -42,8 +42,7 @@ export default {
       },
     ],
   },
-  3: {
-    name: 'pumpkin',
+  pumpkin: {
     colliders: [
       {
         x: 0,
@@ -55,4 +54,4 @@ export default {
       },
     ],
   },
-} as Record<number, ObjectInfo>
+} as Record<string, ObjectInfo>

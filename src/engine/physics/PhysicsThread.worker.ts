@@ -91,7 +91,7 @@ async function start() {
 
   setInterval(() => {
     PhysicsThread.update()
-    PhysicsThread.updateAimedVoxel(position, direction)
+    PhysicsThread.updateAimedItem(position, direction)
   }, 1000 / 60)
 
   setInterval(() => {

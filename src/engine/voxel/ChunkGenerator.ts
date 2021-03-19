@@ -303,11 +303,15 @@ export default class ChunkGenerator {
           }
         })()
 
-        for (y = 0; yy + y < map.heightAt(xx, zz); y++) {
+        const height = map.heightAt(xx, zz)
+
+        if (yy > height) continue
+
+        for (y = 0; y < Chunk.size && yy + y < height; y++) {
           chunk.set(x, y, z, type)
         }
 
-        if (y > map.heightAt(xx, zz)) continue
+        if (yy + y - 1 > Math.floor(height)) continue
 
         // Clutter
         c = noise((xx / map.height) * 30, (zz / map.height) * 30)

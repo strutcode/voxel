@@ -27,21 +27,14 @@ import vsBasic from './shaders/basic.vs.glsl'
 import fsBasic from './shaders/basic.fs.glsl'
 import vsObject from './shaders/object.vs.glsl'
 import fsObject from './shaders/object.fs.glsl'
+import Doodad from '../world/Doodad'
 
 interface ChunkMesh {
   x: number
   y: number
   z: number
-  objects: Record<string, ObjectSummary>
+  objects: Record<string, Chunk['objects']>
   bufferInfo: BufferInfo
-}
-
-interface ObjectSummary {
-  x: number
-  y: number
-  z: number
-  rotation?: number
-  scale?: number
 }
 
 interface ChunkAttributes {
@@ -68,7 +61,7 @@ export default class Renderer {
   private static objectShader: ProgramInfo
   private static blockHighlight = {
     world: m4.identity(),
-    bufferInfo: null,
+    bufferInfo: (null as unknown) as BufferInfo,
   }
   private static tileTexture: WebGLTexture
   private static noTexture: WebGLTexture
@@ -209,23 +202,31 @@ export default class Renderer {
 
       return false
     }
-    const drawObject = (name: string, x: number, y: number, z: number) => {
+    const seen = new Set<string>()
+    const drawObject = (
+      name: string,
+      x: number,
+      y: number,
+      z: number,
+      highlight: boolean,
+    ) => {
       const model = this.models[name]
 
       if (model) {
-        gl.disable(gl.CULL_FACE)
         gl.useProgram(this.objectShader.program)
         setBuffersAndAttributes(gl, this.objectShader, model.bufferInfo)
         setUniforms(this.objectShader, {
           ...this.uniforms,
           diffuse: model.texture,
           alphaCutoff: model.alphaCutoff ?? 1,
+          flags: highlight ? 1 : 0,
           world: m4.translation([x, y, z]),
         })
         drawBufferInfo(gl, model.bufferInfo)
-        gl.enable(gl.CULL_FACE)
       }
     }
+
+    const aimed = Physics.getAimedItem()
 
     this.chunkMeshes.forEach(chunk => {
       chunkDir.set(
@@ -246,23 +247,30 @@ export default class Renderer {
       setUniforms(this.chunkShader, chunkUniforms)
       drawBufferInfo(gl, chunk.bufferInfo)
 
+      gl.disable(gl.CULL_FACE)
       for (let name in chunk.objects) {
-        chunk.objects[name].forEach(info => {
+        chunk.objects[name].forEach(object => {
+          const highlight = aimed?.type === 'object' && aimed.id === object.id
+
           drawObject(
             name,
-            chunk.x * Chunk.size + info.x + 0.5,
-            chunk.y * Chunk.size + info.y,
-            chunk.z * Chunk.size + info.z + 0.5,
+            chunk.x * Chunk.size + object.x + 0.5,
+            chunk.y * Chunk.size + object.y,
+            chunk.z * Chunk.size + object.z + 0.5,
+            highlight,
           )
         })
       }
+      gl.enable(gl.CULL_FACE)
     })
 
-    const aimPos = Physics.getAimedVoxel()
-
-    if (aimPos) {
+    if (aimed?.type === 'voxel') {
       m4.translation(
-        [aimPos.x + 0.5, aimPos.y + 0.5, aimPos.z + 0.5],
+        [
+          aimed.position[0] + 0.5,
+          aimed.position[1] + 0.5,
+          aimed.position[2] + 0.5,
+        ],
         this.uniforms.world,
       )
 

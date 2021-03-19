@@ -38,12 +38,12 @@ enum PhysicsFilter {
 }
 
 export default class PhysicsThread {
-  private static aimedBlock: Vector | null = null
   private static world: AmmoType.btDiscreteDynamicsWorld
   private static playerTransform: AmmoType.btTransform
   private static playerController: AmmoType.btKinematicCharacterController
   private static chunkColliders = new Map<number, ChunkBody>()
   private static chunkObjects = new Map<number, ObjectBody>()
+  private static objects = new Map<number, any>()
 
   public static async init() {
     Ammo = await AmmoModule()
@@ -110,7 +110,11 @@ export default class PhysicsThread {
     )
     const body = new Ammo.btRigidBody(constInfo)
     body.setCollisionFlags(CollisionFlags.Static)
-    this.world.addRigidBody(body, PhysicsFilter.Ground, PhysicsFilter.Player)
+    this.world.addRigidBody(
+      body,
+      PhysicsFilter.Ground,
+      PhysicsFilter.Ground | PhysicsFilter.Player,
+    )
 
     refs.push({
       body,
@@ -124,7 +128,7 @@ export default class PhysicsThread {
 
     for (let name in chunk.objects) {
       chunk.objects[name].forEach(object => {
-        const info = Database.objectInfo(Database.objectId(name))
+        const info = Database.objectInfo(name)
 
         info.colliders.forEach(collider => {
           shape = new Ammo.btBoxShape(
@@ -147,11 +151,15 @@ export default class PhysicsThread {
             shape,
           )
           const body = new Ammo.btRigidBody(constInfo)
+
           body.setCollisionFlags(CollisionFlags.Static)
+          body.setUserIndex(object.id)
+          this.objects.set(object.id, object)
+
           this.world.addRigidBody(
             body,
             PhysicsFilter.Object,
-            PhysicsFilter.Player,
+            PhysicsFilter.Object | PhysicsFilter.Player,
           )
 
           chunkObjects.push({
@@ -184,6 +192,13 @@ export default class PhysicsThread {
       // TODO: For some reason this crashes
       // Ammo.destroy(ref.motionState)
     })
+
+    const objs = this.chunkObjects.get(key)
+    if (objs) {
+      objs.forEach(obj => {
+        this.world.removeRigidBody(obj.body)
+      })
+    }
 
     this.chunkColliders.delete(key)
   }
@@ -252,7 +267,7 @@ export default class PhysicsThread {
     return new Vector(pos.x(), pos.y(), pos.z())
   }
 
-  public static updateAimedVoxel(position: Vector, direction: Vector) {
+  public static updateAimedItem(position: Vector, direction: Vector) {
     const from = new Ammo.btVector3(position.x, position.y, position.z)
     const to = new Ammo.btVector3(
       position.x + direction.x * 10,
@@ -260,32 +275,49 @@ export default class PhysicsThread {
       position.z + direction.z * 10,
     )
     const rayCastResult = new Ammo.ClosestRayResultCallback(from, to)
-    rayCastResult.set_m_collisionFilterMask(0b110)
-    rayCastResult.set_m_collisionFilterGroup(0b110)
+    rayCastResult.set_m_collisionFilterMask(
+      PhysicsFilter.Ground | PhysicsFilter.Object,
+    )
+    rayCastResult.set_m_collisionFilterGroup(
+      PhysicsFilter.Ground | PhysicsFilter.Object,
+    )
+    rayCastResult.set_m_flags(1 << 2)
     this.world.rayTest(from, to, rayCastResult)
 
     if (rayCastResult.hasHit()) {
       const hit = rayCastResult.get_m_hitPointWorld()
       const normal = rayCastResult.get_m_hitNormalWorld()
+      const objectId = rayCastResult.get_m_collisionObject().getUserIndex()
 
-      postMessage({
-        type: 'updateAimedVoxel',
-        result: [
-          Math.floor(hit.x() - normal.x() * 0.5),
-          Math.floor(hit.y() - normal.y() * 0.5),
-          Math.floor(hit.z() - normal.z() * 0.5),
-        ],
-      })
+      // console.log(objectId, this.objects.get(objectId))
+
+      if (objectId) {
+        postMessage({
+          type: 'updateAimedItem',
+          result: {
+            type: 'object',
+            id: objectId,
+          },
+        })
+      } else {
+        postMessage({
+          type: 'updateAimedItem',
+          result: {
+            type: 'voxel',
+            position: [
+              Math.floor(hit.x() - normal.x() * 0.5),
+              Math.floor(hit.y() - normal.y() * 0.5),
+              Math.floor(hit.z() - normal.z() * 0.5),
+            ],
+          },
+        })
+      }
     } else {
       postMessage({
-        type: 'updateAimedVoxel',
+        type: 'updateAimedItem',
         result: null,
       })
     }
-  }
-
-  public static getAimedVoxel() {
-    return this.aimedBlock
   }
 
   public static addMobile(mob: Mobile) {}

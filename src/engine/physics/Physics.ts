@@ -3,11 +3,24 @@ import Mobile from '../world/Mobile'
 import Player from '../world/Player'
 import Vector from '../math/Vector'
 import Game from '../../Game'
+import Doodad from '../world/Doodad'
+
+interface AimedVoxel {
+  type: 'voxel'
+  position: [number, number, number]
+}
+
+interface AimedObject {
+  type: 'object'
+  id: number
+}
+
+type AimedItem = AimedVoxel | AimedObject | null
 
 export default class Physics {
   public static activeDistance = 2
 
-  private static aimedBlock: Vector | null = null
+  private static aimedItem: AimedItem = null
   private static activeChunks = new Set<number>()
   private static workerThread = new Worker('./PhysicsThread.worker.ts')
 
@@ -21,16 +34,8 @@ export default class Physics {
             ev.data.position[2],
           )
           break
-        case 'updateAimedVoxel':
-          if (ev.data.result) {
-            this.aimedBlock = new Vector(
-              ev.data.result[0],
-              ev.data.result[1],
-              ev.data.result[2],
-            )
-          } else {
-            this.aimedBlock = null
-          }
+        case 'updateAimedItem':
+          this.aimedItem = ev.data.result
           break
       }
     })
@@ -95,10 +100,10 @@ export default class Physics {
     })
   }
 
-  public static updateAimedVoxel() {}
+  public static updateAimedItem() {}
 
-  public static getAimedVoxel() {
-    return this.aimedBlock
+  public static getAimedItem() {
+    return this.aimedItem
   }
 
   public static addMobile(mob: Mobile) {}

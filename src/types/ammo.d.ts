@@ -164,6 +164,8 @@ declare module 'ammo.js' {
     }
     class RayResultCallback {
       hasHit(): boolean
+      get_m_flags(): number
+      set_m_flags(m_flags: number): void
       get_m_collisionFilterGroup(): number
       set_m_collisionFilterGroup(m_collisionFilterGroup: number): void
       get_m_collisionFilterMask(): number
