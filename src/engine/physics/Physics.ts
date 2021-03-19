@@ -43,11 +43,10 @@ export default class Physics {
                 object.position[1],
                 object.position[2],
               )
-              doodad.rotation.set(
-                object.rotation[0],
-                object.rotation[1],
-                object.rotation[2],
-              )
+              doodad.graphicsRotation[0] = object.rotation[0]
+              doodad.graphicsRotation[1] = object.rotation[1]
+              doodad.graphicsRotation[2] = object.rotation[2]
+              doodad.graphicsRotation[3] = object.rotation[3]
             }
           })
           break

@@ -379,6 +379,13 @@ export default class PhysicsThread {
         PhysicsFilter.Player | PhysicsFilter.Object | PhysicsFilter.Ground,
       )
 
+      newBody.applyTorqueImpulse(
+        new Ammo.btVector3(
+          Math.random() * 2 - 1,
+          Math.random() * 2 - 1,
+          Math.random() * 2 - 1,
+        ),
+      )
       this.world.removeRigidBody(body)
     } else {
       console.log("it ain't no body")
