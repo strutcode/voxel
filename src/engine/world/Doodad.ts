@@ -10,7 +10,7 @@ export default class Doodad {
 
   public id = gid++
   public position = new Vector()
-  public rotation = 0
+  public rotation = new Vector()
 
   constructor(public name: string) {
     Doodad.byId.set(this.id, this)

@@ -17,7 +17,14 @@ type ObjectBody = Array<{
   motionState: AmmoType.btDefaultMotionState
 }>
 
+type ObjectSync = {
+  id: number
+  position: [number, number, number]
+  rotation: [number, number, number, number]
+}
+
 enum CollisionFlags {
+  None = 0,
   Static = 1,
   Kinematic = 2,
   NoContactResponse = 4,
@@ -44,6 +51,7 @@ export default class PhysicsThread {
   private static chunkColliders = new Map<number, ChunkBody>()
   private static chunkObjects = new Map<number, ObjectBody>()
   private static objects = new Map<number, any>()
+  private static activeObjects = new Map<number, any>()
 
   public static async init() {
     Ammo = await AmmoModule()
@@ -59,6 +67,25 @@ export default class PhysicsThread {
 
   public static update() {
     this.world.stepSimulation(0.016666666666666666, 0)
+
+    const objects: ObjectSync[] = []
+
+    this.activeObjects.forEach((body, id) => {
+      const transform = body.getWorldTransform()
+      const position = transform.getOrigin()
+      const rotation = transform.getRotation()
+
+      objects.push({
+        id,
+        position: [position.x(), position.y(), position.z()],
+        rotation: [rotation.x(), rotation.y(), rotation.z(), rotation.w()],
+      })
+    })
+
+    postMessage({
+      type: 'objectSync',
+      objects,
+    })
   }
 
   public static addChunk(chunk: Chunk) {
@@ -138,9 +165,9 @@ export default class PhysicsThread {
           transform.setIdentity()
           transform.setOrigin(
             new Ammo.btVector3(
-              chunk.x * Chunk.size + object.x + 0.5 + collider.x,
-              chunk.y * Chunk.size + object.y + collider.y,
-              chunk.z * Chunk.size + object.z + 0.5 + collider.z,
+              chunk.x * Chunk.size + object.x + collider.x,
+              chunk.y * Chunk.size + object.y + 1 + collider.y,
+              chunk.z * Chunk.size + object.z + collider.z,
             ),
           )
 
@@ -154,12 +181,12 @@ export default class PhysicsThread {
 
           body.setCollisionFlags(CollisionFlags.Static)
           body.setUserIndex(object.id)
-          this.objects.set(object.id, object)
+          this.objects.set(object.id ?? 0, body)
 
           this.world.addRigidBody(
             body,
-            PhysicsFilter.Object,
-            PhysicsFilter.Object | PhysicsFilter.Player,
+            PhysicsFilter.Object | PhysicsFilter.Ground,
+            PhysicsFilter.Object | PhysicsFilter.Ground | PhysicsFilter.Player,
           )
 
           chunkObjects.push({
@@ -289,8 +316,6 @@ export default class PhysicsThread {
       const normal = rayCastResult.get_m_hitNormalWorld()
       const objectId = rayCastResult.get_m_collisionObject().getUserIndex()
 
-      // console.log(objectId, this.objects.get(objectId))
-
       if (objectId) {
         postMessage({
           type: 'updateAimedItem',
@@ -317,6 +342,46 @@ export default class PhysicsThread {
         type: 'updateAimedItem',
         result: null,
       })
+    }
+  }
+
+  public static makeObjectActive(id: number) {
+    const body = this.objects.get(id)
+
+    if (body) {
+      const shape = new Ammo.btCapsuleShape(0.5, 1, 0.5)
+      const localInertia = new Ammo.btVector3(0, 0, 0)
+      shape.calculateLocalInertia(1, localInertia)
+
+      const oldOrigin = body.getWorldTransform().getOrigin()
+      const transform = new Ammo.btTransform()
+      transform.setIdentity()
+      transform.setOrigin(
+        new Ammo.btVector3(oldOrigin.x(), oldOrigin.y(), oldOrigin.z()),
+      )
+
+      const motionState = new Ammo.btDefaultMotionState(transform)
+      const constInfo = new Ammo.btRigidBodyConstructionInfo(
+        1,
+        motionState,
+        shape,
+        localInertia,
+      )
+      const newBody = new Ammo.btRigidBody(constInfo)
+
+      newBody.setUserIndex(id)
+      this.objects.set(id, newBody)
+      this.activeObjects.set(id, newBody)
+
+      this.world.addRigidBody(
+        newBody,
+        PhysicsFilter.Player | PhysicsFilter.Object | PhysicsFilter.Ground,
+        PhysicsFilter.Player | PhysicsFilter.Object | PhysicsFilter.Ground,
+      )
+
+      this.world.removeRigidBody(body)
+    } else {
+      console.log("it ain't no body")
     }
   }
 

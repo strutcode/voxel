@@ -202,15 +202,8 @@ export default class Renderer {
 
       return false
     }
-    const seen = new Set<string>()
-    const drawObject = (
-      name: string,
-      x: number,
-      y: number,
-      z: number,
-      highlight: boolean,
-    ) => {
-      const model = this.models[name]
+    const drawObject = (object: Doodad, highlight: boolean) => {
+      const model = this.models[object.name]
 
       if (model) {
         gl.useProgram(this.objectShader.program)
@@ -220,7 +213,11 @@ export default class Renderer {
           diffuse: model.texture,
           alphaCutoff: model.alphaCutoff ?? 1,
           flags: highlight ? 1 : 0,
-          world: m4.translation([x, y, z]),
+          world: m4.translation([
+            object.position.x,
+            object.position.y,
+            object.position.z,
+          ]),
         })
         drawBufferInfo(gl, model.bufferInfo)
       }
@@ -250,15 +247,10 @@ export default class Renderer {
       gl.disable(gl.CULL_FACE)
       for (let name in chunk.objects) {
         chunk.objects[name].forEach(object => {
+          const doodad = Doodad.fromId(object.id)
           const highlight = aimed?.type === 'object' && aimed.id === object.id
 
-          drawObject(
-            name,
-            chunk.x * Chunk.size + object.x + 0.5,
-            chunk.y * Chunk.size + object.y,
-            chunk.z * Chunk.size + object.z + 0.5,
-            highlight,
-          )
+          if (doodad) drawObject(doodad, highlight)
         })
       }
       gl.enable(gl.CULL_FACE)

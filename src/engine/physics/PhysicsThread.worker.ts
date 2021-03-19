@@ -34,7 +34,18 @@ interface SyncPlayerMessage extends MessageEvent {
   }
 }
 
-type PhysicsMessage = ChunkMessage | AddPlayerMessage | SyncPlayerMessage
+interface MakeObjectActiveMessage extends MessageEvent {
+  data: {
+    type: 'makeObjectActive'
+    id: number
+  }
+}
+
+type PhysicsMessage =
+  | ChunkMessage
+  | AddPlayerMessage
+  | SyncPlayerMessage
+  | MakeObjectActiveMessage
 
 const position = new Vector()
 const direction = new Vector()
@@ -80,6 +91,9 @@ onmessage = function(event: PhysicsMessage) {
         positionSet = true
       }
 
+      break
+    case 'makeObjectActive':
+      PhysicsThread.makeObjectActive(event.data.id)
       break
   }
 }

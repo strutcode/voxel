@@ -198,8 +198,12 @@ export default class World {
       chunk.objects[name].forEach(object => {
         const doodad = new Doodad(name)
 
-        doodad.position.set(object.x, object.y, object.z)
-        doodad.rotation = object.rotation ?? 0
+        doodad.position.set(
+          chunk.x * Chunk.size + object.x,
+          chunk.y * Chunk.size + object.y,
+          chunk.z * Chunk.size + object.z,
+        )
+        doodad.rotation.set(0, object.rotation ?? 0, 0)
 
         object.id = doodad.id
       })

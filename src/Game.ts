@@ -119,39 +119,43 @@ export default class Game {
       Hud.update()
 
       const target = Physics.getAimedItem()
-      if (Input.getButton('Break') && target?.type === 'voxel') {
-        const block = this.world.getBlock(
-          target.position[0],
-          target.position[1],
-          target.position[2],
-        )
-
-        const air = Database.blockId('air')
-        const grass = Database.blockId('grass')
-        const sand = Database.blockId('sand')
-        const snow = Database.blockId('snow')
-
-        if (block) {
-          // TODO: needs to become data somehow
-          switch (block) {
-            case grass:
-              this.player.addItem('grass')
-              this.player.addItem('dirt', 2)
-              break
-            case sand:
-              this.player.addItem('sand', 3)
-              break
-            case snow:
-              this.player.addItem('snow', 3)
-              break
-          }
-
-          this.world.setBlock(
+      if (Input.getButton('Break')) {
+        if (target?.type === 'voxel') {
+          const block = this.world.getBlock(
             target.position[0],
             target.position[1],
             target.position[2],
-            air,
           )
+
+          const air = Database.blockId('air')
+          const grass = Database.blockId('grass')
+          const sand = Database.blockId('sand')
+          const snow = Database.blockId('snow')
+
+          if (block) {
+            // TODO: needs to become data somehow
+            switch (block) {
+              case grass:
+                this.player.addItem('grass')
+                this.player.addItem('dirt', 2)
+                break
+              case sand:
+                this.player.addItem('sand', 3)
+                break
+              case snow:
+                this.player.addItem('snow', 3)
+                break
+            }
+
+            this.world.setBlock(
+              target.position[0],
+              target.position[1],
+              target.position[2],
+              air,
+            )
+          }
+        } else if (target?.type === 'object') {
+          Physics.makeObjectActive(Doodad.fromId(target?.id))
         }
       }
 

@@ -1,7 +1,6 @@
 import Chunk from '../voxel/Chunk'
 import Mobile from '../world/Mobile'
 import Player from '../world/Player'
-import Vector from '../math/Vector'
 import Game from '../../Game'
 import Doodad from '../world/Doodad'
 
@@ -33,6 +32,24 @@ export default class Physics {
             ev.data.position[1],
             ev.data.position[2],
           )
+          break
+        case 'objectSync':
+          ev.data.objects.forEach(object => {
+            const doodad = Doodad.fromId(object.id)
+
+            if (doodad) {
+              doodad.position.set(
+                object.position[0],
+                object.position[1],
+                object.position[2],
+              )
+              doodad.rotation.set(
+                object.rotation[0],
+                object.rotation[1],
+                object.rotation[2],
+              )
+            }
+          })
           break
         case 'updateAimedItem':
           this.aimedItem = ev.data.result
@@ -104,6 +121,13 @@ export default class Physics {
 
   public static getAimedItem() {
     return this.aimedItem
+  }
+
+  public static makeObjectActive(object: Doodad) {
+    this.workerThread.postMessage({
+      type: 'makeObjectActive',
+      id: object.id,
+    })
   }
 
   public static addMobile(mob: Mobile) {}
