@@ -311,7 +311,7 @@ export default class ChunkGenerator {
           chunk.set(x, y, z, type)
         }
 
-        if (yy + y - 1 > Math.floor(height)) continue
+        if (yy + y - 1 !== Math.floor(height)) continue
 
         // Clutter
         c = noise((xx / map.height) * 30, (zz / map.height) * 30)

@@ -155,46 +155,17 @@ export default class PhysicsThread {
 
     for (let name in chunk.objects) {
       chunk.objects[name].forEach(object => {
-        const info = Database.objectInfo(name)
+        const result = this.createObjectColliders(
+          name,
+          object,
+          chunk.x * Chunk.size + object.x,
+          chunk.y * Chunk.size + object.y,
+          chunk.z * Chunk.size + object.z,
+          false,
+        )
 
-        info.colliders.forEach(collider => {
-          shape = new Ammo.btBoxShape(
-            new Ammo.btVector3(collider.sizeX, collider.sizeY, collider.sizeZ),
-          )
-
-          transform.setIdentity()
-          transform.setOrigin(
-            new Ammo.btVector3(
-              chunk.x * Chunk.size + object.x + collider.x,
-              chunk.y * Chunk.size + object.y + 1 + collider.y,
-              chunk.z * Chunk.size + object.z + collider.z,
-            ),
-          )
-
-          const motionState = new Ammo.btDefaultMotionState(transform)
-          const constInfo = new Ammo.btRigidBodyConstructionInfo(
-            0,
-            motionState,
-            shape,
-          )
-          const body = new Ammo.btRigidBody(constInfo)
-
-          body.setCollisionFlags(CollisionFlags.Static)
-          body.setUserIndex(object.id)
-          this.objects.set(object.id ?? 0, body)
-
-          this.world.addRigidBody(
-            body,
-            PhysicsFilter.Object | PhysicsFilter.Ground,
-            PhysicsFilter.Object | PhysicsFilter.Ground | PhysicsFilter.Player,
-          )
-
-          chunkObjects.push({
-            body,
-            motionState,
-          })
-          Ammo.destroy(constInfo)
-        })
+        chunkObjects.push(result.body)
+        this.objects.set(object.id ?? 0, result)
       })
     }
     this.chunkObjects.set(key, chunkObjects)
@@ -346,46 +317,66 @@ export default class PhysicsThread {
   }
 
   public static makeObjectActive(id: number) {
-    const body = this.objects.get(id)
+    if (this.objects.get(id)) {
+      const { name, object, body } = this.objects.get(id)
 
-    if (body) {
-      const shape = new Ammo.btCapsuleShape(0.5, 1, 0.5)
-      const localInertia = new Ammo.btVector3(0, 0, 0)
-      shape.calculateLocalInertia(1, localInertia)
+      // const shape = new Ammo.btCapsuleShape(0.5, 1, 0.5)
+      // const localInertia = new Ammo.btVector3(0, 0, 0)
+      // shape.calculateLocalInertia(1, localInertia)
+
+      // const oldOrigin = body.getWorldTransform().getOrigin()
+      // const transform = new Ammo.btTransform()
+      // transform.setIdentity()
+      // transform.setOrigin(
+      //   new Ammo.btVector3(oldOrigin.x(), oldOrigin.y(), oldOrigin.z()),
+      // )
+
+      // const motionState = new Ammo.btDefaultMotionState(transform)
+      // const constInfo = new Ammo.btRigidBodyConstructionInfo(
+      //   1,
+      //   motionState,
+      //   shape,
+      //   localInertia,
+      // )
+      // const newBody = new Ammo.btRigidBody(constInfo)
+
+      // newBody.setUserIndex(id)
+      // this.objects.set(id, newBody)
+      // this.activeObjects.set(id, newBody)
+
+      // this.world.addRigidBody(
+      //   newBody,
+      //   PhysicsFilter.Player | PhysicsFilter.Object | PhysicsFilter.Ground,
+      //   PhysicsFilter.Player | PhysicsFilter.Object | PhysicsFilter.Ground,
+      // )
+
+      // newBody.applyTorqueImpulse(
+      //   new Ammo.btVector3(Math.random() * 2 - 1, 2, Math.random() * 2 - 1),
+      // )
+      // this.world.removeRigidBody(body)
 
       const oldOrigin = body.getWorldTransform().getOrigin()
-      const transform = new Ammo.btTransform()
-      transform.setIdentity()
-      transform.setOrigin(
-        new Ammo.btVector3(oldOrigin.x(), oldOrigin.y(), oldOrigin.z()),
+
+      const result = this.createObjectColliders(
+        name,
+        object,
+        oldOrigin.x(),
+        oldOrigin.y(),
+        oldOrigin.z(),
+        true,
       )
 
-      const motionState = new Ammo.btDefaultMotionState(transform)
-      const constInfo = new Ammo.btRigidBodyConstructionInfo(
-        1,
-        motionState,
-        shape,
-        localInertia,
-      )
-      const newBody = new Ammo.btRigidBody(constInfo)
+      this.objects.set(id, result)
+      this.activeObjects.set(id, result.body)
 
-      newBody.setUserIndex(id)
-      this.objects.set(id, newBody)
-      this.activeObjects.set(id, newBody)
-
-      this.world.addRigidBody(
-        newBody,
-        PhysicsFilter.Player | PhysicsFilter.Object | PhysicsFilter.Ground,
-        PhysicsFilter.Player | PhysicsFilter.Object | PhysicsFilter.Ground,
-      )
-
-      newBody.applyTorqueImpulse(
+      result.body.applyTorqueImpulse(
         new Ammo.btVector3(
+          Math.random() * 10 - 5,
           Math.random() * 2 - 1,
-          Math.random() * 2 - 1,
-          Math.random() * 2 - 1,
+          Math.random() * 10 - 5,
         ),
       )
+
       this.world.removeRigidBody(body)
     } else {
       console.log("it ain't no body")
@@ -395,4 +386,79 @@ export default class PhysicsThread {
   public static addMobile(mob: Mobile) {}
 
   public static remMobile(mob: Mobile) {}
+
+  private static createObjectColliders(
+    name: string,
+    object,
+    globalX: number,
+    globalY: number,
+    globalZ: number,
+    active: boolean,
+  ) {
+    const info = Database.objectInfo(name)
+    const mainShape = new Ammo.btCompoundShape()
+    const transform = new Ammo.btTransform()
+
+    info.colliders.forEach(collider => {
+      const subShape = new Ammo.btBoxShape(
+        new Ammo.btVector3(collider.sizeX, collider.sizeY, collider.sizeZ),
+      )
+
+      transform.setIdentity()
+      transform.setOrigin(
+        new Ammo.btVector3(collider.x, collider.y, collider.z),
+      )
+
+      mainShape.addChildShape(transform, subShape)
+    })
+
+    // const centerOfMass = new Ammo.btTransform()
+    const localInertia = new Ammo.btVector3(0, 0, 0)
+
+    if (active) {
+      mainShape.calculateLocalInertia(1, localInertia)
+      // mainShape.calculatePrincipalAxisTransform(
+      //   Array(info.colliders.length).fill(1),
+      //   centerOfMass,
+      //   localInertia,
+      // )
+    }
+
+    transform.setIdentity()
+    transform.setOrigin(new Ammo.btVector3(globalX, globalY, globalZ))
+
+    const motionState = new Ammo.btDefaultMotionState(transform)
+    const constInfo = new Ammo.btRigidBodyConstructionInfo(
+      active ? 1 : 0,
+      motionState,
+      mainShape,
+      localInertia,
+    )
+    const body = new Ammo.btRigidBody(constInfo)
+
+    // if (active) {
+    //   body.setCenterOfMassTransform(centerOfMass)
+    // }
+
+    if (!active) {
+      body.setCollisionFlags(CollisionFlags.Static)
+    }
+
+    body.setUserIndex(object.id)
+
+    this.world.addRigidBody(
+      body,
+      PhysicsFilter.Object | PhysicsFilter.Ground | PhysicsFilter.Player,
+      PhysicsFilter.Object | PhysicsFilter.Ground | PhysicsFilter.Player,
+    )
+
+    Ammo.destroy(transform)
+    Ammo.destroy(constInfo)
+
+    return {
+      name,
+      object,
+      body,
+    }
+  }
 }

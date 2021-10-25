@@ -211,6 +211,35 @@ export default class Renderer {
         const qz = object.graphicsRotation[2]
         const qw = object.graphicsRotation[3]
 
+        const trans = m4.identity()
+
+        m4.multiply(
+          m4.translation([
+            object.position.x,
+            object.position.y,
+            object.position.z,
+          ]),
+          [
+            1.0 - 2.0 * qy * qy - 2.0 * qz * qz,
+            2.0 * qx * qy - 2.0 * qz * qw,
+            2.0 * qx * qz + 2.0 * qy * qw,
+            0.0,
+            2.0 * qx * qy + 2.0 * qz * qw,
+            1.0 - 2.0 * qx * qx - 2.0 * qz * qz,
+            2.0 * qy * qz - 2.0 * qx * qw,
+            0.0,
+            2.0 * qx * qz - 2.0 * qy * qw,
+            2.0 * qy * qz + 2.0 * qx * qw,
+            1.0 - 2.0 * qx * qx - 2.0 * qy * qy,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+          ],
+          trans,
+        )
+
         gl.useProgram(this.objectShader.program)
         setBuffersAndAttributes(gl, this.objectShader, model.bufferInfo)
         setUniforms(this.objectShader, {
@@ -218,31 +247,7 @@ export default class Renderer {
           diffuse: model.texture,
           alphaCutoff: model.alphaCutoff ?? 1,
           flags: highlight ? 1 : 0,
-          world: m4.multiply(
-            m4.translation([
-              object.position.x,
-              object.position.y,
-              object.position.z,
-            ]),
-            [
-              1.0 - 2.0 * qy * qy - 2.0 * qz * qz,
-              2.0 * qx * qy - 2.0 * qz * qw,
-              2.0 * qx * qz + 2.0 * qy * qw,
-              0.0,
-              2.0 * qx * qy + 2.0 * qz * qw,
-              1.0 - 2.0 * qx * qx - 2.0 * qz * qz,
-              2.0 * qy * qz - 2.0 * qx * qw,
-              0.0,
-              2.0 * qx * qz - 2.0 * qy * qw,
-              2.0 * qy * qz + 2.0 * qx * qw,
-              1.0 - 2.0 * qx * qx - 2.0 * qy * qy,
-              0.0,
-              0.0,
-              0.0,
-              0.0,
-              1.0,
-            ],
-          ),
+          world: trans,
         })
 
         drawBufferInfo(gl, model.bufferInfo)

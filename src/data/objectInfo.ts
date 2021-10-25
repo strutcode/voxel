@@ -2,17 +2,17 @@ import { ObjectInfo } from '../engine/Database'
 
 export default {
   none: {
-    colliders: []
+    colliders: [],
   },
   cactus: {
     colliders: [
       {
         x: 0,
-        y: 1,
+        y: 1.05,
         z: 0,
-        sizeX: 0.5,
-        sizeY: 1,
-        sizeZ: 0.5,
+        sizeX: 0.2,
+        sizeY: 1.1,
+        sizeZ: 0.2,
       },
     ],
   },
@@ -21,10 +21,10 @@ export default {
     colliders: [
       {
         x: 0,
-        y: 1,
+        y: 2,
         z: 0,
         sizeX: 0.5,
-        sizeY: 1,
+        sizeY: 2,
         sizeZ: 0.5,
       },
     ],
@@ -34,10 +34,10 @@ export default {
     colliders: [
       {
         x: 0,
-        y: 1,
+        y: 2,
         z: 0,
         sizeX: 0.5,
-        sizeY: 1,
+        sizeY: 2,
         sizeZ: 0.5,
       },
     ],
